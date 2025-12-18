@@ -44,10 +44,22 @@ Function isInputValidationCorrect() As Boolean
             Exit Function
         End If
 
-        If keyArr(i, 1) Like "Directorio*" And Dir(CStr(valueArr(i, 1)), vbDirectory) = "" Then
-            MsgBox "El directorio del parámetro " & keyArr(i, 1) & " no existe. Favor de validar ruta."
-            isInputValidationCorrect = False
-            Exit Function
+        If keyArr(i, 1) Like "Directorio*" Then
+            If Dir(CStr(valueArr(i, 1)), vbDirectory) = "" Then
+                MsgBox "El directorio del parámetro " & keyArr(i, 1) & " no existe. Favor de validar ruta."
+
+                isInputValidationCorrect = False
+
+                Exit Function
+            End If
+
+            If Right(valueArr(i, 1), 1) = "\" Then
+                MsgBox "El directorio del parámetro " & keyArr(i, 1) & " contiene el caracter \ al final. Favor de remover."
+
+                isInputValidationCorrect = False
+                
+                Exit Function
+            End If
         End If
         
         dictParameters.Add keyArr(i, 1), valueArr(i, 1)
