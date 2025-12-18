@@ -68,3 +68,25 @@ Function isInputValidationCorrect() As Boolean
     isInputValidationCorrect = True
 End Function
 
+Sub test()
+    Debug.Print isWorksheetAndTableValidationCorrect
+End Sub
+
+Function isWorksheetAndTableValidationCorrect() As Boolean
+    Dim reportNames As Variant
+    Dim Worksheet As Worksheet
+    
+    reportNames = Range("REPORTES[NOMBRE]")
+
+    For Each item In reportNames
+        On Error GoTo printMessage
+        Set Worksheet = ThisWorkbook.Worksheets(item)
+        GoTo continueLoop
+printMessage:
+        MsgBox "La hoja de cálculo " & item & " no existe. Favor crearla junto a su tabla de Power Query."
+        isWorksheetAndTableValidationCorrect = False
+        Exit Function
+continueLoop:
+    Next item
+    isWorksheetAndTableValidationCorrect = True
+End Function
