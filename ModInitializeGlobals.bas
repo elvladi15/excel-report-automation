@@ -28,6 +28,62 @@ Sub InitializeGlobals()
 End Sub
 
 Function isInputValidationCorrect() As Boolean
+    If isWorksheetAndTableValidationCorrect = False Then
+        isInputValidationCorrect = False
+        Exit Function
+    ElseIf isParameterValidationCorrect = False Then
+        isInputValidationCorrect = False
+        Exit Function
+    End If
+    isInputValidationCorrect = True
+End Function
+
+Function isWorksheetAndTableValidationCorrect() As Boolean
+    Dim reportNames As Variant
+    Dim Worksheet As Worksheet
+    Dim table As ListObject
+    Dim columnExists As Boolean
+    
+    reportNames = Range("REPORTES[NOMBRE]")
+
+    For Each item In reportNames
+        On Error GoTo worksheetNotFound
+        Set Worksheet = ThisWorkbook.Worksheets(item)
+
+        On Error GoTo tableNotFound
+        Set table = Worksheet.ListObjects(item)
+        
+        columnExists = False
+
+        For Each col in table.ListColumns
+            If col.Name = "PROCESS_DATE_FOR_RANGE" Then columnExists = True
+        Next col
+
+        If columnExists = False Then GoTo columnNotFound
+
+        GoTo continueLoop
+
+        worksheetNotFound:
+        MsgBox "La hoja de cálculo " & item & " no existe. Favor crearla junto a su tabla de Power Query."
+        isWorksheetAndTableValidationCorrect = False
+        Exit Function
+
+        tableNotFound:
+        MsgBox "La tabla " & item & " no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+        isWorksheetAndTableValidationCorrect = False
+        Exit Function
+
+        columnNotFound:
+        MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla " & item & ". Favor crear."
+        isWorksheetAndTableValidationCorrect = False
+        Exit Function
+
+        continueLoop:
+    Next item
+    isWorksheetAndTableValidationCorrect = True
+End Function
+
+Function isParameterValidationCorrect() As Boolean
     Set dictParameters = CreateObject("Scripting.Dictionary")
     
     Dim keyArr As Variant
@@ -40,7 +96,7 @@ Function isInputValidationCorrect() As Boolean
     For i = 1 To UBound(keyArr, 1)
         If valueArr(i, 1) = "" Then
             MsgBox "El valor del parámetro " & keyArr(i, 1) & " no puede quedar vacío."
-            isInputValidationCorrect = False
+            isParameterValidationCorrect = False
             Exit Function
         End If
 
@@ -48,7 +104,7 @@ Function isInputValidationCorrect() As Boolean
             If Dir(CStr(valueArr(i, 1)), vbDirectory) = "" Then
                 MsgBox "El directorio del parámetro " & keyArr(i, 1) & " no existe. Favor de validar ruta."
 
-                isInputValidationCorrect = False
+                isParameterValidationCorrect = False
 
                 Exit Function
             End If
@@ -56,7 +112,7 @@ Function isInputValidationCorrect() As Boolean
             If Right(valueArr(i, 1), 1) = "\" Then
                 MsgBox "El directorio del parámetro " & keyArr(i, 1) & " contiene el caracter \ al final. Favor de remover."
 
-                isInputValidationCorrect = False
+                isParameterValidationCorrect = False
                 
                 Exit Function
             End If
@@ -65,28 +121,5 @@ Function isInputValidationCorrect() As Boolean
         dictParameters.Add keyArr(i, 1), valueArr(i, 1)
     Next i
 
-    isInputValidationCorrect = True
-End Function
-
-Sub test()
-    Debug.Print isWorksheetAndTableValidationCorrect
-End Sub
-
-Function isWorksheetAndTableValidationCorrect() As Boolean
-    Dim reportNames As Variant
-    Dim Worksheet As Worksheet
-    
-    reportNames = Range("REPORTES[NOMBRE]")
-
-    For Each item In reportNames
-        On Error GoTo printMessage
-        Set Worksheet = ThisWorkbook.Worksheets(item)
-        GoTo continueLoop
-printMessage:
-        MsgBox "La hoja de cálculo " & item & " no existe. Favor crearla junto a su tabla de Power Query."
-        isWorksheetAndTableValidationCorrect = False
-        Exit Function
-continueLoop:
-    Next item
-    isWorksheetAndTableValidationCorrect = True
+    isParameterValidationCorrect = True
 End Function
