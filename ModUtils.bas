@@ -16,56 +16,48 @@ CleanUp:
 	   Application.DisplayAlerts = True
 End Sub
 
-Sub Manual_RefreshAll()
-    Call RefreshAll("MANUAL")
-End Sub
-Sub Automatic_RefreshAll()
-    Call RefreshAll("AUTOMATICO")
-End Sub
-Sub RefreshAll(executionMode As String)
-	If isInputValidationCorrect = False Then Exit Sub
-	
+Sub RefreshAll()
 	Call AppendToLogsFile("Cerrando los demás libros de Excel...")
 	CloseAllOtherWorkbooks
-	
+
 	Call AppendToLogsFile("Refrescando hoja de cálculo...")
 	ThisWorkbook.Sheets("PARAMETROS").Calculate
-	
+
 	Call AppendToLogsFile("Actualizando reportes...")
 	ThisWorkbook.RefreshAll
 
-    If(executionMode = "MANUAL") Then MsgBox("Hojas de Excel actualizadas.")
+	If(executionMode = "MANUAL") Then MsgBox("Hojas de Excel actualizadas.")
 End Sub
 
 Sub AppendToLogsFile(message As String)
-    If canGenerateLogs = False Then Exit Sub
+	If canGenerateLogs = False Then Exit Sub
 
-    Dim fso As Object
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    
-    With fso.OpenTextFile(logsFileFolder & "\" & "Logs " & Format(Date, dateFormat) & ".txt", 8, True)
-        .WriteLine Format(Now, "yyyy-MM-dd hh:mm:ss - ") & message
-        .Close
-    End With
+	Dim fso As Object
+
+	Set fso = CreateObject("Scripting.FileSystemObject")
+
+	With fso.OpenTextFile(logsFileFolder & "\" & "Logs " & Format(Date, dateFormat) & ".txt", 8, True)
+		.WriteLine Format(Now, "yyyy-MM-dd hh:mm:ss - ") & message
+		.Close
+	End With
 End Sub
 
 Sub AddValidationFromTableColumn()
 	Dim cell As Range
 	Dim listText As String
-	
+
 	Set ws = ThisWorkbook.Sheets("PARAMETROS")
 	Set tbl = ws.ListObjects("PARAMETROS")
 	Set cell = Range("PARAMETROS[VALOR]").Cells(Evaluate("MATCH(""Reporte a generar"",PARAMETROS[NOMBRE],0)"))
-	
+
 	listText = "Todos,"
-	
+
 	For Each item In Range("CORREOS[NOMBRE]")
 		listText = listText & item.Value & ","
 	Next item
-	
+
 	listText = Left(listText, Len(listText) - 1)
-	
+
 	With cell.Validation
 		.delete
 		.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Formula1:=listText
