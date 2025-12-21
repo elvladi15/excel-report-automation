@@ -1,4 +1,8 @@
 Attribute VB_Name = "ModMain"
+
+Public wsPARAMETROS As Worksheet
+Public basicTableStructure As Object
+
 Public executionMode As String
 
 Public currentAttempt As Long
@@ -32,9 +36,10 @@ Public MailItem As Object
 Public Reply As Object
 
 Sub Main()
+	'Set Items = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder).Items.Restrict("[Subject] = '" & conversationSubject & "'")
 	If isInputValidationCorrect = False Then Exit Sub
 
-	executionMode = getExecutionMode()
+	executionMode = "MANUAL"
 	currentAttempt = 1
 	attemptMaxCount = 3
 
@@ -44,7 +49,7 @@ Sub Main()
 	logsFileFolder = dictParameters("Directorio archivos de logs")
 	outlookFolder = dictParameters("Carpeta de Outlook")
 	dateFormat = dictParameters("Formato de fechas")
-	canGenerateLogs = dictParameters("Generar logs") = "SI"
+	canGenerateLogs = dictParameters("Generar logs?") = "SI"
 
 	canMailBeSent = True
 
@@ -66,19 +71,4 @@ Sub Main()
 	Exit Sub
 	ErrorHandler:
 		MsgBox "No correr desde el código. Usar algún botón."
-End Sub
-
-Sub test()
-	'Set OutlookApp = CreateObject("Outlook.Application")
-	'Set OutlookNamespace = CreateObject("Outlook.Application").GetNamespace("MAPI")
-	Set Inbox = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder)
-
-	Set Items = Inbox.Items.Restrict("[Subject] = '" & conversationSubject & "'")
-	Items.Sort "ReceivedTime", True
-
-	If Items.Count > 0 Then
-
-	Else
-		AppendToLogsFile ("No se pudo encontrar la cadena de correos: " & conversationSubject)
-	End If
 End Sub

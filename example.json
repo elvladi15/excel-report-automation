@@ -1,0 +1,93 @@
+{
+	"tables": [
+		{
+			"key": "PARAMETROS",
+			"columns": [
+				{
+					"key": "NOMBRE",
+					"rows": [
+						{
+							"key": "START_PROCESS_DATE",
+							"value": null
+						},
+						{
+							"key": "END_PROCESS_DATE",
+							"value": null
+						},
+						{
+							"key": "Directorio base reportes",
+							"value": null
+						},
+						{
+							"key": "Generar logs?",
+							"value": null
+						},
+						{
+							"key": "Directorio archivos de logs",
+							"value": null
+						},
+						{
+							"key": "Carpeta de Outlook",
+							"value": null
+						},
+						{
+							"key": "Formato de fechas",
+							"value": null
+						}
+					]
+				},
+				{
+					"key": "VALOR",
+					"rows": []
+				}
+			]
+		},
+		{
+			"key": "CORREOS",
+			"columns": [
+				{
+					"key": "NOMBRE",
+					"rows": []
+				},
+				{
+					"key": "CONVERSACION",
+					"rows": []
+				},
+				{
+					"key": "UN ARCHIVO POR RANGO?",
+					"rows": []
+				},
+				{
+					"key": "GENERAR CORREO?",
+					"rows": []
+				}
+			]
+		},
+		{
+			"key": "ARCHIVOS",
+			"columns": [
+				{
+					"key": "NOMBRE",
+					"rows": []
+				},
+				{
+					"key": "CORREO",
+					"rows": []
+				}
+			]
+		},
+		{
+			"key": "REPORTES",
+			"columns": [
+				{
+					"key": "NOMBRE",
+					"rows": []
+				},
+				{
+					"key": "ARCHIVO",
+					"rows": []
+				}
+			]
+		}
+	]
+}

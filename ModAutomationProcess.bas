@@ -16,13 +16,15 @@ Sub ScheduleMailSending()
 	Call ScheduleProcedure("CreateDrafts", scheduleDate + TimeValue("06:55:00"))
 	Call ScheduleProcedure("SendAllDrafts", scheduleDate + TimeValue("07:00:00"))
 
-	If executionMode = "MANUAL" Then MsgBox "Programación exitosa. Próxima corrida: " & Format(scheduleDate, dateFormat)
+	If executionMode = "MANUAL" Then
+		MsgBox "Programación exitosa. Próxima corrida: " & Format(scheduleDate, dateFormat)
+		executionMode = "AUTOMÁTICO"
+	End If
 End Sub
 
 Sub ScheduleProcedure(procedure As String, time As Date)
 	On Error GoTo Schedule
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=False
-
 Schedule:
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=True
 

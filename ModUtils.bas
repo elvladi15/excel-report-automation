@@ -76,3 +76,91 @@ Sub OpenOutlookIfNotRunning()
 	OpenOutlook:
 		Shell """outlook.exe""", vbNormalFocus
 End Sub
+
+Function GetBasicTableStructure() As Object
+	Dim basicTableStructure As Object
+	Set basicTableStructure = CreateObject("Scripting.Dictionary")
+	
+	Set basicTableStructure("tables") = New Collection
+
+		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
+		With basicTableStructure("tables")(basicTableStructure("tables").Count)
+			.Add "key", "PARAMETROS"
+			.Add "columns", New Collection
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "key", "NOMBRE"
+				.Add "rows", New Collection
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "START_PROCESS_DATE"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "END_PROCESS_DATE"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "Directorio base reportes"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "Generar logs?"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "Directorio archivos de logs"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "Carpeta de Outlook"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+
+					.Item("rows").Add CreateObject("Scripting.Dictionary")
+						.Item("rows")(.Item("rows").Count).Add "key", "Formato de fechas"
+						.Item("rows")(.Item("rows").Count).Add "value", Null
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "key", "VALOR"
+				.Add "rows", New Collection
+			End With
+		End With
+
+	Set GetBasicTableStructure = basicTableStructure
+End Function
+
+Function GetBasicTableStructureTableIndex(key As String) As Long
+	Dim i As Long
+
+	For i = 1 To arr.Count
+		If(basicTableStructure("tables")(i)("key") = key) Then
+			GetBasicTableStructureTableIndex = i
+			Exit Function
+		End If
+	Next
+End Function
+
+Function GetBasicTableStructureColumnIndex(tableIndex As Long, key As String) As Long
+	Dim i As Long
+
+	For i = 1 To arr.Count
+		If(basicTableStructure("tables")(tableIndex)("columns")(i)("key") = key) Then
+			GetBasicTableStructureColumnIndex = i
+			Exit Function
+		End If
+	Next
+End Function
+
+Function GetBasicTableStructureRowIndex(tableIndex As Long, columnIndex As Long, key As String) As Long
+	Dim i As Long
+
+	For i = 1 To arr.Count
+		If(basicTableStructure("tables")(tableIndex)("columns")(columnIndex)("rows")(i)("key") = key) Then
+			GetBasicTableStructureRowIndex = i
+			Exit Function
+		End If
+	Next
+End Function

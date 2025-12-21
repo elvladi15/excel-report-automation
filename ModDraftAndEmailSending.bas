@@ -192,7 +192,7 @@ Sub SendAllDrafts()
 
 	If executionMode = "MANUAL" Then
 		MsgBox "Correos enviados exitosamente."
-	ElseIf executionMode = "AUTOMÁTICO"
+	ElseIf executionMode = "AUTOMÁTICO" Then
 		ScheduleMailSending
 	End If
 	Exit Sub
