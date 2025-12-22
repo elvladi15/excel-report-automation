@@ -1,29 +1,20 @@
 Attribute VB_Name = "ModDraftAndEmailSending"
 Sub CreateDrafts()
-	Dim fileGenerated As Boolean
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
 
 	If Not isConversationColumnCorrect Then Exit Sub
-
-	fileGenerated = False
 
 	For Each row In tbl_CORREOS.DataBodyRange.Rows
 		colGENERAR_REPORTE = row.Cells(1, tbl_CORREOS.ListColumns("GENERAR CORREO?").Index).Value
 		colNOMBRE = row.Cells(1, tbl_CORREOS.ListColumns("NOMBRE").Index).Value
 
 		If colGENERAR_REPORTE = "SI" Then
-			fileGenerated = True
 			Call CreateDraft(colNOMBRE)
 		End If
 	Next row
 
-	If executionMode = "MANUAL" Then
-		If fileGenerated Then
-			MsgBox "Borradores creados correctamente."
-		Else
-			MsgBox "No hay ningún correo seleccionado para generar borradores."
-		End If
+	If executionMode = "MANUAL" Then MsgBox "Borradores creados correctamente."
 	End If
 End Sub
 
