@@ -4,6 +4,8 @@ Sub CreateDrafts()
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
 
+	If Not isConversationColumnCorrect Then Exit Sub
+
 	fileGenerated = False
 
 	For Each row In tbl_CORREOS.DataBodyRange.Rows
@@ -17,7 +19,7 @@ Sub CreateDrafts()
 	Next row
 
 	If executionMode = "MANUAL" Then
-		If fileGenerated = True Then
+		If fileGenerated Then
 			MsgBox "Borradores creados correctamente."
 		Else
 			MsgBox "No hay ningún correo seleccionado para generar borradores."
@@ -30,12 +32,8 @@ Sub CreateDraft(mailName As String)
 
 	Call AppendToLogsFile("Creando borrador: " & mailName & "...")
 
-	'Dim OutlookApp As Object
-	'Dim OutlookNamespace As Object
-	'Dim Inbox As Object
-	Dim Items As Object
-	'Dim MailItem As Object
-	Dim Reply As Object
+	Dim conversation As Object
+
 
 	Dim mailFiles As Variant
 	Dim conversationSubject As String
@@ -88,48 +86,36 @@ Sub CreateDraft(mailName As String)
 		foldersToSearch.Add fileFolder
 	End If
 
-	'Set OutlookApp = CreateObject("Outlook.Application")
-	'Set OutlookNamespace = CreateObject("Outlook.Application").GetNamespace("MAPI")
-	'Set Inbox = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder)
-	Set Items = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder).Items.Restrict("[Subject] = '" & conversationSubject & "'")
+	Set conversation = outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversationSubject & "'").item(1).ReplyAll
 
+	For Each folder In foldersToSearch
+		For Each fileEnding In fileEndings
+			fileEndingFound = False
 
-	If Items.Count > 0 Then
-		Items.Sort "ReceivedTime", True
-		'Set MailItem = Items.item(1)
-		Set ReplyAll = Items.item(1).ReplyAll
+			filePath = Dir(folder & "*.*")
 
-		For Each folder In foldersToSearch
-			For Each fileEnding In fileEndings
-				fileEndingFound = False
+			Do While filePath <> ""
+				If InStr(filePath, CStr(fileEnding)) > 0 Then
+					conversation.Attachments.Add folder & filePath
 
-				filePath = Dir(folder & "*.*")
-
-				Do While filePath <> ""
-					If InStr(filePath, CStr(fileEnding)) > 0 Then
-						ReplyAll.Attachments.Add folder & filePath
-
-						fileEndingFound = True
-					End If
-
-					filePath = Dir()
-				Loop
-				If (fileEndingFound = False) Then
-					AppendToLogsFile ("No se puede crear el borrador: " & mailName & ". Faltan archivos por generar.")
-
-					Exit Sub
+					fileEndingFound = True
 				End If
-			Next fileEnding
-		Next folder
 
-		ReplyAll.Body = "MENSAJE " & executionMode & ". Anexo reporte. Saludos"
+				filePath = Dir()
+			Loop
+			If Not fileEndingFound Then
+				AppendToLogsFile ("No se puede crear el borrador: " & mailName & ". Faltan archivos por generar.")
 
-		ReplyAll.Save
+				Exit Sub
+			End If
+		Next fileEnding
+	Next folder
 
-		AppendToLogsFile ("El borrador: " & mailName & " fue creado exitosamente.")
-	Else
-		AppendToLogsFile ("No se pudo encontrar la cadena de correos: " & conversationSubject)
-	End If
+	conversation.Body = "MENSAJE " & executionMode & ". Anexo reporte. Saludos"
+
+	conversation.Save
+
+	AppendToLogsFile ("El borrador: " & mailName & " fue creado exitosamente.")
 
 	If executionMode = "AUTOMÁTICO" Then OpenOutlookIfNotRunning
 	Exit Sub
@@ -138,77 +124,37 @@ ErrorHandler:
 End Sub
 
 Sub SendAllDrafts()
-	On Error GoTo ErrHandler
-
 	Call AppendToLogsFile("Enviando borradores...")
+	
+	SendAllDraftsRecursive(1)
+End Sub
 
-	Dim olApp As Object
-	Dim ns As Object
-	Dim drafts As Object
-	Dim itms As Object
-	Dim i As Long
-	Dim mi As Object
-
-	Set olApp = GetObject("", "Outlook.Application")
-	If olApp Is Nothing Then Set olApp = CreateObject("Outlook.Application")
-
-	Set ns = olApp.GetNamespace("MAPI")
-	Set drafts = ns.GetDefaultFolder(16)
-
-	Set itms = drafts.Items
-
-	On Error Resume Next
-	itms.Sort "[LastModificationTime]", True
+Sub SendAllDraftsRecursive(attemptCount As Long)
 	On Error GoTo ErrHandler
 
-	For i = drafts.Items.Count To 1 Step - 1
-		Set mi = itms(i)
-
-		If Not mi Is Nothing Then
-			Dim msgClass As String, isSent As Boolean
-			On Error Resume Next
-			msgClass = LCase$(CStr(mi.MessageClass))
-			isSent = False
-			isSent = mi.Sent
-			On Error GoTo ErrHandler
-
-			If msgClass = "ipm.note" And isSent = False Then
-				mi.Display False
-				DoEvents
-
-				Dim allRecipients As String
-				On Error Resume Next
-				allRecipients = Trim$(CStr(mi.To) & CStr(mi.CC) & CStr(mi.BCC))
-				On Error GoTo ErrHandler
-
-				If Len(allRecipients) > 0 Then
-					mi.Send
-				End If
-			End If
+	For Each item In outlookDraftsFolderRef.Items
+		If item.MessageClass = "IPM.Note" And Not item.Sent Then
+			item.Display False
+			DoEvents
+			item.Send
 		End If
-	Next i
+	Next item
 
 	Call AppendToLogsFile("Correos enviados exitosamente.")
 
-	If executionMode = "MANUAL" Then
-		MsgBox "Correos enviados exitosamente."
-	ElseIf executionMode = "AUTOMÁTICO" Then
-		ScheduleMailSending
-	End If
+	If executionMode = "MANUAL" Then MsgBox "Correos enviados exitosamente."
+
 	Exit Sub
 ErrHandler:
-
-	If currentAttempt = attemptMaxCount Then
-		Call AppendToLogsFile("El intento " & attemptMaxCount & " ha sido agotado. Envío de correos abortado.")
+	If attemptCount = attemptMaxCount Then
+		Call AppendToLogsFile("El intento " & attemptCount & " ha sido agotado. Envío de correos abortado.")
 
 		If executionMode = "MANUAL" Then MsgBox "Ha ocurrido un error al enviar los correos."
 
 		Exit Sub
 	End If
 	
-	Call AppendToLogsFile("Ha ocurrido un error al enviar los borradores en el intento " & currentAttempt & ". " & Err.Number & " " & Err.Description)
+	Call AppendToLogsFile("Ha ocurrido un error al enviar los borradores en el intento " & attemptCount & ".")
 
-	currentAttempt = attemptCount + 1
-
-	Call SendAllDrafts()
+	Call SendAllDraftsRecursive(attemptCount + 1)
 End Sub

@@ -4,25 +4,16 @@ Sub CreateMailFiles()
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
 
-	fileGenerated = False
-
 	For Each row In tbl_CORREOS.DataBodyRange.Rows
 		colGENERAR_REPORTE = row.Cells(1, tbl_CORREOS.ListColumns("GENERAR CORREO?").Index).Value
 		colNOMBRE = row.Cells(1, tbl_CORREOS.ListColumns("NOMBRE").Index).Value
 
 		If colGENERAR_REPORTE = "SI" Then
-			fileGenerated = True
 			Call CreateMail(colNOMBRE)
 		End If
 	Next row
 
-	If executionMode = "MANUAL" Then
-		If fileGenerated = True Then
-			MsgBox "Archivos creados correctamente."
-		Else
-			MsgBox "No hay ningún correo seleccionado para generar archivos."
-		End If
-	End If
+	If executionMode = "MANUAL" Then MsgBox "Archivos creados correctamente."
 End Sub
 
 Sub CreateMail(mailName As String)
@@ -30,44 +21,58 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	Application.DisplayAlerts = False
+	Dim colNOMBRE As String
+	Dim colCORREO As String
 
-	mailFiles = ThisWorkbook.ActiveSheet.Evaluate("FILTER(ARCHIVOS[NOMBRE], ARCHIVOS[CORREO] = """ & mailName & """)")
+	Application.DisplayAlerts = False
 
 	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 
-	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
+	mailFileCount = Application.WorksheetFunction.CountIf(tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange, mailName)
 
-	For Each item In mailFiles
+	For Each row In tbl_ARCHIVOS.DataBodyRange.Rows
+		colNOMBRE = row.Cells(1, tbl_ARCHIVOS.ListColumns("NOMBRE").Index).Value
+		colCORREO = row.Cells(1, tbl_ARCHIVOS.ListColumns("CORREO").Index).Value
+
+		If colCORREO <> mailName Then GoTo continueLoop
+		
 		If isOneFilePerRange Then
 			currentProcessDate = Null
 
-			Call CreateMailFile(CStr(item), baseReportFolder & "\" & mailName, mailFileCount)
+			Call CreateMailFile(colNOMBRE)
 		Else
 			Dim dateValue As Date
 
 			For dateValue = startProcessDate To endProcessDate
 				currentProcessDate = dateValue
 
-				Call CreateMailFile(CStr(item), baseReportFolder & "\" & mailName, mailFileCount)
+				Call CreateMailFile(colNOMBRE)
 			Next dateValue
 		End If
-		If canMailBeSent = False Then
+		If Not canMailBeSent Then
 			Call AppendToLogsFile("El correo " & mailName & " no puede ser generado porque el reporte " & errorReport & " no trajo registros.")
 
 			Exit Sub
 		End If
-	Next item
+		continueLoop:
+	Next row
 End Sub
 
-Sub CreateMailFile(mailFileName As String, folder As String, mailFileCount As Long)
+Sub CreateMailFile(mailFileName As String)
 	Call AppendToLogsFile("Generando archivo " & mailFileName & "...")
 
 	Dim Workbook As Workbook
 	Dim fileReports As Variant
 	Dim reportDate As String
+	Dim mailName As String
+	Dim folder As String
+	Dim fileQuantityPerMail As Long
+
+	mailName = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailFileName & """, ARCHIVOS[NOMBRE], ARCHIVOS[CORREO])"))
+	folder = baseReportFolder & "\" & mailName
+	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange, mailName)
 
 	Set Workbook = Workbooks.Add
 
@@ -76,7 +81,7 @@ Sub CreateMailFile(mailFileName As String, folder As String, mailFileCount As Lo
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))
 
-		If canMailBeSent = False Then
+		If Not canMailBeSent Then
 			Workbook.Close False
 
 			Exit Sub
@@ -90,7 +95,7 @@ Sub CreateMailFile(mailFileName As String, folder As String, mailFileCount As Lo
 			Query.delete
 		Next Query
 
-		If mailFileCount > 1 Then
+		If fileQuantityPerMail > 1 Then
 			If IsNull(currentProcessDate) Then
 				 folder = folder & "\" & Format(startProcessDate, "dd") & "-" & Format(endProcessDate, "dd")
 			Else
@@ -156,6 +161,8 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	reportTable.Range.Resize(reportTable.ListRows.Count + 2, reportTable.ListColumns.Count - 1).Copy
 	Worksheet.Range("A1").PasteSpecial Paste:=xlPasteValues
+
+	reportTable.DataBodyRange.Delete
 
 	Worksheet.Columns.AutoFit
 

@@ -5,7 +5,6 @@ Public basicTableStructure As Object
 
 Public executionMode As String
 
-Public currentAttempt As Long
 Public attemptMaxCount As Long
 
 Public tbl_PARAMETROS As ListObject
@@ -18,7 +17,7 @@ Public dictParameters As Object
 Public startProcessDate As Date
 Public endProcessDate As Date
 Public baseReportFolder As String
-Public outlookFolder As String
+Public outlookFolderName As String
 Public logsFileFolder As String
 Public selectedReport As String
 Public dateFormat As String
@@ -28,28 +27,15 @@ Public canMailBeSent As Boolean
 Public currentProcessDate As Variant
 Public errorReport As String
 
-'Public OutlookApp As Object
-'Public OutlookNamespace As Object
-Public Inbox As Object
-Public Items As Object
-Public MailItem As Object
-Public Reply As Object
+Public outlookAppRef As Object
+Public outlookReportFolderRef As Object
+Public outlookDraftsFolderRef As Object
 
 Sub Main()
-	'Set Items = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder).Items.Restrict("[Subject] = '" & conversationSubject & "'")
-	If isInputValidationCorrect = False Then Exit Sub
+	If Not isInputValidationCorrect Then Exit Sub
 
 	executionMode = "MANUAL"
-	currentAttempt = 1
 	attemptMaxCount = 3
-
-	startProcessDate = CDate(dictParameters("START_PROCESS_DATE"))
-	endProcessDate = CDate(dictParameters("END_PROCESS_DATE"))
-	baseReportFolder = dictParameters("Directorio base reportes")
-	logsFileFolder = dictParameters("Directorio archivos de logs")
-	outlookFolder = dictParameters("Carpeta de Outlook")
-	dateFormat = dictParameters("Formato de fechas")
-	canGenerateLogs = dictParameters("Generar logs?") = "SI"
 
 	canMailBeSent = True
 
@@ -64,6 +50,8 @@ Sub Main()
 		SendAllDrafts
 	ElseIf Application.Caller = "btnScheduleMailSending" Then
 		ScheduleMailSending
+	ElseIf Application.Caller = "btnScheduleMailGeneration" Then
+		ScheduleMailGeneration
 	Else
 		MsgBox "Botón no reconocido."
 	End If

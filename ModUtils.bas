@@ -26,11 +26,17 @@ Sub RefreshAll()
 	Call AppendToLogsFile("Actualizando reportes...")
 	ThisWorkbook.RefreshAll
 
-	If(executionMode = "MANUAL") Then MsgBox("Hojas de Excel actualizadas.")
+	If executionMode = "MANUAL" Then
+		MsgBox("Hojas de Excel actualizadas.")
+	ElseIf executionMode = "AUTOMÁTICO"Then
+		Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
+		startProcessDate = CDate(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR]])"))
+		endProcessDate = CDate(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR]])"))
+	End If
 End Sub
 
 Sub AppendToLogsFile(message As String)
-	If canGenerateLogs = False Then Exit Sub
+	If Not canGenerateLogs Then Exit Sub
 
 	Dim fso As Object
 
@@ -39,30 +45,6 @@ Sub AppendToLogsFile(message As String)
 	With fso.OpenTextFile(logsFileFolder & "\" & "Logs " & Format(Date, dateFormat) & ".txt", 8, True)
 		.WriteLine Format(Now, "yyyy-MM-dd hh:mm:ss - ") & message
 		.Close
-	End With
-End Sub
-
-Sub AddValidationFromTableColumn()
-	Dim cell As Range
-	Dim listText As String
-
-	Set ws = ThisWorkbook.Sheets("PARAMETROS")
-	Set tbl = ws.ListObjects("PARAMETROS")
-	Set cell = Range("PARAMETROS[VALOR]").Cells(Evaluate("MATCH(""Reporte a generar"",PARAMETROS[NOMBRE],0)"))
-
-	listText = "Todos,"
-
-	For Each item In Range("CORREOS[NOMBRE]")
-		listText = listText & item.Value & ","
-	Next item
-
-	listText = Left(listText, Len(listText) - 1)
-
-	With cell.Validation
-		.delete
-		.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Formula1:=listText
-		.IgnoreBlank = True
-		.InCellDropdown = True
 	End With
 End Sub
 
@@ -85,82 +67,94 @@ Function GetBasicTableStructure() As Object
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
 		With basicTableStructure("tables")(basicTableStructure("tables").Count)
-			.Add "key", "PARAMETROS"
+			.Add "name", "PARAMETROS"
 			.Add "columns", New Collection
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "key", "NOMBRE"
+				.Add "name", "NOMBRE"
 				.Add "rows", New Collection
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "START_PROCESS_DATE"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "END_PROCESS_DATE"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "Directorio base reportes"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "Generar logs?"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "Directorio archivos de logs"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "Carpeta de Outlook"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
-
-					.Item("rows").Add CreateObject("Scripting.Dictionary")
-						.Item("rows")(.Item("rows").Count).Add "key", "Formato de fechas"
-						.Item("rows")(.Item("rows").Count).Add "value", Null
+					.Item("rows").Add "START_PROCESS_DATE"
+					.Item("rows").Add "END_PROCESS_DATE"
+					.Item("rows").Add "Directorio base reportes"
+					.Item("rows").Add "Generar logs?"
+					.Item("rows").Add "Directorio archivos de logs"
+					.Item("rows").Add "Carpeta de Outlook"
+					.Item("rows").Add "Formato de fechas"
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "key", "VALOR"
+				.Add "name", "VALOR"
+				.Add "rows", New Collection
+			End With
+		End With
+
+		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
+		With basicTableStructure("tables")(basicTableStructure("tables").Count)
+			.Add "name", "CORREOS"
+			.Add "columns", New Collection
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "NOMBRE"
+				.Add "rows", New Collection
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "CONVERSACION"
+				.Add "rows", New Collection
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "UN ARCHIVO POR RANGO?"
+				.Add "rows", New Collection
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "GENERAR CORREO?"
+				.Add "rows", New Collection
+			End With
+		End With
+
+		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
+		With basicTableStructure("tables")(basicTableStructure("tables").Count)
+			.Add "name", "ARCHIVOS"
+			.Add "columns", New Collection
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "NOMBRE"
+				.Add "rows", New Collection
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "CORREO"
+				.Add "rows", New Collection
+			End With
+		End With
+
+		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
+		With basicTableStructure("tables")(basicTableStructure("tables").Count)
+			.Add "name", "REPORTES"
+			.Add "columns", New Collection
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "NOMBRE"
+				.Add "rows", New Collection
+			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", "ARCHIVO"
 				.Add "rows", New Collection
 			End With
 		End With
 
 	Set GetBasicTableStructure = basicTableStructure
-End Function
-
-Function GetBasicTableStructureTableIndex(key As String) As Long
-	Dim i As Long
-
-	For i = 1 To arr.Count
-		If(basicTableStructure("tables")(i)("key") = key) Then
-			GetBasicTableStructureTableIndex = i
-			Exit Function
-		End If
-	Next
-End Function
-
-Function GetBasicTableStructureColumnIndex(tableIndex As Long, key As String) As Long
-	Dim i As Long
-
-	For i = 1 To arr.Count
-		If(basicTableStructure("tables")(tableIndex)("columns")(i)("key") = key) Then
-			GetBasicTableStructureColumnIndex = i
-			Exit Function
-		End If
-	Next
-End Function
-
-Function GetBasicTableStructureRowIndex(tableIndex As Long, columnIndex As Long, key As String) As Long
-	Dim i As Long
-
-	For i = 1 To arr.Count
-		If(basicTableStructure("tables")(tableIndex)("columns")(columnIndex)("rows")(i)("key") = key) Then
-			GetBasicTableStructureRowIndex = i
-			Exit Function
-		End If
-	Next
 End Function

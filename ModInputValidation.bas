@@ -1,38 +1,25 @@
 Attribute VB_Name = "ModInputValidation"
 Function isInputValidationCorrect() As Boolean
-	'Dim wsPARAMETROS As wsPARAMETROS
-
 	Set dictParameters = CreateObject("Scripting.Dictionary")
 
 	On Error Resume Next
 	Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
+	On Error GoTo 0
 
 	If Err.Number <> 0 Then
 		MsgBox "La hoja de cálculo PARÁMETROS no existe. Favor revisar nombres de las hojas."
-		isInputValidationCorrect = False
 		Exit Function
 	End If
 
-	'Set tbl_PARAMETROS = wsPARAMETROS.ListObjects("PARAMETROS")
-	'Set tbl_CORREOS = wsPARAMETROS.ListObjects("CORREOS")
-	'Set tbl_ARCHIVOS = wsPARAMETROS.ListObjects("ARCHIVOS")
-	'Set tbl_REPORTES = wsPARAMETROS.ListObjects("REPORTES")
+	If Not isBasicTableStructureCorrent() Then Exit Function
+	If Not isParameterValidationCorrect() Then Exit Function
+	If Not validateAllBasicTableContents() Then Exit Function
+	If Not isPowerQueryWorksheetAndTableValidationCorrect() Then Exit Function
 
-	If isBasicTableStructureCorrent = False Then
-		isInputValidationCorrect = False
-		Exit Function
-	ElseIf isParameterValidationCorrect = False Then
-		isInputValidationCorrect = False
-		Exit Function
-	ElseIf isWorksheetAndTableValidationCorrect = False Then
-		isInputValidationCorrect = False
-		Exit Function
-	End If
 	isInputValidationCorrect = True
 End Function
 
 Function isBasicTableStructureCorrent() As Boolean
-	'Dim basicTableStructure As Object
 	Dim tableObject As ListObject
 	Dim columnObject As ListColumn
 	
@@ -40,37 +27,30 @@ Function isBasicTableStructureCorrent() As Boolean
 
 	For Each table in basicTableStructure("tables")
 		On Error Resume Next
-		Set tableObject = wsPARAMETROS.ListObjects(table("key"))
+		Set tableObject = wsPARAMETROS.ListObjects(table("name"))
+		On Error GoTo 0
 
 		If Err.Number <> 0 Then
-			MsgBox "La tabla " & table("key") & " no existe. Favor revisar nombres internos de las tablas."
-			isBasicTableStructureCorrent = False
+			MsgBox "La tabla " & table("name") & " no existe. Favor revisar nombres internos de las tablas."
 			Exit Function
 		End If
 
 		For Each column in table("columns")
 			On Error Resume Next
-			Set columnObject = tableObject.ListColumns(column("key"))
+			Set columnObject = tableObject.ListColumns(column("name"))
+			On Error GoTo 0
 
 			If Err.Number <> 0 Then
-				MsgBox "La columna " & column("key") & " de la tabla " & table("key") & " no existe. Favor revisar nombres."
-				isBasicTableStructureCorrent = False
+				MsgBox "La columna " & column("name") & " de la tabla " & table("name") & " no existe. Favor revisar nombres."
 				Exit Function
 			End If
 
-			If column("rows").Count > 0 Then
 				For Each row in column("rows")
-					If IsError(Application.Match(row("key"), Range(table("key") & "[" & column("key") & "]"), 0)) Then
-						MsgBox "El valor " & row("key") & ", columna " & column("key") & ", tabla " & table("key") & " no existe. Favor revisar nombres."
-						isBasicTableStructureCorrent = False
+					If IsError(Application.Match(row, Range(table("name") & "[" & column("name") & "]"), 0)) Then
+						MsgBox "El valor " & row & ", columna " & column("name") & ", tabla " & table("name") & " no existe. Favor revisar nombres."
 						Exit Function
 					End If
 				Next row
-			Else
-				basicTableStructure("tables")(table(key))("columns")(column("key"))("rows").Add CreateObject("Scripting.Dictionary")
-				basicTableStructure("tables")(table(key))("columns")(column("key"))("rows")("key") = 
-			End If
-
 		Next column
 	Next table
 
@@ -81,47 +61,42 @@ Function isParameterValidationCorrect() As Boolean
 	Dim colNOMBRE As String
 	Dim colVALOR As String
 
-	Dim tableIndex As Long
-	Dim columnIndex As Long
-	Dim rowIndex As Long
-
-	Set tableIndex = GetBasicTableStructureTableIndex("PARAMETROS")
-	Set columnIndex = GetBasicTableStructureColumnIndex(tableIndex, "NOMBRE")
+	Set tbl_PARAMETROS = wsPARAMETROS.ListObjects("PARAMETROS")
+	Set tbl_CORREOS = wsPARAMETROS.ListObjects("CORREOS")
+	Set tbl_ARCHIVOS = wsPARAMETROS.ListObjects("ARCHIVOS")
+	Set tbl_REPORTES = wsPARAMETROS.ListObjects("REPORTES")
 
 	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
 		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns("NOMBRE").Index).Value
 		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns("VALOR").Index).Value
 
-		rowIndex = GetBasicTableStructureRowIndex(tableIndex, columnIndex, colNOMBRE)
-
-		'dictParameters.Add colNOMBRE, colVALOR
-		basicTableStructure("tables")(tableIndex)("columns")(columnIndex)("rows")(rowIndex)("value") = colVALOR
+		dictParameters.Add colNOMBRE, colVALOR
 	Next row
 
 	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
 		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns("NOMBRE").Index).Value
 		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns("VALOR").Index).Value
 
+		If (colNOMBRE = "START_PROCESS_DATE" Or colNOMBRE = "END_PROCESS_DATE") And Not IsDate(colVALOR) Then
+			MsgBox "El valor del parámetro " & colNOMBRE & " debe ser una fecha válida."
+			Exit Function
+		End If
+
 		If colNOMBRE = "Directorio archivos de logs" And dictParameters("Generar logs") = "NO" Then GoTo continueLoop
 
 		If colVALOR = "" Then
 			MsgBox "El valor del parámetro " & colNOMBRE & " no puede quedar vacío."
-			isParameterValidationCorrect = False
 			Exit Function
 		End If
 
 		If colNOMBRE Like "Directorio*" Then
 			If Dir(colVALOR, vbDirectory) = "" Then
 				MsgBox "El directorio del parámetro " & colNOMBRE & " no existe. Favor de validar ruta."
-				isParameterValidationCorrect = False
 				Exit Function
 			End If
 
 			If Right(colVALOR, 1) = "\" Then
 				MsgBox "El directorio del parámetro " & colVALOR & " contiene el caracter \ al final. Favor de remover."
-
-				isParameterValidationCorrect = False
-
 				Exit Function
 			End If
 		End If
@@ -129,68 +104,124 @@ Function isParameterValidationCorrect() As Boolean
 		continueLoop:
 	Next row
 
+	startProcessDate = CDate(dictParameters("START_PROCESS_DATE"))
+	endProcessDate = CDate(dictParameters("END_PROCESS_DATE"))
+	baseReportFolder = dictParameters("Directorio base reportes")
+	logsFileFolder = dictParameters("Directorio archivos de logs")
+	outlookFolderName = dictParameters("Carpeta de Outlook")
+	dateFormat = dictParameters("Formato de fechas")
+	canGenerateLogs = dictParameters("Generar logs?") = "SI"
+
 	isParameterValidationCorrect = True
 End Function
 
-Function isWorksheetAndTableValidationCorrect() As Boolean
-	'Dim reportNames As Variant
+Function validateAllBasicTableContents() As Boolean
+	If Not validateBasicTableContent(tbl_CORREOS) Then Exit Function
+	If Not validateBasicTableContent(tbl_ARCHIVOS) Then Exit Function
+	If Not validateBasicTableContent(tbl_REPORTES) Then Exit Function
+
+	validateAllBasicTableContents = True
+End Function
+
+Function validateBasicTableContent(table As ListObject)
+	Dim atLeast1MailToGenerate As Boolean
+
+	atLeast1MailToGenerate = False
+
+	If table.ListRows.Count = 0 Then
+		MsgBox "La tabla " & table.Name & " está vacía."
+		Exit Function
+	End If
+
+	For Each column in table.ListColumns
+		For Each cell in column.DataBodyRange
+			If cell.Value = "" Then
+				MsgBox "Hay valores vacíos en la tabla " & table.Name & "."
+				Exit Function
+			End If
+
+
+			If table.Name = "CORREOS" Then
+				If column.Name = "UN ARCHIVO POR RANGO?" Then
+					GoTo continueLoop
+				End If
+
+				If column.Name = "GENERAR CORREO?" Then
+					If cell.Value = "SI" Then
+						atLeast1MailToGenerate = True
+					End If
+
+					GoTo continueLoop
+				End If
+			End If
+
+			If table.Name = "REPORTES" Then GoTo continueLoop
+
+			If Application.CountIf(column.DataBodyRange, cell.Value) > 1 Then
+				MsgBox "Hay valores duplicados en la columna " & column.Name & " de la tabla " & table.Name & "."
+				Exit Function
+			End If
+			continueLoop:
+		Next cell
+	Next column
+	
+	If table.Name = "CORREOS" And Not atLeast1MailToGenerate Then
+		MsgBox "Debe haber al menos 1 correo a generar."
+		Exit Function
+	End If
+
+	validateBasicTableContent = True
+End Function
+
+Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim Worksheet As Worksheet
 	Dim table As ListObject
 	Dim columnExists As Boolean
 	Dim colNOMBRE As String
 
-	'reportNames = Range("REPORTES[NOMBRE]")
-
 	For Each row In tbl_REPORTES.DataBodyRange.Rows
 		colNOMBRE = row.Cells(1, tbl_REPORTES.ListColumns("NOMBRE").Index).Value
 
-		On Error GoTo worksheetNotFound
+		On Error Resume Next
 		Set Worksheet = ThisWorkbook.Worksheets(colNOMBRE)
+		On Error GoTo 0
+		If Err.Number <> 0 Then
+			MsgBox "La hoja de cálculo " & colNOMBRE & " no existe. Favor crearla junto a su tabla de Power Query."
+			Exit Function
+		End If
 
-		On Error GoTo tableNotFound
+		On Error Resume Next
 		Set table = Worksheet.ListObjects(colNOMBRE)
+		On Error GoTo 0
+		If Err.Number <> 0 Then
+			MsgBox "La tabla " & colNOMBRE & " no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+			Exit Function
+		End If
 
-		On Error GoTo columnNotFound
+		On Error Resume Next
 		colNOMBRE = table.ListColumns("PROCESS_DATE_FOR_RANGE")
-
-		GoTo continueLoop
-
-		worksheetNotFound:
-		MsgBox "La hoja de cálculo " & colNOMBRE & " no existe. Favor crearla junto a su tabla de Power Query."
-		isWorksheetAndTableValidationCorrect = False
-		Exit Function
-
-		tableNotFound:
-		MsgBox "La tabla " & colNOMBRE & " no fue encontrada en su respectiva hoja de cálculo. Favor crear."
-		isWorksheetAndTableValidationCorrect = False
-		Exit Function
-
-		columnNotFound:
-		MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla " & colNOMBRE & ". Favor crear."
-		isWorksheetAndTableValidationCorrect = False
-		Exit Function
-
-		continueLoop:
+		On Error GoTo 0
+		If Err.Number <> 0 Then
+			MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla " & colNOMBRE & ". Favor crear."
+			Exit Function
+		End If
 	Next row
-	isWorksheetAndTableValidationCorrect = True
+	isPowerQueryWorksheetAndTableValidationCorrect = True
 End Function
 
+Function isConversationColumnCorrect() As Boolean
+	Dim colCONVERSACION As String
 
+	Set outlookAppRef = CreateObject("Outlook.Application").GetNamespace("MAPI")
+	Set outlookReportFolderRef = outlookAppRef.GetDefaultFolder(6).Parent.Folders(outlookFolderName)
+	Set outlookDraftsFolderRef = outlookAppRef.GetDefaultFolder(16)
 
-Sub test()
-	Dim conversationSubject As String
-	conversationSubject = "something"
-	Set Items = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder).Items.Restrict("[Subject] = '" & conversationSubject & "'")
-	'Set OutlookApp = CreateObject("Outlook.Application")
-	'Set OutlookNamespace = CreateObject("Outlook.Application").GetNamespace("MAPI")
-	Set Inbox = CreateObject("Outlook.Application").GetNamespace("MAPI").GetDefaultFolder(6).Parent.Folders(outlookFolder)
+	For each conversation in tbl_CORREOS.ListColumns("CONVERSACION").DataBodyRange.Cells
+		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
+			MsgBox "La conversación " & conversation.Value & " no existe."
+			Exit Function
+		End If
+	Next conversation
 
-	Set Items = Inbox.Items.Restrict("[Subject] = '" & conversationSubject & "'")
-	Items.Sort "ReceivedTime", True
-
-	If Items.Count > 0 Then
-		MsgBox "ENCONTRADO: " & conversationSubject
-	Else
-		MsgBox "No se pudo encontrar la cadena de correos: " & conversationSubject
-	End If
-End Sub
+	isConversationColumnCorrect = True
+End Function
