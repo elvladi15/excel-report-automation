@@ -49,3 +49,15 @@ Schedule:
 
 	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - Procedimiento " & procedure & " programado exitosamente para " & Format(time, dateFormat))
 End Sub
+
+Sub AutomaticMailSendingRun(procedures As Collection)
+	For Each procedure In procedures
+		Application.Run procedure
+
+		If Not continueExecution Then
+			Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso: " & procedure & ".")
+
+			Exit Sub
+		End If
+	Next procedure
+End Sub

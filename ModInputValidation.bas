@@ -140,7 +140,6 @@ Function validateBasicTableContent(table As ListObject)
 				Exit Function
 			End If
 
-
 			If table.Name = "CORREOS" Then
 				If column.Name = "UN ARCHIVO POR RANGO?" Then
 					GoTo continueLoop
@@ -153,12 +152,33 @@ Function validateBasicTableContent(table As ListObject)
 
 					GoTo continueLoop
 				End If
+
 			End If
 
-			If table.Name = "REPORTES" Then GoTo continueLoop
+			If (table.Name = "ARCHIVOS" And column.Name = "CORREO") Or table.Name = "REPORTES" Then GoTo continueLoop
 
 			If Application.CountIf(column.DataBodyRange, cell.Value) > 1 Then
 				MsgBox "Hay valores duplicados en la columna " & column.Name & " de la tabla " & table.Name & "."
+				Exit Function
+			End If
+
+			If table.Name = "CORREOS" And column.Name = "NOMBRE" Then
+				For Each mail in tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange
+					If mail.Value = cell.Value Then Goto continueLoop
+				Next mail
+
+				MsgBox "El correo " & cell.Value & " no tiene ningún archivo asociado."
+
+				Exit Function
+			End If
+			
+			If table.Name = "ARCHIVOS" And column.Name = "NOMBRE" Then
+				For Each mailFile in tbl_REPORTES.ListColumns("ARCHIVO").DataBodyRange
+					If mailFile.Value = cell.Value Then Goto continueLoop
+				Next mailFile
+
+				MsgBox "El archivo " & cell.Value & " no tiene ningún reporte asociado."
+
 				Exit Function
 			End If
 			continueLoop:

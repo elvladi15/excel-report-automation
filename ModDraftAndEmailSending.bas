@@ -15,7 +15,6 @@ Sub CreateDrafts()
 	Next row
 
 	If executionMode = "MANUAL" Then MsgBox "Borradores creados correctamente."
-	End If
 End Sub
 
 Sub CreateDraft(mailName As String)
@@ -34,16 +33,13 @@ Sub CreateDraft(mailName As String)
 	Dim isOneFilePerRange As Boolean
 	Dim mailFileCount As Long
 	Dim dateValue As Date
-	Dim fileEndingFound As Boolean
+	Dim quantityOfFilesFound As Long
 
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
 	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
-
 	conversationSubject = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[CONVERSACION])")
-
 	mailFiles = ThisWorkbook.ActiveSheet.Evaluate("FILTER(ARCHIVOS[NOMBRE], ARCHIVOS[CORREO] = """ & mailName & """)")
-
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
 	If mailFileCount > 1 Then
@@ -81,7 +77,7 @@ Sub CreateDraft(mailName As String)
 
 	For Each folder In foldersToSearch
 		For Each fileEnding In fileEndings
-			fileEndingFound = False
+			quantityOfFilesFound = 0
 
 			filePath = Dir(folder & "*.*")
 
@@ -89,13 +85,13 @@ Sub CreateDraft(mailName As String)
 				If InStr(filePath, CStr(fileEnding)) > 0 Then
 					conversation.Attachments.Add folder & filePath
 
-					fileEndingFound = True
+					quantityOfFilesFound = quantityOfFilesFound + 1
 				End If
 
 				filePath = Dir()
 			Loop
-			If Not fileEndingFound Then
-				AppendToLogsFile ("No se puede crear el borrador: " & mailName & ". Faltan archivos por generar.")
+			If quantityOfFilesFound = 0 Then
+				AppendToLogsFile ("No se puede crear el borrador: " & mailName & " porque no hay archivos a generar.")
 
 				Exit Sub
 			End If
@@ -110,6 +106,8 @@ Sub CreateDraft(mailName As String)
 	Exit Sub
 ErrorHandler:
 	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: " & mailName)
+
+	continueExecution = False
 End Sub
 
 Sub SendAllDrafts()
@@ -140,7 +138,8 @@ ErrHandler:
 		Call AppendToLogsFile("El intento " & attemptCount & " ha sido agotado. Envío de correos abortado.")
 
 		If executionMode = "MANUAL" Then MsgBox "Ha ocurrido un error al enviar los correos."
-
+		
+		continueExecution = False
 		Exit Sub
 	End If
 	

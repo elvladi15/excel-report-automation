@@ -17,6 +17,8 @@ CleanUp:
 End Sub
 
 Sub RefreshAll()
+	On Error Goto ErrorHandler
+
 	Call AppendToLogsFile("Cerrando los demás libros de Excel...")
 	CloseAllOtherWorkbooks
 
@@ -33,6 +35,10 @@ Sub RefreshAll()
 		startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 		endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 	End If
+
+	Exit Sub
+	ErrorHandler:
+		continueExecution = False
 End Sub
 
 Sub AppendToLogsFile(message As String)

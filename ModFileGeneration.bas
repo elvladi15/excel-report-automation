@@ -51,11 +51,7 @@ Sub CreateMail(mailName As String)
 				Call CreateMailFile(colNOMBRE)
 			Next dateValue
 		End If
-		If Not canMailBeSent Then
-			Call AppendToLogsFile("El correo " & mailName & " no puede ser generado porque el reporte " & errorReport & " no trajo registros.")
-
-			Exit Sub
-		End If
+		'If Not canMailBeSent Then Call AppendToLogsFile("El correo " & mailName & " no puede ser generado porque el reporte " & errorReport & " no trajo registros.")
 		continueLoop:
 	Next row
 End Sub
@@ -81,11 +77,11 @@ Sub CreateMailFile(mailFileName As String)
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))
 
-		If Not canMailBeSent Then
-			Workbook.Close False
+		'If Not canMailBeSent Then
+		'	Workbook.Close False
 
-			Exit Sub
-		End If
+		'	Exit Sub
+		'End If
 	Next item
 
 	If Workbook.Worksheets.Count > 1 Then
@@ -132,6 +128,11 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Dim reportTable As ListObject
 	Dim newTbl As ListObject
 	Dim rowCount As Long
+	Dim mailFile As String
+	Dim mailName As String
+
+	mailFile = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & fileReportName & """, REPORTES[NOMBRE], REPORTES[ARCHIVO])"))
+	mailName = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailFile & """, ARCHIVOS[NOMBRE], ARCHIVOS[CORREO])"))
 
 	ThisWorkbook.Activate
 
@@ -145,7 +146,9 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	End If
 
 	If rowCount = 0 Then
-		canMailBeSent = False
+		'canMailBeSent = False
+
+		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
 
 		errorReport = fileReportName
 
