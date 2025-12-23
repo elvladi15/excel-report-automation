@@ -107,8 +107,6 @@ Sub CreateDraft(mailName As String)
 	conversation.Save
 
 	AppendToLogsFile ("El borrador: " & mailName & " fue creado exitosamente.")
-
-	If executionMode = "AUTOMÁTICO" Then OpenOutlookIfNotRunning
 	Exit Sub
 ErrorHandler:
 	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: " & mailName)
@@ -116,7 +114,8 @@ End Sub
 
 Sub SendAllDrafts()
 	Call AppendToLogsFile("Enviando borradores...")
-	
+
+	If executionMode = "AUTOMÁTICO" Then OpenOutlookIfNotRunning
 	SendAllDraftsRecursive(1)
 End Sub
 
