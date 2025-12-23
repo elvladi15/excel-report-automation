@@ -34,9 +34,10 @@ Public outlookDraftsFolderRef As Object
 Sub Main()
 	If Not isInputValidationCorrect Then Exit Sub
 
+	CloseAllOtherWorkbooks
+
 	executionMode = "MANUAL"
 	attemptMaxCount = 3
-
 	canMailBeSent = True
 
 	On Error GoTo ErrorHandler

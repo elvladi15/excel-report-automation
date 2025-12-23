@@ -138,12 +138,9 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
 
-	If IsNull(currentProcessDate) Then
-		rowCount = Application.WorksheetFunction.Subtotal(103, reportTable.ListColumns(1).DataBodyRange)
-	Else
-		reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
-		rowCount = reportTable.ListRows.Count
-	End If
+	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
+
+	rowCount = reportTable.ListRows.Count
 
 	If rowCount = 0 Then
 		'canMailBeSent = False
