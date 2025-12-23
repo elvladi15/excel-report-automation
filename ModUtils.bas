@@ -30,8 +30,8 @@ Sub RefreshAll()
 		MsgBox("Hojas de Excel actualizadas.")
 	ElseIf executionMode = "AUTOMÁTICO"Then
 		Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
-		startProcessDate = CDate(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR]])"))
-		endProcessDate = CDate(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR]])"))
+		startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
+		endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 	End If
 End Sub
 
