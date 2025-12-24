@@ -2,7 +2,7 @@ Attribute VB_Name = "ModAutomationProcess"
 Sub ScheduleAutomaticRun()
 	Dim scheduleDateTime As Date
 
-	scheduleDateTime = Date + 1 + scheduleTime
+	scheduleDateTime = Date + 1 + ScheduleTime
 
 	If sendMails Then
 		If Not isConversationColumnCorrect Then Exit Sub
@@ -52,13 +52,14 @@ Sub AutomaticRun()
 	End If
 
 	scheduleNextRun:
-		Call ScheduleProcedure("AutomaticRun", Date + 1 + scheduleTime)
+	Call ScheduleProcedure("AutomaticRun", Date + 1 + scheduleTime)
 End Sub
 
 Sub ScheduleProcedure(procedure As String, time As Date)
 	On Error GoTo Schedule
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=False
-Schedule:
+	
+	Schedule:
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=True
 
 	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - Procedimiento " & procedure & " programado exitosamente para " & Format(time, dateFormat & " hh:mm:ss"))

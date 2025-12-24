@@ -7,7 +7,7 @@ Function isInputValidationCorrect() As Boolean
 	On Error GoTo 0
 
 	If Err.Number <> 0 Then
-		MsgBox "La hoja de cálculo PARÁMETROS no existe. Favor revisar nombres de las hojas."
+		MsgBox "La hoja de cálculo: 'PARÁMETROS' no existe. Favor revisar nombres de las hojas."
 		Exit Function
 	End If
 
@@ -31,7 +31,7 @@ Function isBasicTableStructureCorrent() As Boolean
 		On Error GoTo 0
 
 		If Err.Number <> 0 Then
-			MsgBox "La tabla " & table("name") & " no existe. Favor revisar nombres internos de las tablas."
+			MsgBox "La tabla: '" & table("name") & "' no existe. Favor revisar nombres internos de las tablas."
 			Exit Function
 		End If
 
@@ -41,16 +41,20 @@ Function isBasicTableStructureCorrent() As Boolean
 			On Error GoTo 0
 
 			If Err.Number <> 0 Then
-				MsgBox "La columna " & column("name") & " de la tabla " & table("name") & " no existe. Favor revisar nombres."
+				MsgBox "La columna: '" & column("name") & "' de la tabla: '" & table("name") & "' no existe. Favor revisar nombres."
 				Exit Function
 			End If
 
-				For Each row in column("rows")
-					If IsError(Application.Match(row, Range(table("name") & "[" & column("name") & "]"), 0)) Then
-						MsgBox "El valor " & row & ", columna " & column("name") & ", tabla " & table("name") & " no existe. Favor revisar nombres."
-						Exit Function
-					End If
-				Next row
+			If IsNull(column("rows")) Then Goto continueLoop
+
+			For Each row in column("rows")
+				If IsError(Application.Match(row, Range(table("name") & "[" & column("name") & "]"), 0)) Then
+					MsgBox "El valor: '" & row & "', columna: '" & column("name") & "', tabla: '" & table("name") & "' no existe. Favor revisar nombres."
+					Exit Function
+				End If
+			Next row
+
+		continueLoop:
 		Next column
 	Next table
 
@@ -78,31 +82,36 @@ Function isParameterValidationCorrect() As Boolean
 		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns("VALOR").Index).Value
 
 		If (colNOMBRE = "START_PROCESS_DATE" Or colNOMBRE = "END_PROCESS_DATE") And Not IsDate(colVALOR) Then
-			MsgBox "El valor del parámetro " & colNOMBRE & " debe ser una fecha válida."
+			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser una fecha válida."
 			Exit Function
 		End If
 
 		If colNOMBRE = "Directorio archivos de logs" And dictParameters("Generar logs") = "NO" Then GoTo continueLoop
 
 		If colVALOR = "" Then
-			MsgBox "El valor del parámetro " & colNOMBRE & " no puede quedar vacío."
+			MsgBox "El valor del parámetro: '" & colNOMBRE & "' no puede quedar vacío."
 			Exit Function
 		End If
 
 		If colNOMBRE Like "Directorio*" Then
 			If Dir(colVALOR, vbDirectory) = "" Then
-				MsgBox "El directorio del parámetro " & colNOMBRE & " no existe. Favor de validar ruta."
+				MsgBox "El directorio del parámetro: '" & colNOMBRE & "' no existe. Favor de validar ruta."
 				Exit Function
 			End If
 
 			If Right(colVALOR, 1) = "\" Then
-				MsgBox "El directorio del parámetro " & colVALOR & " contiene el caracter \ al final. Favor de remover."
+				MsgBox "El directorio del parámetro: '" & colVALOR & "' contiene el caracter \ al final. Favor de remover."
 				Exit Function
 			End If
 		End If
 
-		If colNOMBRE = "Hora de ejecución" And Not IsDate(colVALOR) Then
-			MsgBox "La hora de ejecución " & colVALOR & " no es una fecha válida."
+		If colNOMBRE = "Hora de ejecución" Then
+			On Error Goto NotValidTime
+			scheduleTime = TimeValue(colVALOR)
+			GoTo continueLoop
+
+			NotValidTime:
+			MsgBox "La hora de ejecución: '" & colVALOR & "' no es una fecha válida."
 			Exit Function
 		End If
 
@@ -135,14 +144,14 @@ Function validateBasicTableContent(table As ListObject)
 	atLeast1MailToGenerate = False
 
 	If table.ListRows.Count = 0 Then
-		MsgBox "La tabla " & table.Name & " está vacía."
+		MsgBox "La tabla: '" & table.Name & "' está vacía."
 		Exit Function
 	End If
 
 	For Each column in table.ListColumns
 		For Each cell in column.DataBodyRange
 			If cell.Value = "" Then
-				MsgBox "Hay valores vacíos en la tabla " & table.Name & "."
+				MsgBox "Hay valores vacíos en la tabla: '" & table.Name & "'."
 				Exit Function
 			End If
 
@@ -164,26 +173,26 @@ Function validateBasicTableContent(table As ListObject)
 			If (table.Name = "ARCHIVOS" And column.Name = "CORREO") Or table.Name = "REPORTES" Then GoTo continueLoop
 
 			If Application.CountIf(column.DataBodyRange, cell.Value) > 1 Then
-				MsgBox "Hay valores duplicados en la columna " & column.Name & " de la tabla " & table.Name & "."
+				MsgBox "Hay valores duplicados en la columna: '" & column.Name & "' de la tabla: '" & table.Name & "'."
 				Exit Function
 			End If
 
 			If table.Name = "CORREOS" And column.Name = "NOMBRE" Then
-				For Each mail in tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange
-					If mail.Value = cell.Value Then Goto continueLoop
-				Next mail
+				For Each mailName In tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange
+					If mailName.Value = cell.Value Then Goto continueLoop
+				Next mailName
 
-				MsgBox "El correo " & cell.Value & " no tiene ningún archivo asociado."
+				MsgBox "El correo: '" & cell.Value & "' no tiene ningún archivo asociado."
 
 				Exit Function
 			End If
 			
 			If table.Name = "ARCHIVOS" And column.Name = "NOMBRE" Then
-				For Each mailFile in tbl_REPORTES.ListColumns("ARCHIVO").DataBodyRange
-					If mailFile.Value = cell.Value Then Goto continueLoop
-				Next mailFile
+				For Each mailFileName in tbl_REPORTES.ListColumns("ARCHIVO").DataBodyRange
+					If mailFileName.Value = cell.Value Then Goto continueLoop
+				Next mailFileName
 
-				MsgBox "El archivo " & cell.Value & " no tiene ningún reporte asociado."
+				MsgBox "El archivo: '" & cell.Value & "' no tiene ningún reporte asociado."
 
 				Exit Function
 			End If
@@ -212,7 +221,7 @@ Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		Set Worksheet = ThisWorkbook.Worksheets(colNOMBRE)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La hoja de cálculo " & colNOMBRE & " no existe. Favor crearla junto a su tabla de Power Query."
+			MsgBox "La hoja de cálculo: '" & colNOMBRE & "' no existe. Favor crearla junto a su tabla de Power Query."
 			Exit Function
 		End If
 
@@ -220,7 +229,7 @@ Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		Set table = Worksheet.ListObjects(colNOMBRE)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La tabla " & colNOMBRE & " no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+			MsgBox "La tabla: '" & colNOMBRE & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
 			Exit Function
 		End If
 
@@ -228,7 +237,7 @@ Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		colNOMBRE = table.ListColumns("PROCESS_DATE_FOR_RANGE")
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla " & colNOMBRE & ". Favor crear."
+			MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla: '" & colNOMBRE & "'. Favor crear."
 			Exit Function
 		End If
 	Next row
@@ -244,7 +253,7 @@ Function isConversationColumnCorrect() As Boolean
 
 	For each conversation in tbl_CORREOS.ListColumns("CONVERSACION").DataBodyRange.Cells
 		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
-			MsgBox "La conversación " & conversation.Value & " no existe."
+			MsgBox "La conversación: '" & conversation.Value & "' no existe."
 			Exit Function
 		End If
 	Next conversation

@@ -4,14 +4,9 @@ Sub CreateMailFiles()
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
 
-	For Each row In tbl_CORREOS.DataBodyRange.Rows
-		colGENERAR_REPORTE = row.Cells(1, tbl_CORREOS.ListColumns("GENERAR CORREO?").Index).Value
-		colNOMBRE = row.Cells(1, tbl_CORREOS.ListColumns("NOMBRE").Index).Value
-
-		If colGENERAR_REPORTE = "SI" Then
-			Call CreateMail(colNOMBRE)
-		End If
-	Next row
+	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+		Call CreateMail(CStr(mailName))
+	Next mailName
 
 	If executionMode = "MANUAL" And allFilesCreated Then MsgBox "Archivos creados correctamente."
 End Sub
@@ -21,12 +16,7 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	Dim colNOMBRE As String
-	Dim colCORREO As String
-
 	On Error Goto ErrorHandler
-
-	Application.DisplayAlerts = False
 
 	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
 
@@ -34,37 +24,31 @@ Sub CreateMail(mailName As String)
 
 	mailFileCount = Application.WorksheetFunction.CountIf(tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange, mailName)
 
-	For Each row In tbl_ARCHIVOS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_ARCHIVOS.ListColumns("NOMBRE").Index).Value
-		colCORREO = row.Cells(1, tbl_ARCHIVOS.ListColumns("CORREO").Index).Value
-
-		If colCORREO <> mailName Then GoTo continueLoop
-		
+	For Each mailFileName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(ARCHIVOS[NOMBRE], ARCHIVOS[CORREO] = """ & mailName & """)")
 		If isOneFilePerRange Then
 			currentProcessDate = Null
 
-			Call CreateMailFile(colNOMBRE)
+			Call CreateMailFile(CStr(mailFileName))
 		Else
 			Dim dateValue As Date
 
 			For dateValue = startProcessDate To endProcessDate
 				currentProcessDate = dateValue
 
-				Call CreateMailFile(colNOMBRE)
+				Call CreateMailFile(CStr(mailFileName))
 			Next dateValue
 		End If
-		continueLoop:
-	Next row
-	
+	Next mailFileName
+
 	Exit Sub
 	ErrorHandler:
-		AppendToLogsFile ("Ha ocurrido un error al crear los archivos del correo: " & mailName)
+		AppendToLogsFile ("Ha ocurrido un error al crear los archivos del correo: '" & mailName & "'.")
 
 		continueExecution = False
 End Sub
 
 Sub CreateMailFile(mailFileName As String)
-	Call AppendToLogsFile("Generando archivo " & mailFileName & "...")
+	Call AppendToLogsFile("Generando archivo: '" & mailFileName & "'...")
 
 	Dim Workbook As Workbook
 	Dim fileReports As Variant
@@ -85,9 +69,7 @@ Sub CreateMailFile(mailFileName As String)
 		Call CreateFileReport(Workbook, CStr(item))
 	Next item
 
-	If Workbook.Worksheets.Count > 1 Then
-		Workbook.Sheets("Sheet1").delete
-
+	If Workbook.Worksheets(Workbook.Worksheets.Count).Name <> "Sheet1" Then
 		For Each Query In Workbook.Queries
 			Query.delete
 		Next Query
@@ -116,13 +98,15 @@ Sub CreateMailFile(mailFileName As String)
 
 		folder = folder & ".xlsx"
 
-	   Workbook.SaveAs fileName:=folder, FileFormat:=xlOpenXMLWorkbook
+		Application.DisplayAlerts = False
+		Workbook.SaveAs fileName:=folder, FileFormat:=xlOpenXMLWorkbook
+		Application.DisplayAlerts = True
 
-	   Call AppendToLogsFile("Archivo " & mailFileName & " creado exitosamente.")
+	   Call AppendToLogsFile("Archivo: '" & mailFileName & "' creado exitosamente.")
 	Else
-		MsgBox "El archivo " & mailFileName & " no pudo ser creado porque no se generó ningún reporte."
+		MsgBox "El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte."
 
-		Call AppendToLogsFile("El archivo " & mailFileName & " no pudo ser creado porque no se generó ningún reporte.")
+		Call AppendToLogsFile("El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte.")
 
 		allFilesCreated = False
 	End If
@@ -137,9 +121,6 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Dim rowCount As Long
 	Dim mailFile As String
 	Dim mailName As String
-
-	mailFile = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & fileReportName & """, REPORTES[NOMBRE], REPORTES[ARCHIVO])"))
-	mailName = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailFile & """, ARCHIVOS[NOMBRE], ARCHIVOS[CORREO])"))
 
 	ThisWorkbook.Activate
 
@@ -157,7 +138,11 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 		GoTo removeFilter
 	End If
 
-	Set Worksheet = Workbook.Worksheets.Add
+	If Workbook.Worksheets(1).Name = "Sheet1" Then
+		Set Worksheet = Workbook.Worksheets(1)
+	Else
+		Set Worksheet = Workbook.Worksheets.Add
+	End If
 
 	Worksheet.Name = fileReportName
 

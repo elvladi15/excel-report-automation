@@ -12,8 +12,8 @@ Sub CloseAllOtherWorkbooks()
 		End If
 	Next wb
 
-CleanUp:
-	   Application.DisplayAlerts = True
+	CleanUp:
+	Application.DisplayAlerts = True
 End Sub
 
 Sub RefreshAll()
@@ -37,8 +37,9 @@ Sub RefreshAll()
 	End If
 
 	Exit Sub
+
 	ErrorHandler:
-		continueExecution = False
+	continueExecution = False
 End Sub
 
 Sub AppendToLogsFile(message As String)
@@ -93,7 +94,7 @@ Function GetBasicTableStructure() As Object
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "VALOR"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 		End With
 
@@ -105,25 +106,25 @@ Function GetBasicTableStructure() As Object
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "NOMBRE"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "CONVERSACION"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "UN ARCHIVO POR RANGO?"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "GENERAR CORREO?"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 		End With
 
@@ -135,13 +136,13 @@ Function GetBasicTableStructure() As Object
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "NOMBRE"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "CORREO"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 		End With
 
@@ -153,13 +154,13 @@ Function GetBasicTableStructure() As Object
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "NOMBRE"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", "ARCHIVO"
-				.Add "rows", New Collection
+				.Add "rows", Null
 			End With
 		End With
 

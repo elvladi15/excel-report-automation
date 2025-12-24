@@ -5,16 +5,9 @@ Sub CreateDrafts()
 
 	If Not isConversationColumnCorrect Then Exit Sub
 
-	For Each row In tbl_CORREOS.DataBodyRange.Rows
-		colGENERAR_REPORTE = row.Cells(1, tbl_CORREOS.ListColumns("GENERAR CORREO?").Index).Value
-		colNOMBRE = row.Cells(1, tbl_CORREOS.ListColumns("NOMBRE").Index).Value
-
-		If colGENERAR_REPORTE = "SI" Then
-			Call CreateDraft(colNOMBRE)
-
-			'If Not allDraftsCreated Then Exit Sub
-		End If
-	Next row
+	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+		Call CreateDraft(CStr(mailName))
+	Next mailName
 
 	If executionMode = "MANUAL" And allDraftsCreated Then MsgBox "Borradores creados correctamente."
 End Sub
@@ -22,7 +15,7 @@ End Sub
 Sub CreateDraft(mailName As String)
 	On Error GoTo ErrorHandler
 
-	Call AppendToLogsFile("Creando borrador: " & mailName & "...")
+	Call AppendToLogsFile("Creando borrador: '" & mailName & "'...")
 
 	Dim conversation As Object
 
@@ -93,9 +86,9 @@ Sub CreateDraft(mailName As String)
 				filePath = Dir()
 			Loop
 			If quantityOfFilesFound = 0 Then
-				MsgBox "No se puede crear el borrador: " & mailName & " porque no hay archivos a generar."
+				MsgBox "No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar."
 
-				AppendToLogsFile ("No se puede crear el borrador: " & mailName & " porque no hay archivos a generar.")
+				AppendToLogsFile ("No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar.")
 
 				allDraftsCreated = False
 
@@ -108,38 +101,78 @@ Sub CreateDraft(mailName As String)
 
 	conversation.Save
 
-	AppendToLogsFile ("El borrador: " & mailName & " fue creado exitosamente.")
+	AppendToLogsFile ("El borrador: '" & mailName & "' fue creado exitosamente.")
 	Exit Sub
-ErrorHandler:
-	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: " & mailName)
+
+	ErrorHandler:
+	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: '" & mailName & "'.")
 
 	continueExecution = False
 End Sub
 
 Sub SendAllDrafts()
+	If executionMode = "MANUAL" Then
+		If Not isConversationColumnCorrect Then Exit Sub
+	End If
+	
 	Call AppendToLogsFile("Enviando borradores...")
+	Dim successfulMailSending As Boolean
+
 	SendAllDraftsRecursive(1)
 End Sub
 
 Sub SendAllDraftsRecursive(attemptCount As Long)
+	Dim mailItem As Object
+	Dim i As Long
+	
 	On Error GoTo ErrHandler
 
-	For Each item In outlookDraftsFolderRef.Items
-		If item.MessageClass = "IPM.Note" And Not item.Sent Then
-			item.Display False
+	If outlookDraftsFolderRef.Items.Count = 0 Then
+		Call AppendToLogsFile("No hay borradores que enviar.")
+		If executionMode = "MANUAL" Then MsgBox "No hay borradores que enviar."
+		Exit Sub
+	End If
+	
+	successfulMailSending = True
+
+	For Each conversation In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[CONVERSACION], CORREOS[GENERAR CORREO?] = ""SI"")")
+		On Error Goto mailItemNotFound
+		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
+
+		If mailItem.MessageClass = "IPM.Note" And Not mailItem.Sent Then
+			mailItem.Display False
 			DoEvents
-			item.Send
+			mailItem.Send
 		End If
-	Next item
+		Goto continueLoop
 
-	Call AppendToLogsFile("Correos enviados exitosamente.")
+		mailItemNotFound:
+		Call AppendToLogsFile("La conversación: '" & CStr(conversation) & "' no fue encontrada.")
+		If executionMode = "MANUAL" Then MsgBox "La conversación: '" & CStr(conversation) & "' no fue encontrada."
 
-	If executionMode = "MANUAL" Then MsgBox "Correos enviados exitosamente."
+		successfulMailSending = False
+
+		continueLoop:
+	Next conversation
+
+	Application.Wait Now + TimeValue("00:00:30")
+
+	If outlookDraftsFolderRef.Items.Count > 0 Then
+		for i = outlookDraftsFolderRef.Items.Count To 1 Step -1
+			outlookDraftsFolderRef.Items(i).Delete
+		Next
+	End If
+
+	If successfulMailSending Then
+		Call AppendToLogsFile("Correos enviados exitosamente.")
+		If executionMode = "MANUAL" And successfulMailSending Then MsgBox "Correos enviados exitosamente."
+	End If
 
 	Exit Sub
-ErrHandler:
+
+	ErrHandler:
 	If attemptCount = attemptMaxCount Then
-		Call AppendToLogsFile("El intento " & attemptCount & " ha sido agotado. Envío de correos abortado.")
+		Call AppendToLogsFile("El intento número " & attemptCount & " ha sido agotado. Envío de correos abortado.")
 
 		If executionMode = "MANUAL" Then MsgBox "Ha ocurrido un error al enviar los correos."
 		
@@ -147,7 +180,7 @@ ErrHandler:
 		Exit Sub
 	End If
 	
-	Call AppendToLogsFile("Ha ocurrido un error al enviar los borradores en el intento " & attemptCount & ".")
+	Call AppendToLogsFile("Ha ocurrido un error al enviar los borradores en el intento número " & attemptCount & ".")
 
 	Call SendAllDraftsRecursive(attemptCount + 1)
 End Sub

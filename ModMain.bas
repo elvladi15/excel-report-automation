@@ -47,7 +47,6 @@ Sub Main()
 	allFilesCreated = True
 	continueExecution = True
 
-	On Error GoTo ErrorHandler
 	If Application.Caller = "btnRefreshAll" Then
 		RefreshAll
 	ElseIf Application.Caller = "btnCreateMailFiles" Then
@@ -65,8 +64,6 @@ Sub Main()
 	Else
 		MsgBox "Botón no reconocido."
 	End If
-
+	Application.DisplayAlerts = True
 	Exit Sub
-	ErrorHandler:
-		MsgBox "No correr desde el código. Usar algún botón."
 End Sub
