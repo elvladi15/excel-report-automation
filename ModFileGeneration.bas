@@ -13,7 +13,7 @@ Sub CreateMailFiles()
 		End If
 	Next row
 
-	If executionMode = "MANUAL" Then MsgBox "Archivos creados correctamente."
+	If executionMode = "MANUAL" And allFilesCreated Then MsgBox "Archivos creados correctamente."
 End Sub
 
 Sub CreateMail(mailName As String)
@@ -23,6 +23,8 @@ Sub CreateMail(mailName As String)
 
 	Dim colNOMBRE As String
 	Dim colCORREO As String
+
+	On Error Goto ErrorHandler
 
 	Application.DisplayAlerts = False
 
@@ -51,9 +53,14 @@ Sub CreateMail(mailName As String)
 				Call CreateMailFile(colNOMBRE)
 			Next dateValue
 		End If
-		'If Not canMailBeSent Then Call AppendToLogsFile("El correo " & mailName & " no puede ser generado porque el reporte " & errorReport & " no trajo registros.")
 		continueLoop:
 	Next row
+	
+	Exit Sub
+	ErrorHandler:
+		AppendToLogsFile ("Ha ocurrido un error al crear los archivos del correo: " & mailName)
+
+		continueExecution = False
 End Sub
 
 Sub CreateMailFile(mailFileName As String)
@@ -76,12 +83,6 @@ Sub CreateMailFile(mailFileName As String)
 
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))
-
-		'If Not canMailBeSent Then
-		'	Workbook.Close False
-
-		'	Exit Sub
-		'End If
 	Next item
 
 	If Workbook.Worksheets.Count > 1 Then
@@ -118,6 +119,12 @@ Sub CreateMailFile(mailFileName As String)
 	   Workbook.SaveAs fileName:=folder, FileFormat:=xlOpenXMLWorkbook
 
 	   Call AppendToLogsFile("Archivo " & mailFileName & " creado exitosamente.")
+	Else
+		MsgBox "El archivo " & mailFileName & " no pudo ser creado porque no se generó ningún reporte."
+
+		Call AppendToLogsFile("El archivo " & mailFileName & " no pudo ser creado porque no se generó ningún reporte.")
+
+		allFilesCreated = False
 	End If
 
 	Workbook.Close False
@@ -143,8 +150,6 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	rowCount = reportTable.ListRows.Count
 
 	If rowCount = 0 Then
-		'canMailBeSent = False
-
 		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
 
 		errorReport = fileReportName

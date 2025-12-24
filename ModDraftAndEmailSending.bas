@@ -11,10 +11,12 @@ Sub CreateDrafts()
 
 		If colGENERAR_REPORTE = "SI" Then
 			Call CreateDraft(colNOMBRE)
+
+			'If Not allDraftsCreated Then Exit Sub
 		End If
 	Next row
 
-	If executionMode = "MANUAL" Then MsgBox "Borradores creados correctamente."
+	If executionMode = "MANUAL" And allDraftsCreated Then MsgBox "Borradores creados correctamente."
 End Sub
 
 Sub CreateDraft(mailName As String)
@@ -91,7 +93,11 @@ Sub CreateDraft(mailName As String)
 				filePath = Dir()
 			Loop
 			If quantityOfFilesFound = 0 Then
+				MsgBox "No se puede crear el borrador: " & mailName & " porque no hay archivos a generar."
+
 				AppendToLogsFile ("No se puede crear el borrador: " & mailName & " porque no hay archivos a generar.")
+
+				allDraftsCreated = False
 
 				Exit Sub
 			End If
@@ -112,8 +118,6 @@ End Sub
 
 Sub SendAllDrafts()
 	Call AppendToLogsFile("Enviando borradores...")
-
-	If executionMode = "AUTOMÁTICO" Then OpenOutlookIfNotRunning
 	SendAllDraftsRecursive(1)
 End Sub
 

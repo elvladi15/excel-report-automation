@@ -18,18 +18,23 @@ Public startProcessDate As Date
 Public endProcessDate As Date
 Public baseReportFolder As String
 Public outlookFolderName As String
-Public logsFileFolder As String
-Public selectedReport As String
-Public dateFormat As String
 Public canGenerateLogs As Boolean
+Public logsFileFolder As String
+Public dateFormat As String
+Public scheduleTime As Date
 
-Public canMailBeSent As Boolean
 Public currentProcessDate As Variant
 Public errorReport As String
 
 Public outlookAppRef As Object
 Public outlookReportFolderRef As Object
 Public outlookDraftsFolderRef As Object
+
+Public allDraftsCreated As Boolean
+Public allFilesCreated As Boolean
+
+Public continueExecution As Boolean
+Public sendMails As Boolean
 
 Sub Main()
 	If Not isInputValidationCorrect Then Exit Sub
@@ -38,7 +43,9 @@ Sub Main()
 
 	executionMode = "MANUAL"
 	attemptMaxCount = 3
-	canMailBeSent = True
+	allDraftsCreated = True
+	allFilesCreated = True
+	continueExecution = True
 
 	On Error GoTo ErrorHandler
 	If Application.Caller = "btnRefreshAll" Then
@@ -50,9 +57,11 @@ Sub Main()
 	ElseIf Application.Caller = "btnSendAllDrafts" Then
 		SendAllDrafts
 	ElseIf Application.Caller = "btnScheduleMailSending" Then
-		ScheduleMailSending
+		sendMails = True
+		ScheduleAutomaticRun
 	ElseIf Application.Caller = "btnScheduleMailGeneration" Then
-		ScheduleMailGeneration
+		sendMails = False
+		ScheduleAutomaticRun
 	Else
 		MsgBox "Botón no reconocido."
 	End If

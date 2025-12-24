@@ -1,44 +1,58 @@
 Attribute VB_Name = "ModAutomationProcess"
-Sub ScheduleMailSending()
-	Dim scheduleDayIncrement As Long
-	Dim scheduleDate As Date
+Sub ScheduleAutomaticRun()
+	Dim scheduleDateTime As Date
 
-	If Not isConversationColumnCorrect Then Exit Sub
+	scheduleDateTime = Date + 1 + scheduleTime
 
-	scheduleDayIncrement = 1
+	If sendMails Then
+		If Not isConversationColumnCorrect Then Exit Sub
+	End If
 
-	scheduleDate = Date + scheduleDayIncrement
+	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
-	Call ScheduleProcedure("RefreshAll", scheduleDate + TimeValue("06:45:00"))
-	Call ScheduleProcedure("CreateMailFiles", scheduleDate + TimeValue("06:50:00"))
-	Call ScheduleProcedure("CreateDrafts", scheduleDate + TimeValue("06:55:00"))
-	Call ScheduleProcedure("SendAllDrafts", scheduleDate + TimeValue("07:00:00"))
-
-	If executionMode = "AUTOMÁTICO" Then
-		Call ScheduleProcedure("ScheduleMailSending", scheduleDate + TimeValue("07:02:00"))
-	ElseIf executionMode = "MANUAL" Then
-		MsgBox "Programación de envío de correos exitosa. Próxima corrida: " & Format(scheduleDate, dateFormat)
+	If executionMode = "MANUAL" Then
+		If sendMails Then
+			MsgBox "Programación de envío de correos exitosa. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+		Else
+			MsgBox "Programación de genereración de reportes exitosa. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+		End If
 		executionMode = "AUTOMÁTICO"
 	End If
 End Sub
 
-Sub ScheduleMailGeneration()
-	Dim scheduleDayIncrement As Long
-	Dim scheduleDate As Date
+Sub AutomaticRun()
+	Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
+	startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
+	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 
-	scheduleDayIncrement = 1
-
-	scheduleDate = Date + scheduleDayIncrement
-
-	Call ScheduleProcedure("RefreshAll", scheduleDate + TimeValue("06:55:00"))
-	Call ScheduleProcedure("CreateMailFiles", scheduleDate + TimeValue("07:00:00"))
-
-	If executionMode = "AUTOMÁTICO" Then
-		Call ScheduleProcedure("ScheduleMailSending", scheduleDate + TimeValue("07:02:00"))
-	ElseIf executionMode = "MANUAL" Then
-		MsgBox "Programación de generación de correo exitosa. Próxima corrida: " & Format(scheduleDate, dateFormat)
-		executionMode = "AUTOMÁTICO"
+	RefreshAll
+	If Not continueExecution Then
+		Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de refrescar hoja de cálculo.")
+		Goto scheduleNextRun
 	End If
+	CreateMailFiles
+	If Not continueExecution Then
+		Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de crear los archivos.")
+		Goto scheduleNextRun
+	End If
+	If sendMails Then
+		CreateDrafts
+		If Not continueExecution Then
+			Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de creación de borradores.")
+			Goto scheduleNextRun
+		End If
+
+		OpenOutlookIfNotRunning
+
+		SendAllDrafts
+		If Not continueExecution Then
+			Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de envío de correos.")
+			Goto scheduleNextRun
+		End If
+	End If
+
+	scheduleNextRun:
+		Call ScheduleProcedure("AutomaticRun", Date + 1 + scheduleTime)
 End Sub
 
 Sub ScheduleProcedure(procedure As String, time As Date)
@@ -47,17 +61,5 @@ Sub ScheduleProcedure(procedure As String, time As Date)
 Schedule:
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=True
 
-	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - Procedimiento " & procedure & " programado exitosamente para " & Format(time, dateFormat))
-End Sub
-
-Sub AutomaticMailSendingRun(procedures As Collection)
-	For Each procedure In procedures
-		Application.Run procedure
-
-		If Not continueExecution Then
-			Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso: " & procedure & ".")
-
-			Exit Sub
-		End If
-	Next procedure
+	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - Procedimiento " & procedure & " programado exitosamente para " & Format(time, dateFormat & " hh:mm:ss"))
 End Sub

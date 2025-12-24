@@ -87,6 +87,7 @@ Function GetBasicTableStructure() As Object
 					.Item("rows").Add "Directorio archivos de logs"
 					.Item("rows").Add "Carpeta de Outlook"
 					.Item("rows").Add "Formato de fechas"
+					.Item("rows").Add "Hora de ejecución"
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")

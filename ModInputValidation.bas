@@ -101,6 +101,11 @@ Function isParameterValidationCorrect() As Boolean
 			End If
 		End If
 
+		If colNOMBRE = "Hora de ejecución" And Not IsDate(colVALOR) Then
+			MsgBox "La hora de ejecución " & colVALOR & " no es una fecha válida."
+			Exit Function
+		End If
+
 		continueLoop:
 	Next row
 
@@ -111,6 +116,7 @@ Function isParameterValidationCorrect() As Boolean
 	outlookFolderName = dictParameters("Carpeta de Outlook")
 	dateFormat = dictParameters("Formato de fechas")
 	canGenerateLogs = dictParameters("Generar logs?") = "SI"
+	scheduleTime = TimeValue(dictParameters("Hora de ejecución"))
 
 	isParameterValidationCorrect = True
 End Function
