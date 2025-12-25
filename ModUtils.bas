@@ -33,7 +33,7 @@ Sub RefreshAll()
 	Exit Sub
 
 	ErrorHandler:
-	continueExecution = False
+	'continueExecution = False
 End Sub
 
 Sub AppendToLogsFile(message As String)

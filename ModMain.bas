@@ -24,16 +24,17 @@ Public dateFormat As String
 Public scheduleTime As Date
 
 Public currentProcessDate As Variant
-Public errorReport As String
+
+Public mailFilesNotGenerated As Collection
+Public reportsNotGenerated As Collection
+Public draftsNotGenerated As Collection
+Public conversationsNotSent As collection
 
 Public outlookAppRef As Object
 Public outlookReportFolderRef As Object
 Public outlookDraftsFolderRef As Object
 
-Public allDraftsCreated As Boolean
-Public allFilesCreated As Boolean
-
-Public continueExecution As Boolean
+'Public continueExecution As Boolean
 Public sendMails As Boolean
 
 Sub Main()
@@ -43,9 +44,11 @@ Sub Main()
 
 	executionMode = "MANUAL"
 	attemptMaxCount = 3
-	allDraftsCreated = True
-	allFilesCreated = True
-	continueExecution = True
+	Set mailFilesNotGenerated = New Collection
+	Set reportsNotGenerated = New Collection
+	Set draftsNotGenerated = New Collection
+	Set conversationsNotSent = New Collection
+	'continueExecution = True
 
 	If Application.Caller = "btnRefreshAll" Then
 		RefreshAll

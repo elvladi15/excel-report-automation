@@ -3,20 +3,52 @@ Sub CreateMailFiles()
 	Dim fileGenerated As Boolean
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
+	Dim outputMesssage As String
+
+	outputMesssage = ""
 
 	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
-	If executionMode = "MANUAL" And allFilesCreated Then MsgBox "Archivos creados correctamente."
+	If executionMode = "MANUAL" Then
+		If reportsNotGenerated.Count = 0 Then
+			outputMesssage = outputMesssage & "Reportes generados exitosamente."
+		Else
+			outputMesssage = "Los reportes:" & vbCrLf & vbCrLf
+
+			For Each report In reportsNotGenerated
+				outputMesssage = outputMesssage & report & vbCrLf
+			Next report
+			
+			outputMesssage = outputMesssage & vbCrLf
+
+			outputMesssage = outputMesssage & " no se pudieron generar." & vbCrLf & vbCrLf
+		End If
+
+		If mailFilesNotGenerated.Count = 0 Then
+			outputMesssage = outputMesssage & "Archivos creados exitosamente."
+		Else
+			outputMesssage = outputMesssage & "Los archivos:" & vbCrLf & vbCrLf
+
+			For Each mailFile In mailFilesNotGenerated
+				outputMesssage = outputMesssage & mailFile & vbCrLf
+			Next mailFile
+
+			outputMesssage = outputMesssage & vbCrLf
+
+			outputMesssage = outputMesssage & " no se pudieron crear porque no tenían ningún reporte."
+		End If
+
+		MsgBox outputMesssage
+	End If
+
 End Sub
 
 Sub CreateMail(mailName As String)
 	Dim mailFiles As Variant
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
-
-	On Error Goto ErrorHandler
 
 	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
 
@@ -39,15 +71,10 @@ Sub CreateMail(mailName As String)
 			Next dateValue
 		End If
 	Next mailFileName
-
-	Exit Sub
-	ErrorHandler:
-		AppendToLogsFile ("Ha ocurrido un error al crear los archivos del correo: '" & mailName & "'.")
-
-		continueExecution = False
 End Sub
 
 Sub CreateMailFile(mailFileName As String)
+	On Error Goto ErrorHandler
 	Call AppendToLogsFile("Generando archivo: '" & mailFileName & "'...")
 
 	Dim Workbook As Workbook
@@ -104,14 +131,15 @@ Sub CreateMailFile(mailFileName As String)
 
 	   Call AppendToLogsFile("Archivo: '" & mailFileName & "' creado exitosamente.")
 	Else
-		MsgBox "El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte."
+		mailFilesNotGenerated.Add mailFileName
 
 		Call AppendToLogsFile("El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte.")
-
-		allFilesCreated = False
 	End If
 
 	Workbook.Close False
+
+	ErrorHandler:
+	Call AppendToLogsFile("Ha ocurrido un error al generar el archivo " & mailFileName & ".")
 End Sub
 
 Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
@@ -121,18 +149,28 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Dim mailFile As String
 	Dim mailName As String
 
+	On Error Goto ErrorHandler
+
 	ThisWorkbook.Activate
 
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
+
+	If reportTable.ListRows.Count = 0 Then
+		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros. Pudo haber sido algún error al consultar la data.")
+
+		reportsNotGenerated.Add fileReportName
+
+		Exit Sub
+	End If
 
 	reportTable.DataBodyRange.Borders.LineStyle = xlContinuous
 
 	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
 
 	If Application.WorksheetFunction.CountA(reportTable.DataBodyRange) = 0 Then
-		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
+		Call AppendToLogsFile("El reporte " & fileReportName & " no se actualizó.")
 
-		errorReport = fileReportName
+		reportsNotGenerated.Add fileReportName
 
 		GoTo removeFilter
 	End If
@@ -155,6 +193,10 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	Worksheet.Columns.AutoFit
 
-removeFilter:
-	reportTable.AutoFilter.ShowAllData
+	removeFilter:
+		reportTable.AutoFilter.ShowAllData
+
+	ErrorHandler:
+		Call AppendToLogsFile("Ha ocurrido un error al generar el reporte " & fileReportName & ".")
+		'fileReportName
 End Sub
