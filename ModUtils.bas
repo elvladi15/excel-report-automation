@@ -19,12 +19,6 @@ End Sub
 Sub RefreshAll()
 	On Error Goto ErrorHandler
 
-	Call AppendToLogsFile("Cerrando los demás libros de Excel...")
-	CloseAllOtherWorkbooks
-
-	Call AppendToLogsFile("Refrescando hoja de cálculo...")
-	ThisWorkbook.Sheets("PARAMETROS").Calculate
-
 	Call AppendToLogsFile("Actualizando reportes...")
 	ThisWorkbook.RefreshAll
 

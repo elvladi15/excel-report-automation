@@ -118,7 +118,6 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Dim Worksheet As Worksheet
 	Dim reportTable As ListObject
 	Dim newTbl As ListObject
-	Dim rowCount As Long
 	Dim mailFile As String
 	Dim mailName As String
 
@@ -126,11 +125,11 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
 
+	reportTable.DataBodyRange.Borders.LineStyle = xlContinuous
+
 	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
 
-	rowCount = reportTable.ListRows.Count
-
-	If rowCount = 0 Then
+	If Application.WorksheetFunction.CountA(reportTable.DataBodyRange) = 0 Then
 		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
 
 		errorReport = fileReportName
@@ -152,7 +151,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	reportTable.Range.Resize(reportTable.ListRows.Count + 2, reportTable.ListColumns.Count - 1).Copy
 	Worksheet.Range("A1").PasteSpecial Paste:=xlPasteValues
 
-	reportTable.DataBodyRange.Delete
+	reportTable.DataBodyRange.ClearContents
 
 	Worksheet.Columns.AutoFit
 

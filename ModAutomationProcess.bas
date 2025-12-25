@@ -21,6 +21,12 @@ Sub ScheduleAutomaticRun()
 End Sub
 
 Sub AutomaticRun()
+	Call AppendToLogsFile("Cerrando los demás libros de Excel...")
+	CloseAllOtherWorkbooks
+
+	Call AppendToLogsFile("Refrescando hoja de cálculo...")
+	ThisWorkbook.Sheets("PARAMETROS").Calculate
+
 	Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
 	startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
@@ -30,11 +36,13 @@ Sub AutomaticRun()
 		Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de refrescar hoja de cálculo.")
 		Goto scheduleNextRun
 	End If
+
 	CreateMailFiles
 	If Not continueExecution Then
 		Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de crear los archivos.")
 		Goto scheduleNextRun
 	End If
+	
 	If sendMails Then
 		CreateDrafts
 		If Not continueExecution Then
