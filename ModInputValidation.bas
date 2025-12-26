@@ -86,6 +86,11 @@ Function isParameterValidationCorrect() As Boolean
 			Exit Function
 		End If
 
+		If colNOMBRE = "Timeout máximo en segundos" And Not IsNumeric(colVALOR) Then
+			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser un número."
+			Exit Function
+		End If
+
 		If colNOMBRE = "Directorio archivos de logs" And dictParameters("Generar logs") = "NO" Then GoTo continueLoop
 
 		If colVALOR = "" Then
@@ -230,14 +235,6 @@ Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		On Error GoTo 0
 		If Err.Number <> 0 Then
 			MsgBox "La tabla: '" & colNOMBRE & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
-			Exit Function
-		End If
-
-		On Error Resume Next
-		colNOMBRE = table.ListColumns("PROCESS_DATE_FOR_RANGE")
-		On Error GoTo 0
-		If Err.Number <> 0 Then
-			MsgBox "La columna PROCESS_DATE_FOR_RANGE no fue encontrada en la tabla: '" & colNOMBRE & "'. Favor crear."
 			Exit Function
 		End If
 	Next row

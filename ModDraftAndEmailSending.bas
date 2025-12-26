@@ -9,11 +9,9 @@ Sub CreateDrafts()
 		Call CreateDraft(CStr(mailName))
 	Next mailName
 
-	If 
-
 	If executionMode = "MANUAL" Then
 		If draftsNotGenerated.Count = 0 Then
-				outputMesssage = outputMesssage & "Borradores generados exitosamente."
+				outputMesssage = outputMesssage & "Borradores generados exitosamente. "
 			Else
 				outputMesssage = "Los borradores:" & vbCrLf & vbCrLf
 
@@ -122,8 +120,6 @@ Sub CreateDraft(mailName As String)
 
 	ErrorHandler:
 	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: '" & mailName & "'.")
-
-	'continueExecution = False
 End Sub
 
 Sub SendAllDrafts()
@@ -132,7 +128,6 @@ Sub SendAllDrafts()
 	End If
 	
 	Call AppendToLogsFile("Enviando borradores...")
-	'Dim successfulMailSending As Boolean
 
 	SendAllDraftsRecursive(1)
 
@@ -204,7 +199,6 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Call AppendToLogsFile("El intento número " & attemptCount & " ha sido agotado. Envío de correos abortado.")
 
 		Set conversationsNotSent = Null
-		'If executionMode = "MANUAL" Then MsgBox "Ha ocurrido un error al enviar los correos."
 		Exit Sub
 	End If
 	

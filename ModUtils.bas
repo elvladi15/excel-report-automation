@@ -33,7 +33,6 @@ Sub RefreshAll()
 	Exit Sub
 
 	ErrorHandler:
-	'continueExecution = False
 End Sub
 
 Sub AppendToLogsFile(message As String)
@@ -77,6 +76,7 @@ Function GetBasicTableStructure() As Object
 				.Add "rows", New Collection
 					.Item("rows").Add "START_PROCESS_DATE"
 					.Item("rows").Add "END_PROCESS_DATE"
+					.Item("rows").Add "Timeout máximo en segundos"
 					.Item("rows").Add "Directorio base reportes"
 					.Item("rows").Add "Generar logs?"
 					.Item("rows").Add "Directorio archivos de logs"

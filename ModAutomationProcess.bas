@@ -32,30 +32,15 @@ Sub AutomaticRun()
 	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 
 	RefreshAll
-	'If Not continueExecution Then
-	'	Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de refrescar hoja de cálculo.")
-	'	Goto scheduleNextRun
-	'End If
 
 	CreateMailFiles
-	'If Not continueExecution Then
-	'	Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de crear los archivos.")
-	'	Goto scheduleNextRun
-	'End If
 
 	If sendMails Then
 		CreateDrafts
-	'	If Not continueExecution Then
-	'		Call AppendToLogsFile("Se ha abortado la ejecución debido a un error en el proceso de creación de borradores.")
-	'		Goto scheduleNextRun
-	'	End If
 
 		OpenOutlookIfNotRunning
 
 		SendAllDrafts
-	'	If Not continueExecution Then
-	'		Call AppendToLogsFile("Ha ocurrido un error en el proceso de envío de correos.")
-	'	End If
 	End If
 
 	scheduleNextRun:

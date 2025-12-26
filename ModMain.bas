@@ -33,8 +33,6 @@ Public conversationsNotSent As collection
 Public outlookAppRef As Object
 Public outlookReportFolderRef As Object
 Public outlookDraftsFolderRef As Object
-
-'Public continueExecution As Boolean
 Public sendMails As Boolean
 
 Sub Main()
@@ -48,7 +46,6 @@ Sub Main()
 	Set reportsNotGenerated = New Collection
 	Set draftsNotGenerated = New Collection
 	Set conversationsNotSent = New Collection
-	'continueExecution = True
 
 	If Application.Caller = "btnRefreshAll" Then
 		RefreshAll

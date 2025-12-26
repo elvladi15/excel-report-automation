@@ -13,7 +13,7 @@ Sub CreateMailFiles()
 
 	If executionMode = "MANUAL" Then
 		If reportsNotGenerated.Count = 0 Then
-			outputMesssage = outputMesssage & "Reportes generados exitosamente."
+			outputMesssage = outputMesssage & "Reportes generados exitosamente. "
 		Else
 			outputMesssage = "Los reportes:" & vbCrLf & vbCrLf
 
@@ -129,7 +129,7 @@ Sub CreateMailFile(mailFileName As String)
 		Workbook.SaveAs fileName:=folder, FileFormat:=xlOpenXMLWorkbook
 		Application.DisplayAlerts = True
 
-	   Call AppendToLogsFile("Archivo: '" & mailFileName & "' creado exitosamente.")
+		Call AppendToLogsFile("Archivo: '" & mailFileName & "' creado exitosamente.")
 	Else
 		mailFilesNotGenerated.Add mailFileName
 
@@ -137,6 +137,8 @@ Sub CreateMailFile(mailFileName As String)
 	End If
 
 	Workbook.Close False
+
+	Exit Sub
 
 	ErrorHandler:
 	Call AppendToLogsFile("Ha ocurrido un error al generar el archivo " & mailFileName & ".")
@@ -155,8 +157,16 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
 
+	If reportTable.ListRows.Count = 1 And reportTable.ListColumns.Count = 1 Then
+		Call AppendToLogsFile("Hubo un error al consultar el reporte " & fileReportName & " desde la base de datos")
+
+		reportsNotGenerated.Add fileReportName
+
+		Exit Sub
+	End If
+
 	If reportTable.ListRows.Count = 0 Then
-		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros. Pudo haber sido algún error al consultar la data.")
+		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
 
 		reportsNotGenerated.Add fileReportName
 
@@ -165,6 +175,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	reportTable.DataBodyRange.Borders.LineStyle = xlContinuous
 
+	On Error Goto no_PROCESS_DATE_FOR_RANGE_column
 	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
 
 	If Application.WorksheetFunction.CountA(reportTable.DataBodyRange) = 0 Then
@@ -189,14 +200,18 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	reportTable.Range.Resize(reportTable.ListRows.Count + 2, reportTable.ListColumns.Count - 1).Copy
 	Worksheet.Range("A1").PasteSpecial Paste:=xlPasteValues
 
-	reportTable.DataBodyRange.ClearContents
-
 	Worksheet.Columns.AutoFit
+	Exit Sub
 
 	removeFilter:
 		reportTable.AutoFilter.ShowAllData
+		Exit Sub
 
 	ErrorHandler:
 		Call AppendToLogsFile("Ha ocurrido un error al generar el reporte " & fileReportName & ".")
-		'fileReportName
+		Exit Sub
+
+	no_PROCESS_DATE_FOR_RANGE_column:
+		Call AppendToLogsFile("No se encontró la columna PROCESS_DATE_FOR_RANGE en el reporte " & fileReportName & ".")
+		Exit Sub
 End Sub
