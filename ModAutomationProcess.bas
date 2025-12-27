@@ -1,6 +1,8 @@
 Attribute VB_Name = "ModAutomationProcess"
 Sub ScheduleAutomaticRun()
 	Dim scheduleDateTime As Date
+	Dim mails As Variant
+	Dim mailCount As Long
 
 	scheduleDateTime = Date + 1 + ScheduleTime
 
@@ -10,11 +12,14 @@ Sub ScheduleAutomaticRun()
 
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
-	If executionMode = "MANUAL" Then
+	If executionMode = "MANUAL" Then	
+		mails = ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+		mailCount = UBound(mails) - LBound(mails) + 1
+
 		If sendMails Then
-			MsgBox "Programación de envío de correos exitosa. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+			MsgBox "Programación de envío de correos exitosa. Se enviarán " & mailCount & " correos. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
 		Else
-			MsgBox "Programación de genereración de reportes exitosa. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+			MsgBox "Programación de genereración de reportes exitosa. Se generarán los archivos de " & mailCount & " correos. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
 		End If
 		executionMode = "AUTOMÁTICO"
 	End If

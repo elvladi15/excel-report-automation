@@ -23,9 +23,9 @@ Sub CreateDrafts()
 
 				outputMesssage = outputMesssage & " no se pudieron crear porque sus archivos no se crearon." & vbCrLf & vbCrLf
 		End If
+		
+		MsgBox outputMesssage
 	End If
-
-	MsgBox outputMesssage
 End Sub
 
 Sub CreateDraft(mailName As String)

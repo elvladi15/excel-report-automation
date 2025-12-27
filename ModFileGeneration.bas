@@ -201,17 +201,15 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Worksheet.Range("A1").PasteSpecial Paste:=xlPasteValues
 
 	Worksheet.Columns.AutoFit
-	Exit Sub
+	'Exit Sub
 
 	removeFilter:
 		reportTable.AutoFilter.ShowAllData
 		Exit Sub
-
-	ErrorHandler:
-		Call AppendToLogsFile("Ha ocurrido un error al generar el reporte " & fileReportName & ".")
-		Exit Sub
-
 	no_PROCESS_DATE_FOR_RANGE_column:
 		Call AppendToLogsFile("No se encontró la columna PROCESS_DATE_FOR_RANGE en el reporte " & fileReportName & ".")
+		Exit Sub
+	ErrorHandler:
+		Call AppendToLogsFile("Ha ocurrido un error al generar el reporte " & fileReportName & ".")
 		Exit Sub
 End Sub

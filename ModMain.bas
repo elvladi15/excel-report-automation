@@ -61,8 +61,6 @@ Sub Main()
 	ElseIf Application.Caller = "btnScheduleMailGeneration" Then
 		sendMails = False
 		ScheduleAutomaticRun
-	Else
-		MsgBox "Botón no reconocido."
 	End If
 	Application.DisplayAlerts = True
 	Exit Sub
