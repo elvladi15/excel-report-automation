@@ -1,5 +1,7 @@
 Attribute VB_Name = "ModMain"
 
+Public Const version As String = "1.0.0"
+
 Public wsPARAMETROS As Worksheet
 Public basicTableStructure As Object
 
