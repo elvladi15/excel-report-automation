@@ -3,7 +3,7 @@ Sub CreateDrafts()
 	Dim colGENERAR_REPORTE As String
 	Dim colNOMBRE As String
 
-	If Not isConversationColumnCorrect Then Exit Sub
+	If Not IsConversationColumnCorrect Then Exit Sub
 
 	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
 		Call CreateDraft(CStr(mailName))
@@ -124,7 +124,7 @@ End Sub
 
 Sub SendAllDrafts()
 	If executionMode = "MANUAL" Then
-		If Not isConversationColumnCorrect Then Exit Sub
+		If Not IsConversationColumnCorrect Then Exit Sub
 	End If
 	
 	Call AppendToLogsFile("Enviando borradores...")

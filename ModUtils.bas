@@ -25,7 +25,6 @@ Sub RefreshAll()
 	If executionMode = "MANUAL" Then
 		MsgBox("Hojas de Excel actualizadas.")
 	ElseIf executionMode = "AUTOMÁTICO"Then
-		Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
 		startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 		endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
 	End If
@@ -72,22 +71,22 @@ Function GetBasicTableStructure() As Object
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "NOMBRE"
+				.Add "name", GetNameParameterColumnName()
 				.Add "rows", New Collection
-					.Item("rows").Add "START_PROCESS_DATE"
-					.Item("rows").Add "END_PROCESS_DATE"
-					.Item("rows").Add "Timeout máximo en segundos"
-					.Item("rows").Add "Directorio base reportes"
-					.Item("rows").Add "Generar logs?"
-					.Item("rows").Add "Directorio archivos de logs"
-					.Item("rows").Add "Carpeta de Outlook"
-					.Item("rows").Add "Formato de fechas"
-					.Item("rows").Add "Hora de ejecución"
+					.Item("rows").Add GetStartProcessDateParameterName()
+					.Item("rows").Add GetEndProcessDateParameterName()
+					.Item("rows").Add GetMaxTimeoutInSecondsParameterName()
+					.Item("rows").Add GetFilesBaseFolderParameterName()
+					.Item("rows").Add GetGenerateLogsParameterName()
+					.Item("rows").Add GetLogFilesFolderParameterName()
+					.Item("rows").Add GetOutlookFolderParameterName()
+					.Item("rows").Add GetDateFormatParameterName()
+					.Item("rows").Add GetScheduleTimeParameterName()
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "VALOR"
+				.Add "name", GetValueParameterColumnName()
 				.Add "rows", Null
 			End With
 		End With
@@ -159,4 +158,47 @@ Function GetBasicTableStructure() As Object
 		End With
 
 	Set GetBasicTableStructure = basicTableStructure
+End Function
+
+Function GetLanguageStructure() As Object
+	Dim languageStructure As Object
+	Set languageStructure = CreateObject("Scripting.Dictionary")
+	
+	Set languageStructure("languages") = New Collection
+		languageStructure("languages").Add CreateObject("Scripting.Dictionary")
+
+		With languageStructure("languages")(languageStructure("languages").Count)
+			.Add "name", "SPANISH"
+			.Add "languageNames", New Collection
+				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
+				With .Item("languageNames")(.Item("languageNames").Count)
+					.Add "language", "SPANISH"
+					.Add "name", "Español"
+				End With
+
+				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
+				With .Item("languageNames")(.Item("languageNames").Count)
+					.Add "language", "ENGLISH"
+					.Add "name", "Inglés"
+				End With
+		End With
+
+		languageStructure("languages").Add CreateObject("Scripting.Dictionary")
+		With languageStructure("languages")(languageStructure("languages").Count)
+			.Add "name", "ENGLISH"
+			.Add "languageNames", New Collection
+				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
+				With .Item("languageNames")(.Item("languageNames").Count)
+					.Add "language", "SPANISH"
+					.Add "name", "Spanish"
+				End With
+
+				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
+				With .Item("languageNames")(.Item("languageNames").Count)
+					.Add "language", "ENGLISH"
+					.Add "name", "English"
+				End With
+		End With
+
+	Set GetlanguageStructure = languageStructure
 End Function

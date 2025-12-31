@@ -1,8 +1,11 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.0.0"
+Public Const version As String = "1.1.0"
 
-Public wsPARAMETROS As Worksheet
+Public currentLanguage As String
+Public languageStructure As Object
+Public isSilentChange As Boolean
+
 Public basicTableStructure As Object
 
 Public executionMode As String
@@ -38,7 +41,7 @@ Public outlookDraftsFolderRef As Object
 Public sendMails As Boolean
 
 Sub Main()
-	If Not isInputValidationCorrect Then Exit Sub
+	If Not IsInputValidationCorrect Then Exit Sub
 
 	CloseAllOtherWorkbooks
 

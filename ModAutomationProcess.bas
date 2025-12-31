@@ -7,7 +7,7 @@ Sub ScheduleAutomaticRun()
 	scheduleDateTime = Date + 1 + ScheduleTime
 
 	If sendMails Then
-		If Not isConversationColumnCorrect Then Exit Sub
+		If Not IsConversationColumnCorrect Then Exit Sub
 	End If
 
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
@@ -32,9 +32,8 @@ Sub AutomaticRun()
 	Call AppendToLogsFile("Refrescando hoja de cálculo...")
 	ThisWorkbook.Sheets("PARAMETROS").Calculate
 
-	Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
-	startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
-	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
+	startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & GetStartProcessDateParameterName() & """, PARAMETROS[" & GetNameParameterColumnName() & "], PARAMETROS[" & GetValueParameterColumnName() & "])")))
+	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & GetEndProcessDateParameterName() & """, PARAMETROS[" & GetNameParameterColumnName() & "], PARAMETROS[" & GetValueParameterColumnName() & "])")))
 
 	RefreshAll
 

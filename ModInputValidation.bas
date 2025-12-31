@@ -1,25 +1,16 @@
 Attribute VB_Name = "ModInputValidation"
-Function isInputValidationCorrect() As Boolean
+Function IsInputValidationCorrect() As Boolean
 	Set dictParameters = CreateObject("Scripting.Dictionary")
 
-	On Error Resume Next
-	Set wsPARAMETROS = ThisWorkbook.Sheets("PARAMETROS")
-	On Error GoTo 0
+	If Not IsBasicTableStructureCorrent() Then Exit Function
+	If Not IsParameterValidationCorrect() Then Exit Function
+	If Not ValidateAllBasicTableContents() Then Exit Function
+	If Not IsPowerQueryWorksheetAndTableValidationCorrect() Then Exit Function
 
-	If Err.Number <> 0 Then
-		MsgBox "La hoja de cálculo: 'PARÁMETROS' no existe. Favor revisar nombres de las hojas."
-		Exit Function
-	End If
-
-	If Not isBasicTableStructureCorrent() Then Exit Function
-	If Not isParameterValidationCorrect() Then Exit Function
-	If Not validateAllBasicTableContents() Then Exit Function
-	If Not isPowerQueryWorksheetAndTableValidationCorrect() Then Exit Function
-
-	isInputValidationCorrect = True
+	IsInputValidationCorrect = True
 End Function
 
-Function isBasicTableStructureCorrent() As Boolean
+Function IsBasicTableStructureCorrent() As Boolean
 	Dim tableObject As ListObject
 	Dim columnObject As ListColumn
 	
@@ -27,7 +18,7 @@ Function isBasicTableStructureCorrent() As Boolean
 
 	For Each table in basicTableStructure("tables")
 		On Error Resume Next
-		Set tableObject = wsPARAMETROS.ListObjects(table("name"))
+		Set tableObject = PARAMETERS.ListObjects(table("name"))
 		On Error GoTo 0
 
 		If Err.Number <> 0 Then
@@ -58,40 +49,67 @@ Function isBasicTableStructureCorrent() As Boolean
 		Next column
 	Next table
 
-	isBasicTableStructureCorrent = True
+	IsBasicTableStructureCorrent = True
 End Function
 
-Function isParameterValidationCorrect() As Boolean
+Function IsParameterValidationCorrect() As Boolean
 	Dim colNOMBRE As String
 	Dim colVALOR As String
 
-	Set tbl_PARAMETROS = wsPARAMETROS.ListObjects("PARAMETROS")
-	Set tbl_CORREOS = wsPARAMETROS.ListObjects("CORREOS")
-	Set tbl_ARCHIVOS = wsPARAMETROS.ListObjects("ARCHIVOS")
-	Set tbl_REPORTES = wsPARAMETROS.ListObjects("REPORTES")
+	Dim nameParameterColumnName As String
+	Dim valueParameterColumnName As String
+
+	Dim startProcessDateParameterName As String
+	Dim endProcessDateParameterName As String
+	Dim maxTimeoutInSecondsParameterName As String
+	Dim filesBaseFolderParameterName As String
+	Dim generateLogsParameterName As String
+	Dim logsFileFolderParameterName As String
+	Dim outlookFolderParameterName As String
+	Dim dateFormatParameterName As String
+	Dim scheduleTimeParameterName As String
+
+
+	nameParameterColumnName = GetNameParameterColumnName()
+	valueParameterColumnName = GetValueParameterColumnName()
+
+	startProcessDateParameterName = GetStartProcessDateParameterName()
+	endProcessDateParameterName = GetEndProcessDateParameterName()
+	maxTimeoutInSecondsParameterName = GetMaxTimeoutInSecondsParameterName()
+	filesBaseFolderParameterName = GetFilesBaseFolderParameterName()
+	generateLogsParameterName = GetGenerateLogsParameterName()
+	logsFileFolderParameterName = GetLogFilesFolderParameterName()
+	outlookFolderParameterName = GetOutlookFolderParameterName()
+	dateFormatParameterName = GetDateFormatParameterName()
+	scheduleTimeParameterName = GetScheduleTimeParameterName()
+
+	Set tbl_PARAMETROS = PARAMETERS.ListObjects("PARAMETROS")
+	Set tbl_CORREOS = PARAMETERS.ListObjects("CORREOS")
+	Set tbl_ARCHIVOS = PARAMETERS.ListObjects("ARCHIVOS")
+	Set tbl_REPORTES = PARAMETERS.ListObjects("REPORTES")
 
 	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns("NOMBRE").Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns("VALOR").Index).Value
+		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns(nameParameterColumnName).Index).Value
+		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns(valueParameterColumnName).Index).Value
 
 		dictParameters.Add colNOMBRE, colVALOR
 	Next row
 
 	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns("NOMBRE").Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns("VALOR").Index).Value
+		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns(nameParameterColumnName).Index).Value
+		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns(valueParameterColumnName).Index).Value
 
-		If (colNOMBRE = "START_PROCESS_DATE" Or colNOMBRE = "END_PROCESS_DATE") And Not IsDate(colVALOR) Then
+		If (colNOMBRE = startProcessDateParameterName Or colNOMBRE = endProcessDateParameterName) And Not IsDate(colVALOR) Then
 			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser una fecha válida."
 			Exit Function
 		End If
 
-		If colNOMBRE = "Timeout máximo en segundos" And Not IsNumeric(colVALOR) Then
+		If colNOMBRE = maxTimeoutInSecondsParameterName And Not IsNumeric(colVALOR) Then
 			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser un número."
 			Exit Function
 		End If
 
-		If colNOMBRE = "Directorio archivos de logs" And dictParameters("Generar logs") = "NO" Then GoTo continueLoop
+		If colNOMBRE = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = "NO" Then GoTo continueLoop
 
 		If colVALOR = "" Then
 			MsgBox "El valor del parámetro: '" & colNOMBRE & "' no puede quedar vacío."
@@ -110,7 +128,7 @@ Function isParameterValidationCorrect() As Boolean
 			End If
 		End If
 
-		If colNOMBRE = "Hora de ejecución" Then
+		If colNOMBRE = scheduleTimeParameterName Then
 			On Error Goto NotValidTime
 			scheduleTime = TimeValue(colVALOR)
 			GoTo continueLoop
@@ -123,27 +141,27 @@ Function isParameterValidationCorrect() As Boolean
 		continueLoop:
 	Next row
 
-	startProcessDate = CDate(dictParameters("START_PROCESS_DATE"))
-	endProcessDate = CDate(dictParameters("END_PROCESS_DATE"))
-	baseReportFolder = dictParameters("Directorio base reportes")
-	logsFileFolder = dictParameters("Directorio archivos de logs")
-	outlookFolderName = dictParameters("Carpeta de Outlook")
-	dateFormat = dictParameters("Formato de fechas")
-	canGenerateLogs = dictParameters("Generar logs?") = "SI"
-	scheduleTime = TimeValue(dictParameters("Hora de ejecución"))
+	startProcessDate = CDate(dictParameters(startProcessDateParameterName))
+	endProcessDate = CDate(dictParameters(endProcessDateParameterName))
+	baseReportFolder = dictParameters(filesBaseFolderParameterName)
+	logsFileFolder = dictParameters(logsFileFolderParameterName)
+	outlookFolderName = dictParameters(outlookFolderParameterName)
+	dateFormat = dictParameters(dateFormatParameterName)
+	canGenerateLogs = dictParameters(generateLogsParameterName) = "SI"
+	scheduleTime = TimeValue(dictParameters(scheduleTimeParameterName))
 
-	isParameterValidationCorrect = True
+	IsParameterValidationCorrect = True
 End Function
 
-Function validateAllBasicTableContents() As Boolean
-	If Not validateBasicTableContent(tbl_CORREOS) Then Exit Function
-	If Not validateBasicTableContent(tbl_ARCHIVOS) Then Exit Function
-	If Not validateBasicTableContent(tbl_REPORTES) Then Exit Function
+Function ValidateAllBasicTableContents() As Boolean
+	If Not ValidateBasicTableContent(tbl_CORREOS) Then Exit Function
+	If Not ValidateBasicTableContent(tbl_ARCHIVOS) Then Exit Function
+	If Not ValidateBasicTableContent(tbl_REPORTES) Then Exit Function
 
-	validateAllBasicTableContents = True
+	ValidateAllBasicTableContents = True
 End Function
 
-Function validateBasicTableContent(table As ListObject)
+Function ValidateBasicTableContent(table As ListObject)
 	Dim atLeast1MailToGenerate As Boolean
 
 	atLeast1MailToGenerate = False
@@ -210,10 +228,10 @@ Function validateBasicTableContent(table As ListObject)
 		Exit Function
 	End If
 
-	validateBasicTableContent = True
+	ValidateBasicTableContent = True
 End Function
 
-Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
+Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim Worksheet As Worksheet
 	Dim table As ListObject
 	Dim columnExists As Boolean
@@ -238,10 +256,10 @@ Function isPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 			Exit Function
 		End If
 	Next row
-	isPowerQueryWorksheetAndTableValidationCorrect = True
+	IsPowerQueryWorksheetAndTableValidationCorrect = True
 End Function
 
-Function isConversationColumnCorrect() As Boolean
+Function IsConversationColumnCorrect() As Boolean
 	Dim colCONVERSACION As String
 
 	Set outlookAppRef = CreateObject("Outlook.Application").GetNamespace("MAPI")
@@ -255,5 +273,5 @@ Function isConversationColumnCorrect() As Boolean
 		End If
 	Next conversation
 
-	isConversationColumnCorrect = True
+	IsConversationColumnCorrect = True
 End Function
