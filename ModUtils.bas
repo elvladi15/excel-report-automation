@@ -24,9 +24,9 @@ Sub RefreshAll()
 
 	If executionMode = "MANUAL" Then
 		MsgBox("Hojas de Excel actualizadas.")
-	ElseIf executionMode = "AUTOMÁTICO"Then
-		startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
-		endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETROS[NOMBRE], PARAMETROS[VALOR])")))
+	ElseIf executionMode = "AUTOMATIC"Then
+		startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETERS[NOMBRE], PARAMETERS[VALOR])")))
+		endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETERS[NOMBRE], PARAMETERS[VALOR])")))
 	End If
 
 	Exit Sub
@@ -66,7 +66,7 @@ Function GetBasicTableStructure() As Object
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
 		With basicTableStructure("tables")(basicTableStructure("tables").Count)
-			.Add "name", "PARAMETROS"
+			.Add "name", "PARAMETERS"
 			.Add "columns", New Collection
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")

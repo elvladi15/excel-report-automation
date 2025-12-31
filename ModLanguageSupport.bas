@@ -7,7 +7,12 @@ Sub UpdateApplicationLanguage()
 
     PARAMETERS.Name =  GetParameterWorksheetName()
 
-    PARAMETERS.Buttons("btnRefreshAll.Caption").Caption = GetBtnRefreshAllCaption()
+    PARAMETERS.Buttons("btnRefreshAll").Caption = GetBtnRefreshAllCaption()
+    PARAMETERS.Buttons("btnCreateMailFiles").Caption = GetBtnCreateMailFilesCaption()
+    PARAMETERS.Buttons("btnCreateDrafts").Caption = GetBtnCreateDraftsCaption()
+    PARAMETERS.Buttons("btnSendAllDrafts").Caption = GetBtnSendAllDraftsCaption()
+    PARAMETERS.Buttons("btnScheduleFileGeneration").Caption = GetBtnScheduleFileGenerationCaption()
+    PARAMETERS.Buttons("btnScheduleMailSending").Caption = GetBtnScheduleMailSendingCaption()
 
     Range("A1").Value = GetNameParameterColumnName()
     Range("B1").Value = GetValueParameterColumnName()
@@ -89,7 +94,7 @@ End Function
 
 Function GetParameterWorksheetName() As String
     If currentLanguage = "SPANISH" Then
-        GetParameterWorksheetName = "PARAMETROS"
+        GetParameterWorksheetName = "PARÁMETROS"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetParameterWorksheetName = "PARAMETERS"
     End If
@@ -102,6 +107,50 @@ Function GetBtnRefreshAllCaption() As String
         GetBtnRefreshAllCaption = "REFRESH WORKSHEETS"
     End If
 End Function
+
+Function GetBtnCreateMailFilesCaption() As String
+    If currentLanguage = "SPANISH" Then
+        GetBtnCreateMailFilesCaption = "GENERAR ARCHIVOS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetBtnCreateMailFilesCaption = "CREATE MAIL FILES"
+    End If
+End Function
+
+Function GetBtnCreateDraftsCaption() As String
+    If currentLanguage = "SPANISH" Then
+        GetBtnCreateDraftsCaption = "CREAR BORRADORES"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetBtnCreateDraftsCaption = "CREATE MAIL DRAFTS"
+    End If
+End Function
+
+Function GetBtnSendAllDraftsCaption() As String
+    If currentLanguage = "SPANISH" Then
+        GetBtnSendAllDraftsCaption = "ENVIAR BORRADORES"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetBtnSendAllDraftsCaption = "SEND ALL DRAFTS"
+    End If
+End Function
+
+Function GetBtnScheduleFileGenerationCaption() As String
+    If currentLanguage = "SPANISH" Then
+        GetBtnScheduleFileGenerationCaption = "PROGRAMAR GENERACIÓN DE ARCHIVOS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetBtnScheduleFileGenerationCaption = "SCHEDULE FILE GENERATION"
+    End If
+End Function
+
+Function GetBtnScheduleMailSendingCaption() As String
+    If currentLanguage = "SPANISH" Then
+        GetBtnScheduleMailSendingCaption = "PROGRAMAR ENVÍO DE CORREOS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetBtnScheduleMailSendingCaption = "SCHEDULE MAIL SENDING"
+    End If
+End Function
+
+
+
+
 
 Function GetNameParameterColumnName() As String
     If currentLanguage = "SPANISH" Then

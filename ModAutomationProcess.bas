@@ -13,7 +13,7 @@ Sub ScheduleAutomaticRun()
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
 	If executionMode = "MANUAL" Then	
-		mails = ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+		mails = PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = ""SI"")")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then
@@ -21,7 +21,7 @@ Sub ScheduleAutomaticRun()
 		Else
 			MsgBox "Programación de genereración de reportes exitosa. Se generarán los archivos de " & mailCount & " correos. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
 		End If
-		executionMode = "AUTOMÁTICO"
+		executionMode = "AUTOMATIC"
 	End If
 End Sub
 
@@ -30,10 +30,10 @@ Sub AutomaticRun()
 	CloseAllOtherWorkbooks
 
 	Call AppendToLogsFile("Refrescando hoja de cálculo...")
-	ThisWorkbook.Sheets("PARAMETROS").Calculate
+	PARAMETERS.Calculate
 
-	startProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & GetStartProcessDateParameterName() & """, PARAMETROS[" & GetNameParameterColumnName() & "], PARAMETROS[" & GetValueParameterColumnName() & "])")))
-	endProcessDate = CDate(CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & GetEndProcessDateParameterName() & """, PARAMETROS[" & GetNameParameterColumnName() & "], PARAMETROS[" & GetValueParameterColumnName() & "])")))
+	startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetStartProcessDateParameterName() & """, PARAMETERS[" & GetNameParameterColumnName() & "], PARAMETERS[" & GetValueParameterColumnName() & "])")))
+	endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetEndProcessDateParameterName() & """, PARAMETERS[" & GetNameParameterColumnName() & "], PARAMETERS[" & GetValueParameterColumnName() & "])")))
 
 	RefreshAll
 

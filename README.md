@@ -13,7 +13,7 @@ Al conectarse por 1ra. vez a SQL Server, es posible que también salga alguna al
 
 ## Documentación
 
-La aplicación corre sobre una hoja de cálculo llamada PARAMETROS, donde se configuran los valores iniciales y se programan las acciones de generación y envío automático por medio de la aplicación de escritorio Outlook.
+La aplicación corre sobre una hoja de cálculo llamada PARAMETERS, donde se configuran los valores iniciales y se programan las acciones de generación y envío automático por medio de la aplicación de escritorio Outlook.
 
 1. Para agregar un nuevo reporte, hay que abrir la herramienta nativa de Excel llamada Power Query, presionando Alt + F12 en el teclado, y crear un nuevo query asociado al reporte a generar (se puede duplicar uno de los ya existentes para conveniencia).
 
@@ -21,9 +21,9 @@ De todas formas, aquí está la plantilla:
 
 ```
 let
-    StartProcessDate = DateTime.ToText(Table.SelectRows(PARAMETROS, each [NOMBRE] = "START_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
-    EndProcessDate = DateTime.ToText(Table.SelectRows(PARAMETROS, each [NOMBRE] = "END_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
-    MaxTimeoutInSeconds = Int64.From(Table.SelectRows(PARAMETROS, each [NOMBRE] = "Timeout máximo en segundos"){0}[VALOR]),
+    StartProcessDate = DateTime.ToText(Table.SelectRows(PARAMETERS, each [NOMBRE] = "START_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
+    EndProcessDate = DateTime.ToText(Table.SelectRows(PARAMETERS, each [NOMBRE] = "END_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
+    MaxTimeoutInSeconds = Int64.From(Table.SelectRows(PARAMETERS, each [NOMBRE] = "Timeout máximo en segundos"){0}[VALOR]),
     SQL =
     "
         {CÓDIGO SQL AQUÍ}
@@ -37,7 +37,7 @@ in
 
 Hay que llenar la variable "SQL" con la consulta de SQL Server.
 
-1. Sustituir los filtros de fecha por las variables StartProcessDate y EndProcessDate que vienen en el script para que a la hora de construir el script SQL, utilice las variables que vienen de la hoja de cálculo de la tabla PARAMETROS
+1. Sustituir los filtros de fecha por las variables StartProcessDate y EndProcessDate que vienen en el script para que a la hora de construir el script SQL, utilice las variables que vienen de la hoja de cálculo de la tabla PARAMETERS
 
 Ejemplo:
 

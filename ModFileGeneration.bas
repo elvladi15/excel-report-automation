@@ -7,7 +7,7 @@ Sub CreateMailFiles()
 
 	outputMesssage = ""
 
-	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = ""SI"")")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
@@ -50,13 +50,13 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[NOMBRE], MAILS[UN ARCHIVO POR RANGO?])") = "SI"
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 
-	mailFileCount = Application.WorksheetFunction.CountIf(tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange, mailName)
+	mailFileCount = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange, mailName)
 
-	For Each mailFileName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(ARCHIVOS[NOMBRE], ARCHIVOS[CORREO] = """ & mailName & """)")
+	For Each mailFileName In PARAMETERS.Evaluate("FILTER(MAIL_FILES[NOMBRE], MAIL_FILES[CORREO] = """ & mailName & """)")
 		If isOneFilePerRange Then
 			currentProcessDate = Null
 
@@ -84,13 +84,13 @@ Sub CreateMailFile(mailFileName As String)
 	Dim folder As String
 	Dim fileQuantityPerMail As Long
 
-	mailName = CStr(ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailFileName & """, ARCHIVOS[NOMBRE], ARCHIVOS[CORREO])"))
+	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, MAIL_FILES[NOMBRE], MAIL_FILES[CORREO])"))
 	folder = baseReportFolder & "\" & mailName
-	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange, mailName)
+	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange, mailName)
 
 	Set Workbook = Workbooks.Add
 
-	fileReports = ThisWorkbook.ActiveSheet.Evaluate("FILTER(REPORTES[NOMBRE], REPORTES[ARCHIVO] = """ & mailFileName & """)")
+	fileReports = PARAMETERS.Evaluate("FILTER(FILE_REPORTS[NOMBRE], FILE_REPORTS[ARCHIVO] = """ & mailFileName & """)")
 
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))

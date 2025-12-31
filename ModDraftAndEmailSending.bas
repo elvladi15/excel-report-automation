@@ -5,7 +5,7 @@ Sub CreateDrafts()
 
 	If Not IsConversationColumnCorrect Then Exit Sub
 
-	For Each mailName In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[NOMBRE], CORREOS[GENERAR CORREO?] = ""SI"")")
+	For Each mailName In PARAMETERS.Evaluate("FILTER([NOMBRE], [GENERAR CORREO?] = ""SI"")")
 		Call CreateDraft(CStr(mailName))
 	Next mailName
 
@@ -48,9 +48,9 @@ Sub CreateDraft(mailName As String)
 
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
-	isOneFilePerRange = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[UN ARCHIVO POR RANGO?])") = "SI"
-	conversationSubject = ThisWorkbook.ActiveSheet.Evaluate("XLOOKUP(""" & mailName & """, CORREOS[NOMBRE], CORREOS[CONVERSACION])")
-	mailFiles = ThisWorkbook.ActiveSheet.Evaluate("FILTER(ARCHIVOS[NOMBRE], ARCHIVOS[CORREO] = """ & mailName & """)")
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, [NOMBRE], [UN ARCHIVO POR RANGO?])") = "SI"
+	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, [NOMBRE], [CONVERSACION])")
+	mailFiles = PARAMETERS.Evaluate("FILTER(MAIL_FILES[NOMBRE], MAIL_FILES[CORREO] = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
 	If mailFileCount > 1 Then
@@ -164,7 +164,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Exit Sub
 	End If
 
-	For Each conversation In ThisWorkbook.ActiveSheet.Evaluate("FILTER(CORREOS[CONVERSACION], CORREOS[GENERAR CORREO?] = ""SI"")")
+	For Each conversation In PARAMETERS.Evaluate("FILTER([CONVERSACION], [GENERAR CORREO?] = ""SI"")")
 		On Error Goto mailItemNotFound
 		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
 

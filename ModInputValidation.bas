@@ -83,21 +83,21 @@ Function IsParameterValidationCorrect() As Boolean
 	dateFormatParameterName = GetDateFormatParameterName()
 	scheduleTimeParameterName = GetScheduleTimeParameterName()
 
-	Set tbl_PARAMETROS = PARAMETERS.ListObjects("PARAMETROS")
-	Set tbl_CORREOS = PARAMETERS.ListObjects("CORREOS")
-	Set tbl_ARCHIVOS = PARAMETERS.ListObjects("ARCHIVOS")
-	Set tbl_REPORTES = PARAMETERS.ListObjects("REPORTES")
+	Set tbl_PARAMETERS = PARAMETERS.ListObjects("PARAMETERS")
+	Set tbl_MAILS = PARAMETERS.ListObjects("MAILS")
+	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
+	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
 
-	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns(nameParameterColumnName).Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns(valueParameterColumnName).Index).Value
+	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
+		colNOMBRE = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
+		colVALOR = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
 
 		dictParameters.Add colNOMBRE, colVALOR
 	Next row
 
-	For Each row In tbl_PARAMETROS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETROS.ListColumns(nameParameterColumnName).Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETROS.ListColumns(valueParameterColumnName).Index).Value
+	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
+		colNOMBRE = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
+		colVALOR = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
 
 		If (colNOMBRE = startProcessDateParameterName Or colNOMBRE = endProcessDateParameterName) And Not IsDate(colVALOR) Then
 			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser una fecha válida."
@@ -154,9 +154,9 @@ Function IsParameterValidationCorrect() As Boolean
 End Function
 
 Function ValidateAllBasicTableContents() As Boolean
-	If Not ValidateBasicTableContent(tbl_CORREOS) Then Exit Function
-	If Not ValidateBasicTableContent(tbl_ARCHIVOS) Then Exit Function
-	If Not ValidateBasicTableContent(tbl_REPORTES) Then Exit Function
+	If Not ValidateBasicTableContent(tbl_MAILS) Then Exit Function
+	If Not ValidateBasicTableContent(tbl_MAIL_FILES) Then Exit Function
+	If Not ValidateBasicTableContent(tbl_FILE_REPORTS) Then Exit Function
 
 	ValidateAllBasicTableContents = True
 End Function
@@ -201,7 +201,7 @@ Function ValidateBasicTableContent(table As ListObject)
 			End If
 
 			If table.Name = "CORREOS" And column.Name = "NOMBRE" Then
-				For Each mailName In tbl_ARCHIVOS.ListColumns("CORREO").DataBodyRange
+				For Each mailName In tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange
 					If mailName.Value = cell.Value Then Goto continueLoop
 				Next mailName
 
@@ -211,7 +211,7 @@ Function ValidateBasicTableContent(table As ListObject)
 			End If
 			
 			If table.Name = "ARCHIVOS" And column.Name = "NOMBRE" Then
-				For Each mailFileName in tbl_REPORTES.ListColumns("ARCHIVO").DataBodyRange
+				For Each mailFileName in tbl_FILE_REPORTS.ListColumns("ARCHIVO").DataBodyRange
 					If mailFileName.Value = cell.Value Then Goto continueLoop
 				Next mailFileName
 
@@ -237,8 +237,8 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim columnExists As Boolean
 	Dim colNOMBRE As String
 
-	For Each row In tbl_REPORTES.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_REPORTES.ListColumns("NOMBRE").Index).Value
+	For Each row In tbl_FILE_REPORTS.DataBodyRange.Rows
+		colNOMBRE = row.Cells(1, tbl_FILE_REPORTS.ListColumns("NOMBRE").Index).Value
 
 		On Error Resume Next
 		Set Worksheet = ThisWorkbook.Worksheets(colNOMBRE)
@@ -266,7 +266,7 @@ Function IsConversationColumnCorrect() As Boolean
 	Set outlookReportFolderRef = outlookAppRef.GetDefaultFolder(6).Parent.Folders(outlookFolderName)
 	Set outlookDraftsFolderRef = outlookAppRef.GetDefaultFolder(16)
 
-	For each conversation in tbl_CORREOS.ListColumns("CONVERSACION").DataBodyRange.Cells
+	For each conversation in tbl_MAILS.ListColumns("CONVERSACION").DataBodyRange.Cells
 		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
 			MsgBox "La conversación: '" & conversation.Value & "' no existe."
 			Exit Function

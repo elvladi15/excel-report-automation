@@ -12,10 +12,10 @@ Public executionMode As String
 
 Public attemptMaxCount As Long
 
-Public tbl_PARAMETROS As ListObject
-Public tbl_CORREOS As ListObject
-Public tbl_ARCHIVOS As ListObject
-Public tbl_REPORTES As ListObject
+Public tbl_PARAMETERS As ListObject
+Public tbl_MAILS As ListObject
+Public tbl_MAIL_FILES As ListObject
+Public tbl_FILE_REPORTS As ListObject
 
 Public dictParameters As Object
 
@@ -63,7 +63,7 @@ Sub Main()
 	ElseIf Application.Caller = "btnScheduleMailSending" Then
 		sendMails = True
 		ScheduleAutomaticRun
-	ElseIf Application.Caller = "btnScheduleMailGeneration" Then
+	ElseIf Application.Caller = "btnScheduleFileGeneration" Then
 		sendMails = False
 		ScheduleAutomaticRun
 	End If
