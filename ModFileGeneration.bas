@@ -1,13 +1,13 @@
 Attribute VB_Name = "ModFileGeneration"
 Sub CreateMailFiles()
 	Dim fileGenerated As Boolean
-	Dim colGENERAR_REPORTE As String
-	Dim colNOMBRE As String
+	Dim generateReportColumn As String
+	Dim nameColumn As String
 	Dim outputMesssage As String
 
 	outputMesssage = ""
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = ""SI"")")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
@@ -50,7 +50,7 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[NOMBRE], MAILS[UN ARCHIVO POR RANGO?])") = "SI"
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[NOMBRE], MAILS[UN ARCHIVO POR RANGO?])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 

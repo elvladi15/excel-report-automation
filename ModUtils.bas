@@ -93,37 +93,37 @@ Function GetBasicTableStructure() As Object
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
 		With basicTableStructure("tables")(basicTableStructure("tables").Count)
-			.Add "name", "CORREOS"
+			.Add "name", "MAILS"
 			.Add "columns", New Collection
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "NOMBRE"
+				.Add "name", GetNameMailColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "CONVERSACION"
+				.Add "name", GetConversationMailColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "UN ARCHIVO POR RANGO?"
+				.Add "name", GetIsOneFilePerRangeMailColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "GENERAR CORREO?"
+				.Add "name", GetGenerateMailColumnName()
 				.Add "rows", Null
 			End With
 		End With
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
 		With basicTableStructure("tables")(basicTableStructure("tables").Count)
-			.Add "name", "ARCHIVOS"
+			.Add "name", "MAIL_FILES"
 			.Add "columns", New Collection
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
@@ -141,7 +141,7 @@ Function GetBasicTableStructure() As Object
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
 		With basicTableStructure("tables")(basicTableStructure("tables").Count)
-			.Add "name", "REPORTES"
+			.Add "name", "FILE_REPORTS"
 			.Add "columns", New Collection
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")

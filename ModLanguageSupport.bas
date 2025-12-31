@@ -1,12 +1,29 @@
 Attribute VB_Name = "ModLanguageSupport"
 Sub UpdateApplicationLanguage()
+    Dim isOneFilePerRangeMailColumnName As String
+    Dim generateMailColumnName As String
+
+    Dim mailFilesNameColumnName As String
+    Dim mailFilesMailColumnName As String
+    
+    Dim fileReportsFileColumnName As String
+
     'TEMP
     Set languageStructure = GetLanguageStructure()
+    Set tbl_PARAMETERS = PARAMETERS.ListObjects("PARAMETERS")
+	Set tbl_MAILS = PARAMETERS.ListObjects("MAILS")
+	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
+	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
+
+
+
+
 
     currentLanguage = GetLanguageByLanguageName(Range("B2").Value)
 
     PARAMETERS.Name =  GetParameterWorksheetName()
 
+    'BUTTON CAPTIONS
     PARAMETERS.Buttons("btnRefreshAll").Caption = GetBtnRefreshAllCaption()
     PARAMETERS.Buttons("btnCreateMailFiles").Caption = GetBtnCreateMailFilesCaption()
     PARAMETERS.Buttons("btnCreateDrafts").Caption = GetBtnCreateDraftsCaption()
@@ -14,8 +31,9 @@ Sub UpdateApplicationLanguage()
     PARAMETERS.Buttons("btnScheduleFileGeneration").Caption = GetBtnScheduleFileGenerationCaption()
     PARAMETERS.Buttons("btnScheduleMailSending").Caption = GetBtnScheduleMailSendingCaption()
 
-    Range("A1").Value = GetNameParameterColumnName()
-    Range("B1").Value = GetValueParameterColumnName()
+    'PARAMETERS TABLE
+    tbl_PARAMETERS.ListColumns(1).Name = GetNameParameterColumnName()
+    tbl_PARAMETERS.ListColumns(2).Name = GetValueParameterColumnName()
 
     isSilentChange = True
     Range("B2").Value = GetLanguageNameByLanguage()
@@ -39,6 +57,59 @@ Sub UpdateApplicationLanguage()
     Range("A9").Value = GetOutlookFolderParameterName()
     Range("A10").Value = GetDateFormatParameterName()
     Range("A11").Value = GetScheduleTimeParameterName()
+
+    'MAILS TABLE
+    isOneFilePerRangeMailColumnName = GetIsOneFilePerRangeMailColumnName()
+    generateMailColumnName = GetGenerateMailColumnName()
+
+    tbl_MAILS.ListColumns(1).Name = GetNameMailColumnName()
+    tbl_MAILS.ListColumns(2).Name = GetConversationMailColumnName()
+    tbl_MAILS.ListColumns(3).Name = isOneFilePerRangeMailColumnName
+    tbl_MAILS.ListColumns(4).Name = generateMailColumnName
+
+    With Range("MAILS[" & isOneFilePerRangeMailColumnName & "]").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=GetYesNoInCurrentLanguage()
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
+
+    With Range("MAILS[" & generateMailColumnName & "]").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=GetYesNoInCurrentLanguage()
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
+
+    'MAIL FILES TABLE
+    mailFilesMailColumnName = GetMailFilesMailColumnName()
+
+    tbl_MAIL_FILES.ListColumns(1).Name = GetMailFilesNameColumnName()
+    tbl_MAIL_FILES.ListColumns(2).Name = mailFilesMailColumnName
+    
+    With Range("MAIL_FILES[" & mailFilesMailColumnName & "]").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:="=INDIRECT(""MAILS[" & GetNameMailColumnName() & "]"")"
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
+
+    'FILE REPORTS TABLE
+    fileReportsFileColumnName = GetFileReportsFileColumnName()
+
+    tbl_FILE_REPORTS.ListColumns(1).Name = GetFileReportsNameColumnName()
+    tbl_FILE_REPORTS.ListColumns(2).Name = fileReportsFileColumnName
+
+    With Range("FILE_REPORTS[" & fileReportsFileColumnName & "]").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:="=INDIRECT(""MAIL_FILES[" & GetMailFilesNameColumnName() & "]"")"
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
 End Sub
 
 Function GetLanguageByLanguageName(languageName As String) As String
@@ -90,7 +161,13 @@ End Function
 
 
 
-
+Function GetYesNoInCurrentLanguage() As String
+    If currentLanguage = "SPANISH" Then
+        GetYesNoInCurrentLanguage = "SI,NO"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetYesNoInCurrentLanguage = "YES,NO"
+    End If
+End Function
 
 Function GetParameterWorksheetName() As String
     If currentLanguage = "SPANISH" Then
@@ -100,6 +177,7 @@ Function GetParameterWorksheetName() As String
     End If
 End Function
 
+'BUTTON CAPTION NAMES
 Function GetBtnRefreshAllCaption() As String
     If currentLanguage = "SPANISH" Then
         GetBtnRefreshAllCaption = "REFRESCAR HOJAS"
@@ -148,10 +226,7 @@ Function GetBtnScheduleMailSendingCaption() As String
     End If
 End Function
 
-
-
-
-
+'PARAMETERS TABLE
 Function GetNameParameterColumnName() As String
     If currentLanguage = "SPANISH" Then
         GetNameParameterColumnName = "NOMBRE"
@@ -245,5 +320,74 @@ Function GetScheduleTimeParameterName() As String
         GetScheduleTimeParameterName = "Hora de ejecución"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetScheduleTimeParameterName = "Execution Time"
+    End If
+End Function
+
+' MAILS TABLE
+Function GetNameMailColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetNameMailColumnName = "NOMBRE"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetNameMailColumnName = "NAME"
+    End If
+End Function
+
+Function GetConversationMailColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetConversationMailColumnName = "CONVERSACIÓN"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetConversationMailColumnName = "CONVERSATION"
+    End If
+End Function
+
+Function GetIsOneFilePerRangeMailColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetIsOneFilePerRangeMailColumnName = "UN ARCHIVO POR RANGO?"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetIsOneFilePerRangeMailColumnName = "ONE FILE PER RANGE?"
+    End If
+End Function
+
+Function GetGenerateMailColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetGenerateMailColumnName = "GENERAR CORREO?"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetGenerateMailColumnName = "GENERATE MAIL?"
+    End If
+End Function
+
+'MAIL FILES TABLE
+
+Function GetMailFilesNameColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetMailFilesNameColumnName = "NOMBRE"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetMailFilesNameColumnName = "NAME"
+    End If
+End Function
+
+Function GetMailFilesMailColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetMailFilesMailColumnName = "CORREO"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetMailFilesMailColumnName = "MAIL"
+    End If
+End Function
+
+'FILE REPORTS TABLE
+
+Function GetFileReportsNameColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetFileReportsNameColumnName = "NOMBRE"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetFileReportsNameColumnName = "NAME"
+    End If
+End Function
+
+Function GetFileReportsFileColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetFileReportsFileColumnName = "ARCHIVO"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetFileReportsFileColumnName = "MAIL_FILE"
     End If
 End Function

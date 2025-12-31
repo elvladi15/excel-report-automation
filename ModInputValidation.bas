@@ -53,8 +53,8 @@ Function IsBasicTableStructureCorrent() As Boolean
 End Function
 
 Function IsParameterValidationCorrect() As Boolean
-	Dim colNOMBRE As String
-	Dim colVALOR As String
+	Dim nameColumn As String
+	Dim valueColumn As String
 
 	Dim nameParameterColumnName As String
 	Dim valueParameterColumnName As String
@@ -83,58 +83,53 @@ Function IsParameterValidationCorrect() As Boolean
 	dateFormatParameterName = GetDateFormatParameterName()
 	scheduleTimeParameterName = GetScheduleTimeParameterName()
 
-	Set tbl_PARAMETERS = PARAMETERS.ListObjects("PARAMETERS")
-	Set tbl_MAILS = PARAMETERS.ListObjects("MAILS")
-	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
-	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
-
 	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
+		nameColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
+		valueColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
 
-		dictParameters.Add colNOMBRE, colVALOR
+		dictParameters.Add nameColumn, valueColumn
 	Next row
 
 	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
-		colVALOR = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
+		nameColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
+		valueColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
 
-		If (colNOMBRE = startProcessDateParameterName Or colNOMBRE = endProcessDateParameterName) And Not IsDate(colVALOR) Then
-			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser una fecha válida."
+		If (nameColumn = startProcessDateParameterName Or nameColumn = endProcessDateParameterName) And Not IsDate(valueColumn) Then
+			MsgBox "El valor del parámetro: '" & nameColumn & "' debe ser una fecha válida."
 			Exit Function
 		End If
 
-		If colNOMBRE = maxTimeoutInSecondsParameterName And Not IsNumeric(colVALOR) Then
-			MsgBox "El valor del parámetro: '" & colNOMBRE & "' debe ser un número."
+		If nameColumn = maxTimeoutInSecondsParameterName And Not IsNumeric(valueColumn) Then
+			MsgBox "El valor del parámetro: '" & nameColumn & "' debe ser un número."
 			Exit Function
 		End If
 
-		If colNOMBRE = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = "NO" Then GoTo continueLoop
+		If nameColumn = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
 
-		If colVALOR = "" Then
-			MsgBox "El valor del parámetro: '" & colNOMBRE & "' no puede quedar vacío."
+		If valueColumn = "" Then
+			MsgBox "El valor del parámetro: '" & nameColumn & "' no puede quedar vacío."
 			Exit Function
 		End If
 
-		If colNOMBRE Like "Directorio*" Then
-			If Dir(colVALOR, vbDirectory) = "" Then
-				MsgBox "El directorio del parámetro: '" & colNOMBRE & "' no existe. Favor de validar ruta."
+		If nameColumn Like "Directorio*" Then
+			If Dir(valueColumn, vbDirectory) = "" Then
+				MsgBox "El directorio del parámetro: '" & nameColumn & "' no existe. Favor de validar ruta."
 				Exit Function
 			End If
 
-			If Right(colVALOR, 1) = "\" Then
-				MsgBox "El directorio del parámetro: '" & colVALOR & "' contiene el caracter \ al final. Favor de remover."
+			If Right(valueColumn, 1) = "\" Then
+				MsgBox "El directorio del parámetro: '" & valueColumn & "' contiene el caracter \ al final. Favor de remover."
 				Exit Function
 			End If
 		End If
 
-		If colNOMBRE = scheduleTimeParameterName Then
+		If nameColumn = scheduleTimeParameterName Then
 			On Error Goto NotValidTime
-			scheduleTime = TimeValue(colVALOR)
+			scheduleTime = TimeValue(valueColumn)
 			GoTo continueLoop
 
 			NotValidTime:
-			MsgBox "La hora de ejecución: '" & colVALOR & "' no es una fecha válida."
+			MsgBox "La hora de ejecución: '" & valueColumn & "' no es una fecha válida."
 			Exit Function
 		End If
 
@@ -147,7 +142,7 @@ Function IsParameterValidationCorrect() As Boolean
 	logsFileFolder = dictParameters(logsFileFolderParameterName)
 	outlookFolderName = dictParameters(outlookFolderParameterName)
 	dateFormat = dictParameters(dateFormatParameterName)
-	canGenerateLogs = dictParameters(generateLogsParameterName) = "SI"
+	canGenerateLogs = dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(0)
 	scheduleTime = TimeValue(dictParameters(scheduleTimeParameterName))
 
 	IsParameterValidationCorrect = True
@@ -184,7 +179,7 @@ Function ValidateBasicTableContent(table As ListObject)
 				End If
 
 				If column.Name = "GENERAR CORREO?" Then
-					If cell.Value = "SI" Then
+					If cell.Value = Split(GetYesNoInCurrentLanguage(), ",")(0) Then
 						atLeast1MailToGenerate = True
 					End If
 
@@ -235,24 +230,24 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim Worksheet As Worksheet
 	Dim table As ListObject
 	Dim columnExists As Boolean
-	Dim colNOMBRE As String
+	Dim nameColumn As String
 
 	For Each row In tbl_FILE_REPORTS.DataBodyRange.Rows
-		colNOMBRE = row.Cells(1, tbl_FILE_REPORTS.ListColumns("NOMBRE").Index).Value
+		nameColumn = row.Cells(1, tbl_FILE_REPORTS.ListColumns("NOMBRE").Index).Value
 
 		On Error Resume Next
-		Set Worksheet = ThisWorkbook.Worksheets(colNOMBRE)
+		Set Worksheet = ThisWorkbook.Worksheets(nameColumn)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La hoja de cálculo: '" & colNOMBRE & "' no existe. Favor crearla junto a su tabla de Power Query."
+			MsgBox "La hoja de cálculo: '" & nameColumn & "' no existe. Favor crearla junto a su tabla de Power Query."
 			Exit Function
 		End If
 
 		On Error Resume Next
-		Set table = Worksheet.ListObjects(colNOMBRE)
+		Set table = Worksheet.ListObjects(nameColumn)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La tabla: '" & colNOMBRE & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+			MsgBox "La tabla: '" & nameColumn & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
 			Exit Function
 		End If
 	Next row
@@ -260,13 +255,13 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 End Function
 
 Function IsConversationColumnCorrect() As Boolean
-	Dim colCONVERSACION As String
+	Dim conversationColumn As String
 
 	Set outlookAppRef = CreateObject("Outlook.Application").GetNamespace("MAPI")
 	Set outlookReportFolderRef = outlookAppRef.GetDefaultFolder(6).Parent.Folders(outlookFolderName)
 	Set outlookDraftsFolderRef = outlookAppRef.GetDefaultFolder(16)
 
-	For each conversation in tbl_MAILS.ListColumns("CONVERSACION").DataBodyRange.Cells
+	For each conversation in tbl_MAILS.ListColumns(GetConversationMailColumnName()).DataBodyRange.Cells
 		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
 			MsgBox "La conversación: '" & conversation.Value & "' no existe."
 			Exit Function

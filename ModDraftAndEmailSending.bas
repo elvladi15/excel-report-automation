@@ -1,11 +1,11 @@
 Attribute VB_Name = "ModDraftAndEmailSending"
 Sub CreateDrafts()
-	Dim colGENERAR_REPORTE As String
-	Dim colNOMBRE As String
+	Dim generateReportColumn As String
+	Dim nameColumn As String
 
 	If Not IsConversationColumnCorrect Then Exit Sub
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER([NOMBRE], [GENERAR CORREO?] = ""SI"")")
+	For Each mailName In PARAMETERS.Evaluate("FILTER([NOMBRE], [GENERAR CORREO?] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		Call CreateDraft(CStr(mailName))
 	Next mailName
 
@@ -48,14 +48,14 @@ Sub CreateDraft(mailName As String)
 
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, [NOMBRE], [UN ARCHIVO POR RANGO?])") = "SI"
-	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, [NOMBRE], [CONVERSACION])")
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetNameMailColumnName() & "], MAILS[" & GetIsOneFilePerRangeMailColumnName() & "])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
+	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetNameMailColumnName() & "], MAILS[" & GetConversationMailColumnName() & "])")
 	mailFiles = PARAMETERS.Evaluate("FILTER(MAIL_FILES[NOMBRE], MAIL_FILES[CORREO] = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
 	If mailFileCount > 1 Then
 		If isOneFilePerRange Then
-			If startProcessDate = endProcessDate Then
+			If startProcessDate = endProcessDate Then	
 				fileEndings.Add Format(endProcessDate, dateFormat)
 				foldersToSearch.Add fileFolder & Format(endProcessDate, dateFormat) & "\"
 			Else
@@ -164,7 +164,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Exit Sub
 	End If
 
-	For Each conversation In PARAMETERS.Evaluate("FILTER([CONVERSACION], [GENERAR CORREO?] = ""SI"")")
+	For Each conversation In PARAMETERS.Evaluate("FILTER(MAIL[" & GetConversationMailColumnName() & "], MAIL[" & GetGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		On Error Goto mailItemNotFound
 		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
 

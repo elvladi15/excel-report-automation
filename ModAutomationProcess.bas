@@ -13,7 +13,7 @@ Sub ScheduleAutomaticRun()
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
 	If executionMode = "MANUAL" Then	
-		mails = PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = ""SI"")")
+		mails = PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then
