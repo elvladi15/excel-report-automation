@@ -15,11 +15,7 @@ Sub UpdateApplicationLanguage()
 	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
 	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
 
-
-
-
-
-    currentLanguage = GetLanguageByLanguageName(Range("B2").Value)
+    currentLanguage = GetLanguageByLanguageName(Range("B3").Value)
 
     PARAMETERS.Name =  GetParameterWorksheetName()
 
@@ -32,14 +28,16 @@ Sub UpdateApplicationLanguage()
     PARAMETERS.Buttons("btnScheduleMailSending").Caption = GetBtnScheduleMailSendingCaption()
 
     'PARAMETERS TABLE
+    tbl_PARAMETERS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetParameterTableName()
+
     tbl_PARAMETERS.ListColumns(1).Name = GetNameParameterColumnName()
     tbl_PARAMETERS.ListColumns(2).Name = GetValueParameterColumnName()
 
     isSilentChange = True
-    Range("B2").Value = GetLanguageNameByLanguage()
+    Range("B3").Value = GetLanguageNameByLanguage()
     isSilentChange = False
 
-    With Range("B2").Validation
+    With Range("B3").Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=GetAllLanguageNamesString()
@@ -47,20 +45,35 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    Range("A2").Value = GetApplicationLanguageParameterName()
-    Range("A3").Value = GetStartProcessDateParameterName()
-    Range("A4").Value = GetEndProcessDateParameterName()
-    Range("A5").Value = GetMaxTimeoutInSecondsParameterName()
-    Range("A6").Value = GetFilesBaseFolderParameterName()
-    Range("A7").Value = GetGenerateLogsParameterName()
-    Range("A8").Value = GetLogFilesFolderParameterName()
-    Range("A9").Value = GetOutlookFolderParameterName()
-    Range("A10").Value = GetDateFormatParameterName()
-    Range("A11").Value = GetScheduleTimeParameterName()
+    Dim excelRow As Long
+
+    excelRow = 3
+
+    Range("A" & excelRow).Value = GetApplicationLanguageParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetStartProcessDateParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetEndProcessDateParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetMaxTimeoutInSecondsParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetFilesBaseFolderParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetGenerateLogsParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetLogFilesFolderParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetOutlookFolderParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetDateFormatParameterName()
+        excelRow = excelRow + 1
+    Range("A" & excelRow).Value = GetScheduleTimeParameterName()
 
     'MAILS TABLE
     isOneFilePerRangeMailColumnName = GetIsOneFilePerRangeMailColumnName()
     generateMailColumnName = GetGenerateMailColumnName()
+
+    tbl_MAILS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailsTableName()
 
     tbl_MAILS.ListColumns(1).Name = GetNameMailColumnName()
     tbl_MAILS.ListColumns(2).Name = GetConversationMailColumnName()
@@ -86,6 +99,8 @@ Sub UpdateApplicationLanguage()
     'MAIL FILES TABLE
     mailFilesMailColumnName = GetMailFilesMailColumnName()
 
+    tbl_MAIL_FILES.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailFilesTableName()
+
     tbl_MAIL_FILES.ListColumns(1).Name = GetMailFilesNameColumnName()
     tbl_MAIL_FILES.ListColumns(2).Name = mailFilesMailColumnName
     
@@ -99,6 +114,8 @@ Sub UpdateApplicationLanguage()
 
     'FILE REPORTS TABLE
     fileReportsFileColumnName = GetFileReportsFileColumnName()
+
+    tbl_FILE_REPORTS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetFileReportsTableName()
 
     tbl_FILE_REPORTS.ListColumns(1).Name = GetFileReportsNameColumnName()
     tbl_FILE_REPORTS.ListColumns(2).Name = fileReportsFileColumnName
@@ -227,6 +244,14 @@ Function GetBtnScheduleMailSendingCaption() As String
 End Function
 
 'PARAMETERS TABLE
+Function GetParameterTableName() As String
+    If currentLanguage = "SPANISH" Then
+        GetParameterTableName = "PARÁMETROS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetParameterTableName = "PARAMETERS"
+    End If
+End Function
+
 Function GetNameParameterColumnName() As String
     If currentLanguage = "SPANISH" Then
         GetNameParameterColumnName = "NOMBRE"
@@ -303,7 +328,7 @@ Function GetOutlookFolderParameterName() As String
     If currentLanguage = "SPANISH" Then
         GetOutlookFolderParameterName = "Carpeta de Outlook"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetOutlookFolderParameterName = "Outlook Folder"
+        GetOutlookFolderParameterName = "Outlook folder"
     End If
 End Function
 
@@ -319,11 +344,19 @@ Function GetScheduleTimeParameterName() As String
     If currentLanguage = "SPANISH" Then
         GetScheduleTimeParameterName = "Hora de ejecución"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetScheduleTimeParameterName = "Execution Time"
+        GetScheduleTimeParameterName = "Execution time"
     End If
 End Function
 
 ' MAILS TABLE
+Function GetMailsTableName() As String
+    If currentLanguage = "SPANISH" Then
+        GetMailsTableName = "CORREOS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetMailsTableName = "MAILS"
+    End If
+End Function
+
 Function GetNameMailColumnName() As String
     If currentLanguage = "SPANISH" Then
         GetNameMailColumnName = "NOMBRE"
@@ -357,6 +390,13 @@ Function GetGenerateMailColumnName() As String
 End Function
 
 'MAIL FILES TABLE
+Function GetMailFilesTableName() As String
+    If currentLanguage = "SPANISH" Then
+        GetMailFilesTableName = "ARCHIVOS"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetMailFilesTableName = "MAIL FILES"
+    End If
+End Function
 
 Function GetMailFilesNameColumnName() As String
     If currentLanguage = "SPANISH" Then
@@ -375,6 +415,13 @@ Function GetMailFilesMailColumnName() As String
 End Function
 
 'FILE REPORTS TABLE
+Function GetFileReportsTableName() As String
+    If currentLanguage = "SPANISH" Then
+        GetFileReportsTableName = "REPORTES"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetFileReportsTableName = "FILE REPORTS"
+    End If
+End Function
 
 Function GetFileReportsNameColumnName() As String
     If currentLanguage = "SPANISH" Then
