@@ -2,7 +2,9 @@ Attribute VB_Name = "ModMain"
 
 Public Const version As String = "1.1.0"
 
+Public currentLanguageName As String
 Public currentLanguage As String
+
 Public languageStructure As Object
 Public isSilentChange As Boolean
 

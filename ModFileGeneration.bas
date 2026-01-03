@@ -7,7 +7,7 @@ Sub CreateMailFiles()
 
 	outputMesssage = ""
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
@@ -50,13 +50,13 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[NOMBRE], MAILS[UN ARCHIVO POR RANGO?])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailIsOneFilePerRangeColumnName() & "])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 
-	mailFileCount = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange, mailName)
+	mailFileCount = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange, mailName)
 
-	For Each mailFileName In PARAMETERS.Evaluate("FILTER(MAIL_FILES[NOMBRE], MAIL_FILES[CORREO] = """ & mailName & """)")
+	For Each mailFileName In PARAMETERS.Evaluate("FILTER(MAIL_FILES[" & GetMailFilesNameColumnName() & "], MAIL_FILES[" & GetMailFilesMailColumnName() & "] = """ & mailName & """)")
 		If isOneFilePerRange Then
 			currentProcessDate = Null
 
@@ -84,13 +84,13 @@ Sub CreateMailFile(mailFileName As String)
 	Dim folder As String
 	Dim fileQuantityPerMail As Long
 
-	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, MAIL_FILES[NOMBRE], MAIL_FILES[CORREO])"))
+	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, MAIL_FILES[" & GetMailFilesNameColumnName() & "], MAIL_FILES[" & GetMailFilesMailColumnName() & "])"))
 	folder = baseReportFolder & "\" & mailName
-	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange, mailName)
+	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange, mailName)
 
 	Set Workbook = Workbooks.Add
 
-	fileReports = PARAMETERS.Evaluate("FILTER(FILE_REPORTS[NOMBRE], FILE_REPORTS[ARCHIVO] = """ & mailFileName & """)")
+	fileReports = PARAMETERS.Evaluate("FILTER(FILE_REPORTS[" & GetFileReportsNameColumnName() & "], FILE_REPORTS[" & GetFileReportsFileColumnName() & "] = """ & mailFileName & """)")
 
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))
@@ -158,7 +158,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
 
 	If reportTable.ListRows.Count = 1 And reportTable.ListColumns.Count = 1 Then
-		Call AppendToLogsFile("Hubo un error al consultar el reporte " & fileReportName & " desde la base de datos")
+		Call AppendToLogsFile("Hubo un error al consultar el reporte " & fileReportName & " desde la base de datos.")
 
 		reportsNotGenerated.Add fileReportName
 
@@ -176,7 +176,10 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	reportTable.DataBodyRange.Borders.LineStyle = xlContinuous
 
 	On Error Goto no_PROCESS_DATE_FOR_RANGE_column
-	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, "dd-MM-yyyy")
+	reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").DataBodyRange.NumberFormat = dateFormat
+	
+	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, dateFormat)
+
 
 	If Application.WorksheetFunction.CountA(reportTable.DataBodyRange) = 0 Then
 		Call AppendToLogsFile("El reporte " & fileReportName & " no se actualizó.")
@@ -201,7 +204,6 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Worksheet.Range("A1").PasteSpecial Paste:=xlPasteValues
 
 	Worksheet.Columns.AutoFit
-	'Exit Sub
 
 	removeFilter:
 		reportTable.AutoFilter.ShowAllData

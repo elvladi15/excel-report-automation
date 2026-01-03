@@ -71,22 +71,22 @@ Function GetBasicTableStructure() As Object
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetNameParameterColumnName()
+				.Add "name", GetParameterNameColumnName()
 				.Add "rows", New Collection
-					.Item("rows").Add GetStartProcessDateParameterName()
-					.Item("rows").Add GetEndProcessDateParameterName()
-					.Item("rows").Add GetMaxTimeoutInSecondsParameterName()
-					.Item("rows").Add GetFilesBaseFolderParameterName()
-					.Item("rows").Add GetGenerateLogsParameterName()
-					.Item("rows").Add GetLogFilesFolderParameterName()
-					.Item("rows").Add GetOutlookFolderParameterName()
-					.Item("rows").Add GetDateFormatParameterName()
-					.Item("rows").Add GetScheduleTimeParameterName()
+					.Item("rows").Add GetParameterStartProcessDateName()
+					.Item("rows").Add GetParameterEndProcessDateName()
+					.Item("rows").Add GetParameterMaxTimeoutInSecondsName()
+					.Item("rows").Add GetParameterFilesBaseFolderName()
+					.Item("rows").Add GetParameterGenerateLogsName()
+					.Item("rows").Add GetParameterLogFilesFolderName()
+					.Item("rows").Add GetParameterOutlookFolderName()
+					.Item("rows").Add GetParameterDateFormatName()
+					.Item("rows").Add GetParameterScheduleTimeName()
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetValueParameterColumnName()
+				.Add "name", GetParameterValueColumnName()
 				.Add "rows", Null
 			End With
 		End With
@@ -98,25 +98,25 @@ Function GetBasicTableStructure() As Object
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetNameMailColumnName()
+				.Add "name", GetMailNameColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetConversationMailColumnName()
+				.Add "name", GetMailConversationColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetIsOneFilePerRangeMailColumnName()
+				.Add "name", GetMailIsOneFilePerRangeColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", GetGenerateMailColumnName()
+				.Add "name", GetMailGenerateMailColumnName()
 				.Add "rows", Null
 			End With
 		End With
@@ -128,13 +128,13 @@ Function GetBasicTableStructure() As Object
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "NOMBRE"
+				.Add "name", GetMailFilesNameColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "CORREO"
+				.Add "name", GetMailFilesMailColumnName()
 				.Add "rows", Null
 			End With
 		End With
@@ -146,13 +146,13 @@ Function GetBasicTableStructure() As Object
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "NOMBRE"
+				.Add "name", GetFileReportsNameColumnName()
 				.Add "rows", Null
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")
 			With .Item("columns")(.Item("columns").Count)
-				.Add "name", "ARCHIVO"
+				.Add "name", GetFileReportsFileColumnName()
 				.Add "rows", Null
 			End With
 		End With

@@ -70,18 +70,18 @@ Function IsParameterValidationCorrect() As Boolean
 	Dim scheduleTimeParameterName As String
 
 
-	nameParameterColumnName = GetNameParameterColumnName()
-	valueParameterColumnName = GetValueParameterColumnName()
+	nameParameterColumnName = GetParameterNameColumnName()
+	valueParameterColumnName = GetParameterValueColumnName()
 
-	startProcessDateParameterName = GetStartProcessDateParameterName()
-	endProcessDateParameterName = GetEndProcessDateParameterName()
-	maxTimeoutInSecondsParameterName = GetMaxTimeoutInSecondsParameterName()
-	filesBaseFolderParameterName = GetFilesBaseFolderParameterName()
-	generateLogsParameterName = GetGenerateLogsParameterName()
-	logsFileFolderParameterName = GetLogFilesFolderParameterName()
-	outlookFolderParameterName = GetOutlookFolderParameterName()
-	dateFormatParameterName = GetDateFormatParameterName()
-	scheduleTimeParameterName = GetScheduleTimeParameterName()
+	startProcessDateParameterName = GetParameterStartProcessDateName()
+	endProcessDateParameterName = GetParameterEndProcessDateName()
+	maxTimeoutInSecondsParameterName = GetParameterMaxTimeoutInSecondsName()
+	filesBaseFolderParameterName = GetParameterFilesBaseFolderName()
+	generateLogsParameterName = GetParameterGenerateLogsName()
+	logsFileFolderParameterName = GetParameterLogFilesFolderName()
+	outlookFolderParameterName = GetParameterOutlookFolderName()
+	dateFormatParameterName = GetParameterDateFormatName()
+	scheduleTimeParameterName = GetParameterScheduleTimeName()
 
 	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
 		nameColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
@@ -111,7 +111,7 @@ Function IsParameterValidationCorrect() As Boolean
 			Exit Function
 		End If
 
-		If nameColumn Like "Directorio*" Then
+		If nameColumn = logsFileFolderParameterName Or nameColumn = filesBaseFolderParameterName Then
 			If Dir(valueColumn, vbDirectory) = "" Then
 				MsgBox "El directorio del parámetro: '" & nameColumn & "' no existe. Favor de validar ruta."
 				Exit Function
@@ -173,12 +173,12 @@ Function ValidateBasicTableContent(table As ListObject)
 				Exit Function
 			End If
 
-			If table.Name = "CORREOS" Then
+			If table.Name = "MAILS" Then
 				If column.Name = "UN ARCHIVO POR RANGO?" Then
 					GoTo continueLoop
 				End If
 
-				If column.Name = "GENERAR CORREO?" Then
+				If column.Name = GetMailGenerateMailColumnName() Then
 					If cell.Value = Split(GetYesNoInCurrentLanguage(), ",")(0) Then
 						atLeast1MailToGenerate = True
 					End If
@@ -188,15 +188,15 @@ Function ValidateBasicTableContent(table As ListObject)
 
 			End If
 
-			If (table.Name = "ARCHIVOS" And column.Name = "CORREO") Or table.Name = "REPORTES" Then GoTo continueLoop
+			If (table.Name = "MAIL_FILES" And column.Name = GetMailFilesMailColumnName()) Or table.Name = "FILE_REPORTS" Then GoTo continueLoop
 
 			If Application.CountIf(column.DataBodyRange, cell.Value) > 1 Then
 				MsgBox "Hay valores duplicados en la columna: '" & column.Name & "' de la tabla: '" & table.Name & "'."
 				Exit Function
 			End If
 
-			If table.Name = "CORREOS" And column.Name = "NOMBRE" Then
-				For Each mailName In tbl_MAIL_FILES.ListColumns("CORREO").DataBodyRange
+			If table.Name = "MAILS" And column.Name = GetMailNameColumnName() Then
+				For Each mailName In tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange
 					If mailName.Value = cell.Value Then Goto continueLoop
 				Next mailName
 
@@ -205,7 +205,7 @@ Function ValidateBasicTableContent(table As ListObject)
 				Exit Function
 			End If
 			
-			If table.Name = "ARCHIVOS" And column.Name = "NOMBRE" Then
+			If table.Name = "ARCHIVOS" And column.Name = GetMailFilesNameColumnName() Then
 				For Each mailFileName in tbl_FILE_REPORTS.ListColumns("ARCHIVO").DataBodyRange
 					If mailFileName.Value = cell.Value Then Goto continueLoop
 				Next mailFileName
@@ -218,7 +218,7 @@ Function ValidateBasicTableContent(table As ListObject)
 		Next cell
 	Next column
 	
-	If table.Name = "CORREOS" And Not atLeast1MailToGenerate Then
+	If table.Name = "MAILS" And Not atLeast1MailToGenerate Then
 		MsgBox "Debe haber al menos 1 correo a generar."
 		Exit Function
 	End If
@@ -233,7 +233,7 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim nameColumn As String
 
 	For Each row In tbl_FILE_REPORTS.DataBodyRange.Rows
-		nameColumn = row.Cells(1, tbl_FILE_REPORTS.ListColumns("NOMBRE").Index).Value
+		nameColumn = row.Cells(1, tbl_FILE_REPORTS.ListColumns(GetFileReportsNameColumnName()).Index).Value
 
 		On Error Resume Next
 		Set Worksheet = ThisWorkbook.Worksheets(nameColumn)
@@ -261,7 +261,7 @@ Function IsConversationColumnCorrect() As Boolean
 	Set outlookReportFolderRef = outlookAppRef.GetDefaultFolder(6).Parent.Folders(outlookFolderName)
 	Set outlookDraftsFolderRef = outlookAppRef.GetDefaultFolder(16)
 
-	For each conversation in tbl_MAILS.ListColumns(GetConversationMailColumnName()).DataBodyRange.Cells
+	For each conversation in tbl_MAILS.ListColumns(GetMailConversationColumnName()).DataBodyRange.Cells
 		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
 			MsgBox "La conversación: '" & conversation.Value & "' no existe."
 			Exit Function

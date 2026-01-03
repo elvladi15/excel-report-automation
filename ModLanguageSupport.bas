@@ -8,14 +8,16 @@ Sub UpdateApplicationLanguage()
     
     Dim fileReportsFileColumnName As String
 
-    'TEMP
-    Set languageStructure = GetLanguageStructure()
-    Set tbl_PARAMETERS = PARAMETERS.ListObjects("PARAMETERS")
-	Set tbl_MAILS = PARAMETERS.ListObjects("MAILS")
-	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
-	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
+    Dim previousYesNoInCurrentLanguage As String
+    Dim currentYesNoInCurrentLanguage As String
+
+    previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
     currentLanguage = GetLanguageByLanguageName(Range("B3").Value)
+
+    currentYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
+
+    'previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
     PARAMETERS.Name =  GetParameterWorksheetName()
 
@@ -30,12 +32,14 @@ Sub UpdateApplicationLanguage()
     'PARAMETERS TABLE
     tbl_PARAMETERS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetParameterTableName()
 
-    tbl_PARAMETERS.ListColumns(1).Name = GetNameParameterColumnName()
-    tbl_PARAMETERS.ListColumns(2).Name = GetValueParameterColumnName()
+    tbl_PARAMETERS.ListColumns(1).Name = GetParameterNameColumnName()
+    tbl_PARAMETERS.ListColumns(2).Name = GetParameterValueColumnName()
 
     isSilentChange = True
     Range("B3").Value = GetLanguageNameByLanguage()
     isSilentChange = False
+
+    currentLanguageName = Range("B3").Value
 
     With Range("B3").Validation
         .Delete
@@ -49,52 +53,84 @@ Sub UpdateApplicationLanguage()
 
     excelRow = 3
 
-    Range("A" & excelRow).Value = GetApplicationLanguageParameterName()
+    Range("A" & excelRow).Value = GetParameterApplicationLanguageName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetStartProcessDateParameterName()
+    Range("A" & excelRow).Value = GetParameterStartProcessDateName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetEndProcessDateParameterName()
+    Range("A" & excelRow).Value = GetParameterEndProcessDateName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetMaxTimeoutInSecondsParameterName()
+    Range("A" & excelRow).Value = GetParameterMaxTimeoutInSecondsName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetFilesBaseFolderParameterName()
+    Range("A" & excelRow).Value = GetParameterFilesBaseFolderName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetGenerateLogsParameterName()
+    Range("A" & excelRow).Value = GetParameterGenerateLogsName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetLogFilesFolderParameterName()
+    Range("A" & excelRow).Value = GetParameterLogFilesFolderName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetOutlookFolderParameterName()
+    Range("A" & excelRow).Value = GetParameterOutlookFolderName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetDateFormatParameterName()
+    Range("A" & excelRow).Value = GetParameterDateFormatName()
         excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetScheduleTimeParameterName()
+    Range("A" & excelRow).Value = GetParameterScheduleTimeName()
+
+    With Range("B8").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=currentYesNoInCurrentLanguage
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
+
+    If Split(previousYesNoInCurrentLanguage, ",")(0) = Range("B8").Value Then
+        Range("B8").Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+    Else
+        Range("B8").Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+    End If  
 
     'MAILS TABLE
-    isOneFilePerRangeMailColumnName = GetIsOneFilePerRangeMailColumnName()
-    generateMailColumnName = GetGenerateMailColumnName()
+    isOneFilePerRangeMailColumnName = GetMailIsOneFilePerRangeColumnName()
+    generateMailColumnName = GetMailGenerateMailColumnName()
 
     tbl_MAILS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailsTableName()
 
-    tbl_MAILS.ListColumns(1).Name = GetNameMailColumnName()
-    tbl_MAILS.ListColumns(2).Name = GetConversationMailColumnName()
+    tbl_MAILS.ListColumns(1).Name = GetMailNameColumnName()
+    tbl_MAILS.ListColumns(2).Name = GetMailConversationColumnName()
     tbl_MAILS.ListColumns(3).Name = isOneFilePerRangeMailColumnName
     tbl_MAILS.ListColumns(4).Name = generateMailColumnName
 
     With Range("MAILS[" & isOneFilePerRangeMailColumnName & "]").Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=GetYesNoInCurrentLanguage()
+        xlBetween, Formula1:=currentYesNoInCurrentLanguage
         .IgnoreBlank = False
         .InCellDropdown = True
     End With
 
+
+    For Each cell In Range("MAILS[" & isOneFilePerRangeMailColumnName & "]").Cells
+        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+        Else
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        End If 
+    Next cell
+
+
     With Range("MAILS[" & generateMailColumnName & "]").Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=GetYesNoInCurrentLanguage()
+        xlBetween, Formula1:=currentYesNoInCurrentLanguage
         .IgnoreBlank = False
         .InCellDropdown = True
     End With
+
+    For Each cell In Range("MAILS[" & generateMailColumnName & "]").Cells
+        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+        Else
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        End If 
+    Next cell
 
     'MAIL FILES TABLE
     mailFilesMailColumnName = GetMailFilesMailColumnName()
@@ -107,7 +143,7 @@ Sub UpdateApplicationLanguage()
     With Range("MAIL_FILES[" & mailFilesMailColumnName & "]").Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:="=INDIRECT(""MAILS[" & GetNameMailColumnName() & "]"")"
+        xlBetween, Formula1:="=INDIRECT(""MAILS[" & GetMailNameColumnName() & "]"")"
         .IgnoreBlank = False
         .InCellDropdown = True
     End With
@@ -131,20 +167,20 @@ End Sub
 
 Function GetLanguageByLanguageName(languageName As String) As String
     For Each language in languageStructure("languages")
-        For Each currentLanguageName in language("languageNames")
-            If currentLanguageName("name") = languageName Then
-                GetLanguageByLanguageName = currentLanguageName("language")
+        For Each newLanguageName in language("languageNames")
+            If newLanguageName("name") = languageName Then
+                GetLanguageByLanguageName = newLanguageName("language")
                 Exit Function
             End If
-        Next currentLanguageName
+        Next newLanguageName
     Next language
 End Function
 
 Function GetLanguageNameByLanguage() As String
-    For Each currentLanguageIterator in languageStructure("languages")
-        If currentLanguageIterator("name") <> currentLanguage Then Goto continueLoop
+    For Each newLanguageIterator in languageStructure("languages")
+        If newLanguageIterator("name") <> currentLanguage Then Goto continueLoop
 
-        For Each languageName in currentLanguageIterator("languageNames")
+        For Each languageName in newLanguageIterator("languageNames")
             If languageName("language") = currentLanguage Then
                 GetLanguageNameByLanguage = languageName("name")
                 Exit Function
@@ -152,7 +188,7 @@ Function GetLanguageNameByLanguage() As String
         Next languageName
 
         continueLoop:
-    Next currentLanguageIterator
+    Next newLanguageIterator
 End Function
 
 Function GetAllLanguageNamesString() As String
@@ -252,99 +288,99 @@ Function GetParameterTableName() As String
     End If
 End Function
 
-Function GetNameParameterColumnName() As String
+Function GetParameterNameColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetNameParameterColumnName = "NOMBRE"
+        GetParameterNameColumnName = "NOMBRE"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetNameParameterColumnName = "NAME"
+        GetParameterNameColumnName = "NAME"
     End If
 End Function
 
-Function GetValueParameterColumnName() As String
+Function GetParameterValueColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetValueParameterColumnName = "VALOR"
+        GetParameterValueColumnName = "VALOR"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetValueParameterColumnName = "VALUE"
+        GetParameterValueColumnName = "VALUE"
     End If
 End Function
 
-Function GetApplicationLanguageParameterName() As String
+Function GetParameterApplicationLanguageName() As String
     If currentLanguage = "SPANISH" Then
-        GetApplicationLanguageParameterName = "Idioma de la aplicación"
+        GetParameterApplicationLanguageName = "Idioma de la aplicación"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetApplicationLanguageParameterName = "Application language"
+        GetParameterApplicationLanguageName = "Application language"
     End If
 End Function
 
-Function GetStartProcessDateParameterName() As String
+Function GetParameterStartProcessDateName() As String
     If currentLanguage = "SPANISH" Then
-        GetStartProcessDateParameterName = "Fecha de proceso inicial"
+        GetParameterStartProcessDateName = "Fecha de proceso inicial"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetStartProcessDateParameterName = "Start process date"
+        GetParameterStartProcessDateName = "Start process date"
     End If
 End Function
 
-Function GetEndProcessDateParameterName() As String
+Function GetParameterEndProcessDateName() As String
     If currentLanguage = "SPANISH" Then
-        GetEndProcessDateParameterName = "Fecha de proceso final"
+        GetParameterEndProcessDateName = "Fecha de proceso final"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetEndProcessDateParameterName = "End process date"
+        GetParameterEndProcessDateName = "End process date"
     End If
 End Function
 
-Function GetMaxTimeoutInSecondsParameterName() As String
+Function GetParameterMaxTimeoutInSecondsName() As String
     If currentLanguage = "SPANISH" Then
-        GetMaxTimeoutInSecondsParameterName = "Timeout máximo en segundos"
+        GetParameterMaxTimeoutInSecondsName = "Timeout máximo en segundos"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetMaxTimeoutInSecondsParameterName = "Maximum timeout in seconds"
+        GetParameterMaxTimeoutInSecondsName = "Maximum timeout in seconds"
     End If
 End Function
 
-Function GetFilesBaseFolderParameterName() As String
+Function GetParameterFilesBaseFolderName() As String
     If currentLanguage = "SPANISH" Then
-        GetFilesBaseFolderParameterName = "Directorio base archivos"
+        GetParameterFilesBaseFolderName = "Directorio base archivos"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetFilesBaseFolderParameterName = "Files base directory"
+        GetParameterFilesBaseFolderName = "Files base directory"
     End If
 End Function
 
-Function GetGenerateLogsParameterName() As String
+Function GetParameterGenerateLogsName() As String
     If currentLanguage = "SPANISH" Then
-        GetGenerateLogsParameterName = "Generar logs?"
+        GetParameterGenerateLogsName = "Generar logs?"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetGenerateLogsParameterName = "Generate logs?"
+        GetParameterGenerateLogsName = "Generate logs?"
     End If
 End Function
 
-Function GetLogFilesFolderParameterName() As String
+Function GetParameterLogFilesFolderName() As String
     If currentLanguage = "SPANISH" Then
-        GetLogFilesFolderParameterName = "Directorio archivos de logs"
+        GetParameterLogFilesFolderName = "Directorio archivos de logs"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetLogFilesFolderParameterName = "Log files directory"
+        GetParameterLogFilesFolderName = "Log files directory"
     End If
 End Function
 
-Function GetOutlookFolderParameterName() As String
+Function GetParameterOutlookFolderName() As String
     If currentLanguage = "SPANISH" Then
-        GetOutlookFolderParameterName = "Carpeta de Outlook"
+        GetParameterOutlookFolderName = "Carpeta de Outlook"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetOutlookFolderParameterName = "Outlook folder"
+        GetParameterOutlookFolderName = "Outlook folder"
     End If
 End Function
 
-Function GetDateFormatParameterName() As String
+Function GetParameterDateFormatName() As String
     If currentLanguage = "SPANISH" Then
-        GetDateFormatParameterName = "Formato de fechas"
+        GetParameterDateFormatName = "Formato de fechas"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetDateFormatParameterName = "Date format"
+        GetParameterDateFormatName = "Date format"
     End If
 End Function
 
-Function GetScheduleTimeParameterName() As String
+Function GetParameterScheduleTimeName() As String
     If currentLanguage = "SPANISH" Then
-        GetScheduleTimeParameterName = "Hora de ejecución"
+        GetParameterScheduleTimeName = "Hora de ejecución"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetScheduleTimeParameterName = "Execution time"
+        GetParameterScheduleTimeName = "Execution time"
     End If
 End Function
 
@@ -357,35 +393,35 @@ Function GetMailsTableName() As String
     End If
 End Function
 
-Function GetNameMailColumnName() As String
+Function GetMailNameColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetNameMailColumnName = "NOMBRE"
+        GetMailNameColumnName = "NOMBRE"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetNameMailColumnName = "NAME"
+        GetMailNameColumnName = "NAME"
     End If
 End Function
 
-Function GetConversationMailColumnName() As String
+Function GetMailConversationColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetConversationMailColumnName = "CONVERSACIÓN"
+        GetMailConversationColumnName = "CONVERSACIÓN"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetConversationMailColumnName = "CONVERSATION"
+        GetMailConversationColumnName = "CONVERSATION"
     End If
 End Function
 
-Function GetIsOneFilePerRangeMailColumnName() As String
+Function GetMailIsOneFilePerRangeColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetIsOneFilePerRangeMailColumnName = "UN ARCHIVO POR RANGO?"
+        GetMailIsOneFilePerRangeColumnName = "UN ARCHIVO POR RANGO?"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetIsOneFilePerRangeMailColumnName = "ONE FILE PER RANGE?"
+        GetMailIsOneFilePerRangeColumnName = "ONE FILE PER RANGE?"
     End If
 End Function
 
-Function GetGenerateMailColumnName() As String
+Function GetMailGenerateMailColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetGenerateMailColumnName = "GENERAR CORREO?"
+        GetMailGenerateMailColumnName = "GENERAR CORREO?"
     ElseIf currentLanguage = "ENGLISH" Then 
-        GetGenerateMailColumnName = "GENERATE MAIL?"
+        GetMailGenerateMailColumnName = "GENERATE MAIL?"
     End If
 End Function
 

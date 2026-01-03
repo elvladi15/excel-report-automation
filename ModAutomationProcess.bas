@@ -13,7 +13,7 @@ Sub ScheduleAutomaticRun()
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
 	If executionMode = "MANUAL" Then	
-		mails = PARAMETERS.Evaluate("FILTER(MAILS[NOMBRE], MAILS[GENERAR CORREO?] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+		mails = PARAMETERS.Evaluate("FILTER(MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then
@@ -32,8 +32,8 @@ Sub AutomaticRun()
 	Call AppendToLogsFile("Refrescando hoja de cálculo...")
 	PARAMETERS.Calculate
 
-	startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetStartProcessDateParameterName() & """, PARAMETERS[" & GetNameParameterColumnName() & "], PARAMETERS[" & GetValueParameterColumnName() & "])")))
-	endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetEndProcessDateParameterName() & """, PARAMETERS[" & GetNameParameterColumnName() & "], PARAMETERS[" & GetValueParameterColumnName() & "])")))
+	startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetParameterStartProcessDateName() & """, PARAMETERS[" & GetParameterNameColumnName() & "], PARAMETERS[" & GetParameterValueColumnName() & "])")))
+	endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetParameterEndProcessDateName() & """, PARAMETERS[" & GetParameterNameColumnName() & "], PARAMETERS[" & GetParameterValueColumnName() & "])")))
 
 	RefreshAll
 

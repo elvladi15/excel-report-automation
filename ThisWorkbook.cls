@@ -8,7 +8,7 @@ Sub Workbook_Open()
 	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
 	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
 
-    currentLanguage = GetLanguageByLanguageName(Range("B2").Value)
+    currentLanguage = GetLanguageByLanguageName(Range("B3").Value)
 
     isSilentChange = False
 End Sub
