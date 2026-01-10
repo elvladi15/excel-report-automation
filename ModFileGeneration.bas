@@ -176,7 +176,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	reportTable.DataBodyRange.Borders.LineStyle = xlContinuous
 
 	On Error Goto no_PROCESS_DATE_FOR_RANGE_column
-	reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").DataBodyRange.NumberFormat = dateFormat
+	reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").DataBodyRange.NumberFormat = tbl_PARAMETERS.ListRows(2).Range.Cells(1, 2).NumberFormat
 	
 	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, dateFormat)
 

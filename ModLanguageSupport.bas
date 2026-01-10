@@ -13,11 +13,9 @@ Sub UpdateApplicationLanguage()
 
     previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
-    currentLanguage = GetLanguageByLanguageName(Range("B3").Value)
+    currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value)
 
     currentYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
-
-    'previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
     PARAMETERS.Name =  GetParameterWorksheetName()
 
@@ -36,12 +34,12 @@ Sub UpdateApplicationLanguage()
     tbl_PARAMETERS.ListColumns(2).Name = GetParameterValueColumnName()
 
     isSilentChange = True
-    Range("B3").Value = GetLanguageNameByLanguage()
+    tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value = GetLanguageNameByLanguage()
     isSilentChange = False
 
-    currentLanguageName = Range("B3").Value
+    currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value
 
-    With Range("B3").Validation
+    With tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=GetAllLanguageNamesString()
@@ -49,31 +47,18 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    Dim excelRow As Long
+    tbl_PARAMETERS.ListRows(1).Range.Cells(1, 1).Value = GetParameterApplicationLanguageName()
+    tbl_PARAMETERS.ListRows(2).Range.Cells(1, 1).Value = GetParameterStartProcessDateName()
+    tbl_PARAMETERS.ListRows(3).Range.Cells(1, 1).Value = GetParameterEndProcessDateName()
+    tbl_PARAMETERS.ListRows(4).Range.Cells(1, 1).Value = GetParameterMaxTimeoutInSecondsName()
+    tbl_PARAMETERS.ListRows(5).Range.Cells(1, 1).Value = GetParameterFilesBaseFolderName()
+    tbl_PARAMETERS.ListRows(6).Range.Cells(1, 1).Value = GetParameterGenerateLogsName()
+    tbl_PARAMETERS.ListRows(7).Range.Cells(1, 1).Value = GetParameterLogFilesFolderName()
+    tbl_PARAMETERS.ListRows(8).Range.Cells(1, 1).Value = GetParameterOutlookFolderName()
+    tbl_PARAMETERS.ListRows(9).Range.Cells(1, 1).Value = GetParameterDateFormatName()
+    tbl_PARAMETERS.ListRows(10).Range.Cells(1, 1).Value = GetParameterScheduleTimeName()
 
-    excelRow = 3
-
-    Range("A" & excelRow).Value = GetParameterApplicationLanguageName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterStartProcessDateName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterEndProcessDateName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterMaxTimeoutInSecondsName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterFilesBaseFolderName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterGenerateLogsName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterLogFilesFolderName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterOutlookFolderName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterDateFormatName()
-        excelRow = excelRow + 1
-    Range("A" & excelRow).Value = GetParameterScheduleTimeName()
-
-    With Range("B8").Validation
+    With tbl_PARAMETERS.ListRows(6).Range.Cells(1, 1).Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=currentYesNoInCurrentLanguage
@@ -81,10 +66,10 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    If Split(previousYesNoInCurrentLanguage, ",")(0) = Range("B8").Value Then
-        Range("B8").Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+    If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value Then
+        tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
     Else
-        Range("B8").Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
     End If  
 
     'MAILS TABLE
@@ -472,5 +457,13 @@ Function GetFileReportsFileColumnName() As String
         GetFileReportsFileColumnName = "ARCHIVO"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetFileReportsFileColumnName = "MAIL_FILE"
+    End If
+End Function
+
+Function GetLanguageChangePromptMessage() As String
+    If currentLanguage = "SPANISH" Then
+        GetLanguageChangePromptMessage = "¿Seguro que desea cambiar el idioma de la aplicación?"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetLanguageChangePromptMessage = "Are you sure you want to change the application language?"
     End If
 End Function

@@ -17,7 +17,18 @@ Sub CloseAllOtherWorkbooks()
 End Sub
 
 Sub RefreshAll()
+	Dim cn As WorkbookConnection
+	
 	On Error Goto ErrorHandler
+
+	For Each report in tbl_FILE_REPORTS.ListColumns(GetFileReportsNameColumnName()).DataBodyRange
+		Set cn = ThisWorkbook.Connections("Query - " & report.Value)
+
+		With cn
+			.OLEDBConnection.BackgroundQuery = False
+			.RefreshWithRefreshAll = True
+		End With
+	Next report
 
 	Call AppendToLogsFile("Actualizando reportes...")
 	ThisWorkbook.RefreshAll
