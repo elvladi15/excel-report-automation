@@ -3,7 +3,7 @@ Sub Worksheet_Change(ByVal Target As Range)
         If MsgBox(GetLanguageChangePromptMessage(), vbYesNo + vbQuestion) = vbYes Then
             UpdateApplicationLanguage
         Else
-            tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value = currentLanguageName
+            tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value = currentLanguageName
         End If
     End If
 End Sub
@@ -16,8 +16,8 @@ Sub Worksheet_SelectionChange(ByVal Target As Range)
 	Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
 	Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
 
-    If Not Intersect(Target, tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2)) Is Nothing Then
-        currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value
-        currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value)
+    If Not Intersect(Target, tbl_PARAMETERS.ListRows(1).Range.Cells(2)) Is Nothing Then
+        currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value
+        currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value)
     End If
 End Sub

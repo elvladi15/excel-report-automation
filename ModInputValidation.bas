@@ -53,8 +53,8 @@ Function IsBasicTableStructureCorrent() As Boolean
 End Function
 
 Function IsParameterValidationCorrect() As Boolean
-	Dim nameColumn As String
-	Dim valueColumn As String
+	Dim parameterName As String
+	Dim parameterValue As String
 
 	Dim nameParameterColumnName As String
 	Dim valueParameterColumnName As String
@@ -70,66 +70,66 @@ Function IsParameterValidationCorrect() As Boolean
 	Dim scheduleTimeParameterName As String
 
 
-	nameParameterColumnName = GetParameterNameColumnName()
-	valueParameterColumnName = GetParameterValueColumnName()
+	nameParameterColumnName = tbl_PARAMETERS.ListColumns(1).Name
+	valueParameterColumnName = tbl_PARAMETERS.ListColumns(2).Name
 
-	startProcessDateParameterName = GetParameterStartProcessDateName()
-	endProcessDateParameterName = GetParameterEndProcessDateName()
-	maxTimeoutInSecondsParameterName = GetParameterMaxTimeoutInSecondsName()
-	filesBaseFolderParameterName = GetParameterFilesBaseFolderName()
-	generateLogsParameterName = GetParameterGenerateLogsName()
-	logsFileFolderParameterName = GetParameterLogFilesFolderName()
-	outlookFolderParameterName = GetParameterOutlookFolderName()
-	dateFormatParameterName = GetParameterDateFormatName()
-	scheduleTimeParameterName = GetParameterScheduleTimeName()
+	startProcessDateParameterName = tbl_PARAMETERS.ListRows(2).Range.Cells(1).Value
+	endProcessDateParameterName = tbl_PARAMETERS.ListRows(3).Range.Cells(1).Value
+	maxTimeoutInSecondsParameterName = tbl_PARAMETERS.ListRows(4).Range.Cells(1).Value
+	filesBaseFolderParameterName = tbl_PARAMETERS.ListRows(5).Range.Cells(1).Value
+	generateLogsParameterName = tbl_PARAMETERS.ListRows(6).Range.Cells(1).Value
+	logsFileFolderParameterName = tbl_PARAMETERS.ListRows(7).Range.Cells(1).Value
+	outlookFolderParameterName = tbl_PARAMETERS.ListRows(8).Range.Cells(1).Value
+	dateFormatParameterName = tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value
+	scheduleTimeParameterName = tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value
 
-	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
-		nameColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
-		valueColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
+	For Each row In tbl_PARAMETERS.ListRows
+		parameterName = row.Range.Cells(1).Value
+		parameterValue = row.Range.Cells(2).Value
 
-		dictParameters.Add nameColumn, valueColumn
+		dictParameters.Add parameterName, parameterValue
 	Next row
 
-	For Each row In tbl_PARAMETERS.DataBodyRange.Rows
-		nameColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(nameParameterColumnName).Index).Value
-		valueColumn = row.Cells(1, tbl_PARAMETERS.ListColumns(valueParameterColumnName).Index).Value
+	For Each row In tbl_PARAMETERS.ListRows
+		parameterName = row.Range.Cells(1).Value
+		parameterValue = row.Range.Cells(2).Value
 
-		If (nameColumn = startProcessDateParameterName Or nameColumn = endProcessDateParameterName) And Not IsDate(valueColumn) Then
-			MsgBox "El valor del parámetro: '" & nameColumn & "' debe ser una fecha válida."
+		If (parameterName = startProcessDateParameterName Or parameterName = endProcessDateParameterName) And Not IsDate(parameterValue) Then
+			MsgBox "El valor del parámetro: '" & parameterName & "' debe ser una fecha válida."
 			Exit Function
 		End If
 
-		If nameColumn = maxTimeoutInSecondsParameterName And Not IsNumeric(valueColumn) Then
-			MsgBox "El valor del parámetro: '" & nameColumn & "' debe ser un número."
+		If parameterName = maxTimeoutInSecondsParameterName And Not IsNumeric(parameterValue) Then
+			MsgBox "El valor del parámetro: '" & parameterName & "' debe ser un número."
 			Exit Function
 		End If
 
-		If nameColumn = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
+		If parameterName = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
 
-		If valueColumn = "" Then
-			MsgBox "El valor del parámetro: '" & nameColumn & "' no puede quedar vacío."
+		If parameterValue = "" Then
+			MsgBox "El valor del parámetro: '" & parameterName & "' no puede quedar vacío."
 			Exit Function
 		End If
 
-		If nameColumn = logsFileFolderParameterName Or nameColumn = filesBaseFolderParameterName Then
-			If Dir(valueColumn, vbDirectory) = "" Then
-				MsgBox "El directorio del parámetro: '" & nameColumn & "' no existe. Favor de validar ruta."
+		If parameterName = logsFileFolderParameterName Or parameterName = filesBaseFolderParameterName Then
+			If Dir(parameterValue, vbDirectory) = "" Then
+				MsgBox "El directorio del parámetro: '" & parameterName & "' no existe. Favor de validar ruta."
 				Exit Function
 			End If
 
-			If Right(valueColumn, 1) = "\" Then
-				MsgBox "El directorio del parámetro: '" & valueColumn & "' contiene el caracter \ al final. Favor de remover."
+			If Right(parameterValue, 1) = "\" Then
+				MsgBox "El directorio del parámetro: '" & parameterValue & "' contiene el caracter \ al final. Favor de remover."
 				Exit Function
 			End If
 		End If
 
-		If nameColumn = scheduleTimeParameterName Then
+		If parameterName = scheduleTimeParameterName Then
 			On Error Goto NotValidTime
-			scheduleTime = TimeValue(valueColumn)
+			scheduleTime = TimeValue(parameterValue)
 			GoTo continueLoop
 
 			NotValidTime:
-			MsgBox "La hora de ejecución: '" & valueColumn & "' no es una fecha válida."
+			MsgBox "La hora de ejecución: '" & parameterValue & "' no es una fecha válida."
 			Exit Function
 		End If
 

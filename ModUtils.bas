@@ -180,13 +180,8 @@ Function GetLanguageStructure() As Object
 
 		With languageStructure("languages")(languageStructure("languages").Count)
 			.Add "name", "SPANISH"
+			.Add "languageName", "Español"
 			.Add "languageNames", New Collection
-				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
-				With .Item("languageNames")(.Item("languageNames").Count)
-					.Add "language", "SPANISH"
-					.Add "name", "Español"
-				End With
-
 				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
 				With .Item("languageNames")(.Item("languageNames").Count)
 					.Add "language", "ENGLISH"
@@ -197,17 +192,12 @@ Function GetLanguageStructure() As Object
 		languageStructure("languages").Add CreateObject("Scripting.Dictionary")
 		With languageStructure("languages")(languageStructure("languages").Count)
 			.Add "name", "ENGLISH"
+			.Add "languageName", "English"
 			.Add "languageNames", New Collection
 				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
 				With .Item("languageNames")(.Item("languageNames").Count)
 					.Add "language", "SPANISH"
 					.Add "name", "Spanish"
-				End With
-
-				.Item("languageNames").Add CreateObject("Scripting.Dictionary")
-				With .Item("languageNames")(.Item("languageNames").Count)
-					.Add "language", "ENGLISH"
-					.Add "name", "English"
 				End With
 		End With
 

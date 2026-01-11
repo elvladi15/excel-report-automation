@@ -13,7 +13,7 @@ Sub UpdateApplicationLanguage()
 
     previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
-    currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value)
+    currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value)
 
     currentYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
@@ -34,12 +34,12 @@ Sub UpdateApplicationLanguage()
     tbl_PARAMETERS.ListColumns(2).Name = GetParameterValueColumnName()
 
     isSilentChange = True
-    tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value = GetLanguageNameByLanguage()
+    tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value = GetLanguageNameByLanguage()
     isSilentChange = False
 
-    currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Value
+    currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value
 
-    With tbl_PARAMETERS.ListRows(1).Range.Cells(1, 2).Validation
+    With tbl_PARAMETERS.ListRows(1).Range.Cells(2).Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=GetAllLanguageNamesString()
@@ -47,18 +47,18 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    tbl_PARAMETERS.ListRows(1).Range.Cells(1, 1).Value = GetParameterApplicationLanguageName()
-    tbl_PARAMETERS.ListRows(2).Range.Cells(1, 1).Value = GetParameterStartProcessDateName()
-    tbl_PARAMETERS.ListRows(3).Range.Cells(1, 1).Value = GetParameterEndProcessDateName()
-    tbl_PARAMETERS.ListRows(4).Range.Cells(1, 1).Value = GetParameterMaxTimeoutInSecondsName()
-    tbl_PARAMETERS.ListRows(5).Range.Cells(1, 1).Value = GetParameterFilesBaseFolderName()
-    tbl_PARAMETERS.ListRows(6).Range.Cells(1, 1).Value = GetParameterGenerateLogsName()
-    tbl_PARAMETERS.ListRows(7).Range.Cells(1, 1).Value = GetParameterLogFilesFolderName()
-    tbl_PARAMETERS.ListRows(8).Range.Cells(1, 1).Value = GetParameterOutlookFolderName()
-    tbl_PARAMETERS.ListRows(9).Range.Cells(1, 1).Value = GetParameterDateFormatName()
-    tbl_PARAMETERS.ListRows(10).Range.Cells(1, 1).Value = GetParameterScheduleTimeName()
+    tbl_PARAMETERS.ListRows(1).Range.Cells(1).Value = GetParameterApplicationLanguageName()
+    tbl_PARAMETERS.ListRows(2).Range.Cells(1).Value = GetParameterStartProcessDateName()
+    tbl_PARAMETERS.ListRows(3).Range.Cells(1).Value = GetParameterEndProcessDateName()
+    tbl_PARAMETERS.ListRows(4).Range.Cells(1).Value = GetParameterMaxTimeoutInSecondsName()
+    tbl_PARAMETERS.ListRows(5).Range.Cells(1).Value = GetParameterFilesBaseFolderName()
+    tbl_PARAMETERS.ListRows(6).Range.Cells(1).Value = GetParameterGenerateLogsName()
+    tbl_PARAMETERS.ListRows(7).Range.Cells(1).Value = GetParameterLogFilesFolderName()
+    tbl_PARAMETERS.ListRows(8).Range.Cells(1).Value = GetParameterOutlookFolderName()
+    tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value = GetParameterDateFormatName()
+    tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value = GetParameterScheduleTimeName()
 
-    With tbl_PARAMETERS.ListRows(6).Range.Cells(1, 1).Validation
+    With tbl_PARAMETERS.ListRows(6).Range.Cells(1).Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=currentYesNoInCurrentLanguage
@@ -66,10 +66,10 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value Then
-        tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+    If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value Then
+        tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
     Else
-        tbl_PARAMETERS.ListRows(6).Range.Cells(1, 2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
     End If  
 
     'MAILS TABLE
@@ -152,6 +152,11 @@ End Sub
 
 Function GetLanguageByLanguageName(languageName As String) As String
     For Each language in languageStructure("languages")
+        If language("languageName") = languageName Then
+                GetLanguageByLanguageName = language("name")
+                Exit Function
+        End If
+
         For Each newLanguageName in language("languageNames")
             If newLanguageName("name") = languageName Then
                 GetLanguageByLanguageName = newLanguageName("language")
@@ -162,18 +167,12 @@ Function GetLanguageByLanguageName(languageName As String) As String
 End Function
 
 Function GetLanguageNameByLanguage() As String
-    For Each newLanguageIterator in languageStructure("languages")
-        If newLanguageIterator("name") <> currentLanguage Then Goto continueLoop
-
-        For Each languageName in newLanguageIterator("languageNames")
-            If languageName("language") = currentLanguage Then
-                GetLanguageNameByLanguage = languageName("name")
-                Exit Function
-            End If
-        Next languageName
-
-        continueLoop:
-    Next newLanguageIterator
+    For Each language in languageStructure("languages")
+        If language("name") = currentLanguage Then
+            GetLanguageNameByLanguage = language("languageName")
+            Exit Function
+        End If
+    Next language
 End Function
 
 Function GetAllLanguageNamesString() As String
@@ -182,6 +181,8 @@ Function GetAllLanguageNamesString() As String
 
     For Each language in languageStructure("languages")
         If language("name") <> currentLanguage Then Goto continueLoop
+        
+        languageNames = languageNames & language("languageName") & ","
 
         For Each languageName in language("languageNames")
             languageNames = languageNames & languageName("name") & ","
@@ -194,10 +195,6 @@ Function GetAllLanguageNamesString() As String
 
     GetAllLanguageNamesString = languageNames
 End Function
-
-
-
-
 
 Function GetYesNoInCurrentLanguage() As String
     If currentLanguage = "SPANISH" Then
