@@ -1,7 +1,5 @@
 Attribute VB_Name = "ModInputValidation"
 Function IsInputValidationCorrect() As Boolean
-	Set dictParameters = CreateObject("Scripting.Dictionary")
-
 	If Not IsBasicTableStructureCorrent() Then Exit Function
 	If Not IsParameterValidationCorrect() Then Exit Function
 	If Not ValidateAllBasicTableContents() Then Exit Function
@@ -87,13 +85,6 @@ Function IsParameterValidationCorrect() As Boolean
 		parameterName = row.Range.Cells(1).Value
 		parameterValue = row.Range.Cells(2).Value
 
-		dictParameters.Add parameterName, parameterValue
-	Next row
-
-	For Each row In tbl_PARAMETERS.ListRows
-		parameterName = row.Range.Cells(1).Value
-		parameterValue = row.Range.Cells(2).Value
-
 		If (parameterName = startProcessDateParameterName Or parameterName = endProcessDateParameterName) And Not IsDate(parameterValue) Then
 			MsgBox "El valor del parámetro: '" & parameterName & "' debe ser una fecha válida."
 			Exit Function
@@ -104,7 +95,7 @@ Function IsParameterValidationCorrect() As Boolean
 			Exit Function
 		End If
 
-		If parameterName = logsFileFolderParameterName And dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
+		If parameterName = logsFileFolderParameterName And generateLogsParameterName = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
 
 		If parameterValue = "" Then
 			MsgBox "El valor del parámetro: '" & parameterName & "' no puede quedar vacío."
@@ -129,21 +120,21 @@ Function IsParameterValidationCorrect() As Boolean
 			GoTo continueLoop
 
 			NotValidTime:
-			MsgBox "La hora de ejecución: '" & parameterValue & "' no es una fecha válida."
+			MsgBox "La hora de ejecución: '" & parameterValue & "' no es una hora válida."
 			Exit Function
 		End If
 
 		continueLoop:
 	Next row
 
-	startProcessDate = CDate(dictParameters(startProcessDateParameterName))
-	endProcessDate = CDate(dictParameters(endProcessDateParameterName))
-	baseReportFolder = dictParameters(filesBaseFolderParameterName)
-	logsFileFolder = dictParameters(logsFileFolderParameterName)
-	outlookFolderName = dictParameters(outlookFolderParameterName)
-	dateFormat = dictParameters(dateFormatParameterName)
-	canGenerateLogs = dictParameters(generateLogsParameterName) = Split(GetYesNoInCurrentLanguage(), ",")(0)
-	scheduleTime = TimeValue(dictParameters(scheduleTimeParameterName))
+	startProcessDate = CDate(tbl_PARAMETERS.ListRows(2).Range.Cells(2).Value)
+	endProcessDate = CDate(tbl_PARAMETERS.ListRows(3).Range.Cells(2).Value)
+	baseReportFolder = tbl_PARAMETERS.ListRows(5).Range.Cells(2).Value
+	canGenerateLogs = tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(GetYesNoInCurrentLanguage(), ",")(0)
+	logsFileFolder = tbl_PARAMETERS.ListRows(7).Range.Cells(2).Value
+	outlookFolderName = tbl_PARAMETERS.ListRows(8).Range.Cells(2).Value
+	dateFormat = tbl_PARAMETERS.ListRows(9).Range.Cells(2).Value
+	scheduleTime = TimeValue(tbl_PARAMETERS.ListRows(10).Range.Cells(2).Value)
 
 	IsParameterValidationCorrect = True
 End Function

@@ -19,8 +19,6 @@ Public tbl_MAILS As ListObject
 Public tbl_MAIL_FILES As ListObject
 Public tbl_FILE_REPORTS As ListObject
 
-Public dictParameters As Object
-
 Public startProcessDate As Date
 Public endProcessDate As Date
 Public baseReportFolder As String
