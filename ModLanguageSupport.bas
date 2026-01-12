@@ -457,6 +457,100 @@ Function GetFileReportsFileColumnName() As String
     End If
 End Function
 
+'INPUT VALIDATION MESSAGES
+
+'BASIC TABLE CONTENT VALIDATION MESSAGES
+Function InputValidationTableNotExistsMessage(tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationTableNotExistsMessage = "La tabla: '" & tableName & "' no existe. Favor revisar nombres internos de las tablas."
+    ElseIf currentLanguage = "ENGLISH" Then 
+        InputValidationTableNotExistsMessage = "The table: '" & tableName & "' does not exist. Please check internal table names."
+    End If
+End Function
+
+Function InputValidationColumnNotExistsMessage(columnName As String, tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationColumnNotExistsMessage = "La columna: '" & columnName & "' de la tabla: '" & tableName & "' no existe. Favor revisar nombres."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationColumnNotExistsMessage = "The column: '" & columnName & "' in table: '" & tableName & "' does not exist. Please check names."
+    End If
+End Function
+
+Function InputValidationValueNotExistsMessage(rowValue As String, columnName As String, tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationValueNotExistsMessage = "El valor: '" & rowValue & "', columna: '" & columnName & "', tabla: '" & tableName & "' no existe. Favor revisar nombres."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationValueNotExistsMessage = "The value: '" & rowValue & "', column: '" & columnName & "', table: '" & tableName & "' does not exist. Please check names."
+    End If
+End Function
+
+' PARAMETERS TABLE VALIDATION MESSAGES
+Function InputValidationParameterMustBeValidDateMessage(parameterName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationParameterMustBeValidDateMessage = "El valor del parámetro: '" & parameterName & "' debe ser una fecha válida."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationParameterMustBeValidDateMessage = "The value of parameter: '" & parameterName & "' must be a valid date."
+    End If
+End Function
+
+Function InputValidationParameterMustBeNumberMessage(parameterName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationParameterMustBeNumberMessage = "El valor del parámetro: '" & parameterName & "' debe ser un número."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationParameterMustBeNumberMessage = "The value of parameter: '" & parameterName & "' must be a number."
+    End If
+End Function
+
+Function InputValidationParameterCannotBeEmptyMessage(parameterName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationParameterCannotBeEmptyMessage = "El valor del parámetro: '" & parameterName & "' no puede quedar vacío."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationParameterCannotBeEmptyMessage = "The value of parameter: '" & parameterName & "' cannot be empty."
+    End If
+End Function
+
+Function InputValidationParameterDirectoryNotExistsMessage(parameterName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationParameterDirectoryNotExistsMessage = "El directorio del parámetro: '" & parameterName & "' no existe. Favor de validar ruta."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationParameterDirectoryNotExistsMessage = "The directory for parameter: '" & parameterName & "' does not exist. Please validate the path."
+    End If
+End Function
+
+Function InputValidationParameterDirectoryEndsWithSlashMessage(parameterValue As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationParameterDirectoryEndsWithSlashMessage = "El directorio del parámetro: '" & parameterValue & "' contiene el caracter \ al final. Favor de remover."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationParameterDirectoryEndsWithSlashMessage = "The directory value: '" & parameterValue & "' ends with the character \. Please remove it."
+    End If
+End Function
+
+Function InputValidationExecutionTimeNotValidMessage(parameterValue As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationExecutionTimeNotValidMessage = "La hora de ejecución: '" & parameterValue & "' no es una hora válida."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationExecutionTimeNotValidMessage = "The execution time: '" & parameterValue & "' is not a valid time."
+    End If
+End Function
+
+Function InputValidationTableIsEmptyMessage(tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationTableIsEmptyMessage = "La tabla: '" & tableName & "' está vacía."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationTableIsEmptyMessage = "The table: '" & tableName & "' is empty."
+    End If
+End Function
+
+Function InputValidationTableHasEmptyValuesMessage(tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationTableHasEmptyValuesMessage = "Hay valores vacíos en la tabla: '" & tableName & "'."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationTableHasEmptyValuesMessage = "There are empty values in the table: '" & tableName & "'."
+    End If
+End Function
+
+
+' MISCELLANIOUS MESSAGES
 Function GetLanguageChangePromptMessage() As String
     If currentLanguage = "SPANISH" Then
         GetLanguageChangePromptMessage = "¿Seguro que desea cambiar el idioma de la aplicación?"

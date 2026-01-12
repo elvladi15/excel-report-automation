@@ -20,25 +20,30 @@ Function IsBasicTableStructureCorrent() As Boolean
 		On Error GoTo 0
 
 		If Err.Number <> 0 Then
-			MsgBox "La tabla: '" & table("name") & "' no existe. Favor revisar nombres internos de las tablas."
+			MsgBox InputValidationTableNotExistsMessage(CStr(table("name")))
 			Exit Function
 		End If
 
 		For Each column in table("columns")
 			On Error Resume Next
+			Set columnObject = Nothing
 			Set columnObject = tableObject.ListColumns(column("name"))
 			On Error GoTo 0
 
-			If Err.Number <> 0 Then
-				MsgBox "La columna: '" & column("name") & "' de la tabla: '" & table("name") & "' no existe. Favor revisar nombres."
+			If columnObject Is Nothing Then
+				MsgBox InputValidationColumnNotExistsMessage(CStr(column("name")), CStr(table("name")))
 				Exit Function
 			End If
 
 			If IsNull(column("rows")) Then Goto continueLoop
 
 			For Each row in column("rows")
-				If IsError(Application.Match(row, Range(table("name") & "[" & column("name") & "]"), 0)) Then
-					MsgBox "El valor: '" & row & "', columna: '" & column("name") & "', tabla: '" & table("name") & "' no existe. Favor revisar nombres."
+				On Error Resume Next
+				Dim matchResult As Variant
+				matchResult = Application.Match(row, Range(table("name") & "[" & column("name") & "]"), 0)
+
+				If IsError(matchResult) Then
+					MsgBox InputValidationValueNotExistsMessage(CStr(row), CStr(column("name")), CStr(table("name")))
 					Exit Function
 				End If
 			Next row
@@ -86,30 +91,30 @@ Function IsParameterValidationCorrect() As Boolean
 		parameterValue = row.Range.Cells(2).Value
 
 		If (parameterName = startProcessDateParameterName Or parameterName = endProcessDateParameterName) And Not IsDate(parameterValue) Then
-			MsgBox "El valor del parámetro: '" & parameterName & "' debe ser una fecha válida."
+			MsgBox InputValidationParameterMustBeValidDateMessage(parameterName)
 			Exit Function
 		End If
 
 		If parameterName = maxTimeoutInSecondsParameterName And Not IsNumeric(parameterValue) Then
-			MsgBox "El valor del parámetro: '" & parameterName & "' debe ser un número."
+			MsgBox InputValidationParameterMustBeNumberMessage(parameterName)
 			Exit Function
 		End If
 
 		If parameterName = logsFileFolderParameterName And generateLogsParameterName = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
 
 		If parameterValue = "" Then
-			MsgBox "El valor del parámetro: '" & parameterName & "' no puede quedar vacío."
+			MsgBox InputValidationParameterCannotBeEmptyMessage(parameterName)
 			Exit Function
 		End If
 
 		If parameterName = logsFileFolderParameterName Or parameterName = filesBaseFolderParameterName Then
 			If Dir(parameterValue, vbDirectory) = "" Then
-				MsgBox "El directorio del parámetro: '" & parameterName & "' no existe. Favor de validar ruta."
+				MsgBox InputValidationParameterDirectoryNotExistsMessage(parameterName)
 				Exit Function
 			End If
 
 			If Right(parameterValue, 1) = "\" Then
-				MsgBox "El directorio del parámetro: '" & parameterValue & "' contiene el caracter \ al final. Favor de remover."
+				MsgBox InputValidationParameterDirectoryEndsWithSlashMessage(parameterValue)
 				Exit Function
 			End If
 		End If
@@ -120,7 +125,7 @@ Function IsParameterValidationCorrect() As Boolean
 			GoTo continueLoop
 
 			NotValidTime:
-			MsgBox "La hora de ejecución: '" & parameterValue & "' no es una hora válida."
+			MsgBox InputValidationExecutionTimeNotValidMessage(parameterValue)
 			Exit Function
 		End If
 
@@ -153,14 +158,14 @@ Function ValidateBasicTableContent(table As ListObject)
 	atLeast1MailToGenerate = False
 
 	If table.ListRows.Count = 0 Then
-		MsgBox "La tabla: '" & table.Name & "' está vacía."
+		MsgBox InputValidationTableIsEmptyMessage(table.Name)
 		Exit Function
 	End If
 
 	For Each column in table.ListColumns
 		For Each cell in column.DataBodyRange
 			If cell.Value = "" Then
-				MsgBox "Hay valores vacíos en la tabla: '" & table.Name & "'."
+				MsgBox InputValidationTableHasEmptyValuesMessage(table.Name)
 				Exit Function
 			End If
 

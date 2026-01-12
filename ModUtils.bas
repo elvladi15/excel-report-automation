@@ -84,6 +84,7 @@ Function GetBasicTableStructure() As Object
 			With .Item("columns")(.Item("columns").Count)
 				.Add "name", GetParameterNameColumnName()
 				.Add "rows", New Collection
+					.Item("rows").Add GetParameterApplicationLanguageName()
 					.Item("rows").Add GetParameterStartProcessDateName()
 					.Item("rows").Add GetParameterEndProcessDateName()
 					.Item("rows").Add GetParameterMaxTimeoutInSecondsName()
