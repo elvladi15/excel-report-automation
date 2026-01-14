@@ -11,9 +11,9 @@ Sub CreateDrafts()
 
 	If executionMode = "MANUAL" Then
 		If draftsNotGenerated.Count = 0 Then
-				outputMesssage = outputMesssage & MailSendingDraftsGeneratedSuccessfullyMessage()
+				outputMesssage = outputMesssage & DraftCreationDraftsGeneratedSuccessfullyMessage()
 			Else
-				outputMesssage = MailSendingDraftsHeaderMessage() & vbCrLf & vbCrLf
+				outputMesssage = DraftCreationDraftsHeaderMessage() & vbCrLf & vbCrLf
 
 				For Each draft In draftsNotGenerated
 					outputMesssage = outputMesssage & draft & vbCrLf
@@ -21,7 +21,7 @@ Sub CreateDrafts()
 
 				outputMesssage = outputMesssage & vbCrLf
 
-				outputMesssage = outputMesssage & MailSendingDraftsFilesNotCreatedSuffixMessage()
+				outputMesssage = outputMesssage & DraftCreationDraftsFilesNotCreatedSuffixMessage()
 		End If
 
 		MsgBox outputMesssage
@@ -31,25 +31,27 @@ End Sub
 Sub CreateDraft(mailName As String)
 	On Error GoTo ErrorHandler
 
-	Call AppendToLogsFile(MailSendingCreatingDraftMessage(mailName) & "...")
+	Call AppendToLogsFile(DraftCreationCreatingDraftMessage(mailName) & "...")
 
 	Dim conversation As Object
 
 
 	Dim mailFiles As Variant
-	Dim conversationSubject As String
 	Dim foldersToSearch As New collection
 	Dim fileEndings As New collection
 	Dim fileFolder As String
+	Dim conversationSubject As String
 	Dim isOneFilePerRange As Boolean
+	Dim sendWhenNoFiles As Boolean
 	Dim mailFileCount As Long
 	Dim dateValue As Date
 	Dim quantityOfFilesFound As Long
 
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
 	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ")")
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
+	sendWhenNoFiles = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(5).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
 	mailFiles = PARAMETERS.Evaluate("FILTER(" & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & " = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
@@ -101,25 +103,31 @@ Sub CreateDraft(mailName As String)
 
 				filePath = Dir()
 			Loop
+
 			If quantityOfFilesFound = 0 Then
-				draftsNotGenerated.Add mailName
+				If sendWhenNoFiles Then
+					conversation.Body = DraftCreationNoFilesForDateRangeBodyMessage()
+				Else
+					draftsNotGenerated.Add mailName
 
-				Call AppendToLogsFile(MailSendingCannotCreateDraftNoFilesMessage(mailName))
+					Call AppendToLogsFile(DraftCreationCannotCreateDraftNoFilesMessage(mailName))
 
-				Exit Sub
+					Exit Sub
+				End If
+			Else
+				conversation.Body = DraftCreationMessageBodyHeaderMessage()
 			End If
+			
 		Next fileEnding
 	Next folder
 
-	conversation.Body = MailSendingMessageBodyHeaderMessage()
-
 	conversation.Save
 
-	Call AppendToLogsFile(MailSendingDraftCreatedSuccessfullyMessage(mailName))
+	Call AppendToLogsFile(DraftCreationDraftCreatedSuccessfullyMessage(mailName))
 	Exit Sub
 
 	ErrorHandler:
-	Call AppendToLogsFile(MailSendingDraftCreationErrorMessage(mailName))
+	Call AppendToLogsFile(DraftCreationDraftCreationErrorMessage(mailName))
 End Sub
 
 Sub SendAllDrafts()
@@ -204,7 +212,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Exit Sub
 	End If
 
-	Call AppendToLogsFile(MailSendingAttemptErrorMessage(attemptCount))
+	Call AppendToLogsFile(MailSendingAttemptErrorMessage(CStr(attemptCount)))
 
 	Call SendAllDraftsRecursive(CStr(attemptCount + 1))
 End Sub

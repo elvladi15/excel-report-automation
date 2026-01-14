@@ -1,13 +1,5 @@
 Attribute VB_Name = "ModLanguageSupport"
 Sub UpdateApplicationLanguage()
-    Dim isOneFilePerRangeMailColumnName As String
-    Dim generateMailColumnName As String
-
-    Dim mailFilesNameColumnName As String
-    Dim mailFilesMailColumnName As String
-    
-    Dim fileReportsFileColumnName As String
-
     Dim previousYesNoInCurrentLanguage As String
     Dim currentYesNoInCurrentLanguage As String
 
@@ -73,15 +65,13 @@ Sub UpdateApplicationLanguage()
     End If  
 
     'MAILS TABLE
-    isOneFilePerRangeMailColumnName = GetMailIsOneFilePerRangeColumnName()
-    generateMailColumnName = GetMailGenerateMailColumnName()
-
     tbl_MAILS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailsTableName()
 
     tbl_MAILS.ListColumns(1).Name = GetMailNameColumnName()
     tbl_MAILS.ListColumns(2).Name = GetMailConversationColumnName()
-    tbl_MAILS.ListColumns(3).Name = isOneFilePerRangeMailColumnName
-    tbl_MAILS.ListColumns(4).Name = generateMailColumnName
+    tbl_MAILS.ListColumns(3).Name = GetMailIsOneFilePerRangeColumnName()
+    tbl_MAILS.ListColumns(4).Name = GetMailGenerateMailColumnName()
+    tbl_MAILS.ListColumns(5).Name = GetMailSendWhenNoFilesColumnName()
 
     With tbl_MAILS.ListColumns(3).DataBodyRange.Validation
         .Delete
@@ -115,13 +105,27 @@ Sub UpdateApplicationLanguage()
         End If 
     Next cell
 
-    'MAIL FILES TABLE
-    mailFilesMailColumnName = GetMailFilesMailColumnName()
+    With tbl_MAILS.ListColumns(5).DataBodyRange.Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=currentYesNoInCurrentLanguage
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
 
+    For Each cell In tbl_MAILS.ListColumns(5).DataBodyRange.Cells
+        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+        Else
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        End If 
+    Next cell
+
+    'MAIL FILES TABLE
     tbl_MAIL_FILES.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailFilesTableName()
 
     tbl_MAIL_FILES.ListColumns(1).Name = GetMailFilesNameColumnName()
-    tbl_MAIL_FILES.ListColumns(2).Name = mailFilesMailColumnName
+    tbl_MAIL_FILES.ListColumns(2).Name = GetMailFilesMailColumnName()
 
     With tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Validation
         .Delete
@@ -132,12 +136,10 @@ Sub UpdateApplicationLanguage()
     End With
 
     'FILE REPORTS TABLE
-    fileReportsFileColumnName = GetFileReportsFileColumnName()
-
     tbl_FILE_REPORTS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetFileReportsTableName()
 
     tbl_FILE_REPORTS.ListColumns(1).Name = GetFileReportsNameColumnName()
-    tbl_FILE_REPORTS.ListColumns(2).Name = fileReportsFileColumnName
+    tbl_FILE_REPORTS.ListColumns(2).Name = GetFileReportsFileColumnName()
 
     With tbl_FILE_REPORTS.ListColumns(2).DataBodyRange.Validation
         .Delete
@@ -326,7 +328,7 @@ End Function
 
 Function GetParameterGenerateLogsName() As String
     If currentLanguage = "SPANISH" Then
-        GetParameterGenerateLogsName = "Generar logs?"
+        GetParameterGenerateLogsName = "¿Generar logs?"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetParameterGenerateLogsName = "Generate logs?"
     End If
@@ -391,7 +393,7 @@ End Function
 
 Function GetMailIsOneFilePerRangeColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetMailIsOneFilePerRangeColumnName = "UN ARCHIVO POR RANGO?"
+        GetMailIsOneFilePerRangeColumnName = "¿UN ARCHIVO POR RANGO?"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetMailIsOneFilePerRangeColumnName = "ONE FILE PER RANGE?"
     End If
@@ -399,9 +401,17 @@ End Function
 
 Function GetMailGenerateMailColumnName() As String
     If currentLanguage = "SPANISH" Then
-        GetMailGenerateMailColumnName = "GENERAR CORREO?"
+        GetMailGenerateMailColumnName = "¿GENERAR CORREO?"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetMailGenerateMailColumnName = "GENERATE MAIL?"
+    End If
+End Function
+
+Function GetMailSendWhenNoFilesColumnName() As String
+    If currentLanguage = "SPANISH" Then
+        GetMailSendWhenNoFilesColumnName = "¿ENVIAR CUANDO NO HAY ARCHIVOS?"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetMailSendWhenNoFilesColumnName = "SEND WHEN NO FILES?"
     End If
 End Function
 
@@ -707,47 +717,55 @@ Function FileGenerationGenericErrorMessage(fileReportName As String) As String
 End Function
 
 'DRAFT CREATION MESSAGES
-Function MailSendingDraftsGeneratedSuccessfullyMessage() As String
+Function DraftCreationDraftsGeneratedSuccessfullyMessage() As String
     If currentLanguage = "SPANISH" Then
-        MailSendingDraftsGeneratedSuccessfullyMessage = "Borradores generados exitosamente. "
+        DraftCreationDraftsGeneratedSuccessfullyMessage = "Borradores generados exitosamente. "
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingDraftsGeneratedSuccessfullyMessage = "Drafts generated successfully. "
+        DraftCreationDraftsGeneratedSuccessfullyMessage = "Drafts generated successfully. "
     End If
 End Function
 
-Function MailSendingDraftsHeaderMessage() As String
+Function DraftCreationDraftsHeaderMessage() As String
     If currentLanguage = "SPANISH" Then
-        MailSendingDraftsHeaderMessage = "Los borradores:"
+        DraftCreationDraftsHeaderMessage = "Los borradores:"
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingDraftsHeaderMessage = "The drafts:"
+        DraftCreationDraftsHeaderMessage = "The drafts:"
     End If
 End Function
 
-Function MailSendingDraftsFilesNotCreatedSuffixMessage() As String
+Function DraftCreationDraftsFilesNotCreatedSuffixMessage() As String
     If currentLanguage = "SPANISH" Then
-        MailSendingDraftsFilesNotCreatedSuffixMessage = " no se pudieron crear porque sus archivos no se crearon."
+        DraftCreationDraftsFilesNotCreatedSuffixMessage = " no se pudieron crear porque sus archivos no se crearon."
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingDraftsFilesNotCreatedSuffixMessage = " could not be created because their files were not created."
+        DraftCreationDraftsFilesNotCreatedSuffixMessage = " could not be created because their files were not created."
     End If
 End Function
 
-Function MailSendingCreatingDraftMessage(mailName As String) As String
+Function DraftCreationCreatingDraftMessage(mailName As String) As String
     If currentLanguage = "SPANISH" Then
-        MailSendingCreatingDraftMessage = "Creando borrador: '" & mailName & "'"
+        DraftCreationCreatingDraftMessage = "Creando borrador: '" & mailName & "'"
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingCreatingDraftMessage = "Creating draft: '" & mailName & "'"
+        DraftCreationCreatingDraftMessage = "Creating draft: '" & mailName & "'"
     End If
 End Function
 
-Function MailSendingCannotCreateDraftNoFilesMessage(mailName As String) As String
+Function DraftCreationNoFilesForDateRangeBodyMessage() As String
     If currentLanguage = "SPANISH" Then
-        MailSendingCannotCreateDraftNoFilesMessage = "No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar."
+        DraftCreationNoFilesForDateRangeBodyMessage = "NO HAY ARCHIVOS PARA ADJUNTAR EN ESTE RANGO DE FECHAS."
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingCannotCreateDraftNoFilesMessage = "Cannot create the draft: '" & mailName & "' because there are no files to generate."
+        DraftCreationNoFilesForDateRangeBodyMessage = "THERE ARE NO FILES TO ATTACH FOR THIS DATE RANGE."
     End If
 End Function
 
-Function MailSendingMessageBodyHeaderMessage() As String
+Function DraftCreationCannotCreateDraftNoFilesMessage(mailName As String) As String
+    If currentLanguage = "SPANISH" Then
+        DraftCreationCannotCreateDraftNoFilesMessage = "No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        DraftCreationCannotCreateDraftNoFilesMessage = "Cannot create the draft: '" & mailName & "' because there are no files to generate."
+    End If
+End Function
+
+Function DraftCreationMessageBodyHeaderMessage() As String
     If currentLanguage = "SPANISH" Then
         If executionMode = "MANUAL" Then
             executionModeString = "MANUAL"
@@ -755,7 +773,7 @@ Function MailSendingMessageBodyHeaderMessage() As String
             executionModeString = "AUTOMÁTICO"
         End If
 
-        MailSendingMessageBodyHeaderMessage = "MENSAJE " & executionModeString & ". Anexo reporte. Saludos"
+        DraftCreationMessageBodyHeaderMessage = "MENSAJE " & executionModeString & ". Anexo reporte. Saludos"
     ElseIf currentLanguage = "ENGLISH" Then
         If executionMode = "MANUAL" Then
             executionModeString = "MANUAL"
@@ -763,23 +781,23 @@ Function MailSendingMessageBodyHeaderMessage() As String
             executionModeString = "AUTOMATIC"
         End If
 
-        MailSendingMessageBodyHeaderMessage = "" & executionModeString & " MESSAGE. Report attached. Regards"
+        DraftCreationMessageBodyHeaderMessage = "" & executionModeString & " MESSAGE. Report attached. Regards"
     End If
 End Function
 
-Function MailSendingDraftCreatedSuccessfullyMessage(mailName As String) As String
+Function DraftCreationDraftCreatedSuccessfullyMessage(mailName As String) As String
     If currentLanguage = "SPANISH" Then
-        MailSendingDraftCreatedSuccessfullyMessage = "El borrador: '" & mailName & "' fue creado exitosamente."
+        DraftCreationDraftCreatedSuccessfullyMessage = "El borrador: '" & mailName & "' fue creado exitosamente."
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingDraftCreatedSuccessfullyMessage = "The draft: '" & mailName & "' was created successfully."
+        DraftCreationDraftCreatedSuccessfullyMessage = "The draft: '" & mailName & "' was created successfully."
     End If
 End Function
 
-Function MailSendingDraftCreationErrorMessage(mailName As String) As String
+Function DraftCreationDraftCreationErrorMessage(mailName As String) As String
     If currentLanguage = "SPANISH" Then
-        MailSendingDraftCreationErrorMessage = "Ha ocurrido un error al crear el borrador: '" & mailName & "'."
+        DraftCreationDraftCreationErrorMessage = "Ha ocurrido un error al crear el borrador: '" & mailName & "'."
     ElseIf currentLanguage = "ENGLISH" Then
-        MailSendingDraftCreationErrorMessage = "An error occurred while creating the draft: '" & mailName & "'."
+        DraftCreationDraftCreationErrorMessage = "An error occurred while creating the draft: '" & mailName & "'."
     End If
 End Function
 

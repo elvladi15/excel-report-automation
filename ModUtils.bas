@@ -128,6 +128,12 @@ Function GetBasicTableStructure() As Object
 				.Add "name", GetMailGenerateMailColumnName()
 				.Add "rows", Null
 			End With
+
+			.Item("columns").Add CreateObject("Scripting.Dictionary")
+			With .Item("columns")(.Item("columns").Count)
+				.Add "name", GetMailSendWhenNoFilesColumnName()
+				.Add "rows", Null
+			End With
 		End With
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
