@@ -455,8 +455,6 @@ Function GetFileReportsFileColumnName() As String
     End If
 End Function
 
-'INPUT VALIDATION MESSAGES
-
 'BASIC TABLE CONTENT VALIDATION MESSAGES
 Function InputValidationTableNotExistsMessage(tableName As String) As String
     If currentLanguage = "SPANISH" Then
@@ -604,6 +602,69 @@ Function InputValidationConversationNotExistsMessage(conversationValue As String
 End Function
 
 ' FILE GENERATION MESSAGES
+Function FileGenerationReportsGeneratedSuccessfullyMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationReportsGeneratedSuccessfullyMessage = "Reportes generados exitosamente. "
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationReportsGeneratedSuccessfullyMessage = "Reports generated successfully. "
+    End If
+End Function
+
+Function FileGenerationReportsHeaderMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationReportsHeaderMessage = "Los reportes:"
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationReportsHeaderMessage = "The reports:"
+    End If
+End Function
+
+Function FileGenerationReportsNotGeneratedSuffixMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationReportsNotGeneratedSuffixMessage = " no se pudieron generar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationReportsNotGeneratedSuffixMessage = " could not be generated."
+    End If
+End Function
+
+Function FileGenerationFilesCreatedSuccessfullyMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFilesCreatedSuccessfullyMessage = "Archivos creados exitosamente."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFilesCreatedSuccessfullyMessage = "Files created successfully."
+    End If
+End Function
+
+Function FileGenerationFilesHeaderMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFilesHeaderMessage = "Los archivos:"
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFilesHeaderMessage = "The files:"
+    End If
+End Function
+
+Function FileGenerationFilesNoReportSuffixMessage() As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFilesNoReportSuffixMessage = " no se pudieron crear porque no tenían ningún reporte."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFilesNoReportSuffixMessage = " could not be created because they had no associated report."
+    End If
+End Function
+
+Function FileGenerationFileCreatedSuccessfullyMessage(mailFileName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFileCreatedSuccessfullyMessage = "Archivo: '" & mailFileName & "' creado exitosamente."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFileCreatedSuccessfullyMessage = "File: '" & mailFileName & "' was created successfully."
+    End If
+End Function
+
+Function FileGenerationFileNotCreatedNoReportMessage(mailFileName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFileNotCreatedNoReportMessage = "El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFileNotCreatedNoReportMessage = "The file: '" & mailFileName & "' could not be created because no report was generated."
+    End If
+End Function
 
 Function FileGenerationErrorWhenFetchingReportMessage(fileReportName As String) As String
     If currentLanguage = "SPANISH" Then
@@ -645,6 +706,196 @@ Function FileGenerationGenericErrorMessage(fileReportName As String) As String
     End If
 End Function
 
+'DRAFT CREATION MESSAGES
+Function MailSendingDraftsGeneratedSuccessfullyMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingDraftsGeneratedSuccessfullyMessage = "Borradores generados exitosamente. "
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingDraftsGeneratedSuccessfullyMessage = "Drafts generated successfully. "
+    End If
+End Function
+
+Function MailSendingDraftsHeaderMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingDraftsHeaderMessage = "Los borradores:"
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingDraftsHeaderMessage = "The drafts:"
+    End If
+End Function
+
+Function MailSendingDraftsFilesNotCreatedSuffixMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingDraftsFilesNotCreatedSuffixMessage = " no se pudieron crear porque sus archivos no se crearon."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingDraftsFilesNotCreatedSuffixMessage = " could not be created because their files were not created."
+    End If
+End Function
+
+Function MailSendingCreatingDraftMessage(mailName As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingCreatingDraftMessage = "Creando borrador: '" & mailName & "'"
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingCreatingDraftMessage = "Creating draft: '" & mailName & "'"
+    End If
+End Function
+
+Function MailSendingCannotCreateDraftNoFilesMessage(mailName As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingCannotCreateDraftNoFilesMessage = "No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingCannotCreateDraftNoFilesMessage = "Cannot create the draft: '" & mailName & "' because there are no files to generate."
+    End If
+End Function
+
+Function MailSendingMessageBodyHeaderMessage() As String
+    If currentLanguage = "SPANISH" Then
+        If executionMode = "MANUAL" Then
+            executionModeString = "MANUAL"
+        ElseIf executionMode = "AUTOMATIC" Then
+            executionModeString = "AUTOMÁTICO"
+        End If
+
+        MailSendingMessageBodyHeaderMessage = "MENSAJE " & executionModeString & ". Anexo reporte. Saludos"
+    ElseIf currentLanguage = "ENGLISH" Then
+        If executionMode = "MANUAL" Then
+            executionModeString = "MANUAL"
+        ElseIf executionMode = "AUTOMATIC" Then
+            executionModeString = "AUTOMATIC"
+        End If
+
+        MailSendingMessageBodyHeaderMessage = "" & executionModeString & " MESSAGE. Report attached. Regards"
+    End If
+End Function
+
+Function MailSendingDraftCreatedSuccessfullyMessage(mailName As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingDraftCreatedSuccessfullyMessage = "El borrador: '" & mailName & "' fue creado exitosamente."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingDraftCreatedSuccessfullyMessage = "The draft: '" & mailName & "' was created successfully."
+    End If
+End Function
+
+Function MailSendingDraftCreationErrorMessage(mailName As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingDraftCreationErrorMessage = "Ha ocurrido un error al crear el borrador: '" & mailName & "'."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingDraftCreationErrorMessage = "An error occurred while creating the draft: '" & mailName & "'."
+    End If
+End Function
+
+'MAIL SENDING MESSAGES
+Function MailSendingSendingDraftsMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingSendingDraftsMessage = "Enviando borradores..."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingSendingDraftsMessage = "Sending drafts..."
+    End If
+End Function
+
+Function MailSendingGenericErrorMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingGenericErrorMessage = "Ha ocurrido un error durante el envío de correos."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingGenericErrorMessage = "An error occurred while sending emails."
+    End If
+End Function
+
+Function MailSendingEmailsSentSuccessfullyMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingEmailsSentSuccessfullyMessage = "Correos enviados exitosamente."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingEmailsSentSuccessfullyMessage = "Emails sent successfully."
+    End If
+End Function
+
+Function MailSendingEmailsHeaderMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingEmailsHeaderMessage = "Los correos con asunto:"
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingEmailsHeaderMessage = "The emails with subject:"
+    End If
+End Function
+
+Function MailSendingEmailsNotSentSuffixMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingEmailsNotSentSuffixMessage = " no se pudieron enviar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingEmailsNotSentSuffixMessage = " could not be sent."
+    End If
+End Function
+
+Function MailSendingNoDraftsToSendMessage() As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingNoDraftsToSendMessage = "No hay borradores que enviar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingNoDraftsToSendMessage = "There are no drafts to send."
+    End If
+End Function
+
+Function MailSendingConversationNotFoundMessage(conversation As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingConversationNotFoundMessage = "La conversación: '" & conversation & "' no fue encontrada."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingConversationNotFoundMessage = "The conversation: '" & conversation & "' was not found."
+    End If
+End Function
+
+Function MailSendingAttemptsExhaustedMessage(attemptCount As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingAttemptsExhaustedMessage = "El intento número " & attemptCount & " ha sido agotado. Envío de correos abortado."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingAttemptsExhaustedMessage = "Attempt number " & attemptCount & " has been exhausted. Email sending aborted."
+    End If
+End Function
+
+Function MailSendingAttemptErrorMessage(attemptCount As String) As String
+    If currentLanguage = "SPANISH" Then
+        MailSendingAttemptErrorMessage = "Ha ocurrido un error al enviar los borradores en el intento número " & attemptCount & "."
+    ElseIf currentLanguage = "ENGLISH" Then
+        MailSendingAttemptErrorMessage = "An error occurred while sending drafts on attempt number " & attemptCount & "."
+    End If
+End Function
+
+'AUTOMATION PROCESS MESSAGES
+Function AutomationProcessMailScheduleSuccessMessage(mailCount As String, nextRun As String) As String
+    If currentLanguage = "SPANISH" Then
+        AutomationProcessMailScheduleSuccessMessage = "Programación de envío de correos exitosa. Se enviarán " & mailCount & " correos. Próxima corrida: " & nextRun
+    ElseIf currentLanguage = "ENGLISH" Then
+        AutomationProcessMailScheduleSuccessMessage = "Email sending scheduled successfully. " & mailCount & " emails will be sent. Next run: " & nextRun
+    End If
+End Function
+
+Function AutomationProcessReportScheduleSuccessMessage(mailCount As String, nextRun As String) As String
+    If currentLanguage = "SPANISH" Then
+        AutomationProcessReportScheduleSuccessMessage = "Programación de genereración de reportes exitosa. Se generarán los archivos de " & mailCount & " correos. Próxima corrida: " & nextRun
+    ElseIf currentLanguage = "ENGLISH" Then
+        AutomationProcessReportScheduleSuccessMessage = "Report generation scheduled successfully. Files for " & mailCount & " emails will be generated. Next run: " & nextRun
+    End If
+End Function
+
+Function AutomationProcessClosingOtherWorkbooksMessage() As String
+    If currentLanguage = "SPANISH" Then
+        AutomationProcessClosingOtherWorkbooksMessage = "Cerrando los demás libros de Excel..."
+    ElseIf currentLanguage = "ENGLISH" Then
+        AutomationProcessClosingOtherWorkbooksMessage = "Closing other Excel workbooks..."
+    End If
+End Function
+
+Function AutomationProcessRefreshingWorksheetMessage() As String
+    If currentLanguage = "SPANISH" Then
+        AutomationProcessRefreshingWorksheetMessage = "Refrescando hoja de cálculo"
+    ElseIf currentLanguage = "ENGLISH" Then
+        AutomationProcessRefreshingWorksheetMessage = "Refreshing worksheet"
+    End If
+End Function
+
+Function AutomationProcessProcedureScheduledMessage(procedure As String, scheduledTime As String) As String
+    If currentLanguage = "SPANISH" Then
+        AutomationProcessProcedureScheduledMessage = "Procedimiento " & procedure & " programado exitosamente para " & scheduledTime
+    ElseIf currentLanguage = "ENGLISH" Then
+        AutomationProcessProcedureScheduledMessage = "Procedure " & procedure & " scheduled successfully for " & scheduledTime
+    End If
+End Function
 
 ' MISCELLANIOUS MESSAGES
 Function GetLanguageChangePromptMessage() As String

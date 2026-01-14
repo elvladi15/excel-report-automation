@@ -12,24 +12,24 @@ Sub ScheduleAutomaticRun()
 
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
-	If executionMode = "MANUAL" Then	
+	If executionMode = "MANUAL" Then
 		mails = PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then
-			MsgBox "Programación de envío de correos exitosa. Se enviarán " & mailCount & " correos. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+			MsgBox AutomationProcessMailScheduleSuccessMessage(CStr(mailCount), Format(scheduleDateTime, dateFormat & " hh:mm:ss"))
 		Else
-			MsgBox "Programación de genereración de reportes exitosa. Se generarán los archivos de " & mailCount & " correos. Próxima corrida: " & Format(scheduleDateTime, dateFormat & " hh:mm:ss")
+			MsgBox AutomationProcessReportScheduleSuccessMessage(CStr(mailCount), Format(scheduleDateTime, dateFormat & " hh:mm:ss"))
 		End If
 		executionMode = "AUTOMATIC"
 	End If
 End Sub
 
 Sub AutomaticRun()
-	Call AppendToLogsFile("Cerrando los demás libros de Excel...")
+	Call AppendToLogsFile(AutomationProcessClosingOtherWorkbooksMessage())
 	CloseAllOtherWorkbooks
 
-	Call AppendToLogsFile("Refrescando hoja de cálculo...")
+	Call AppendToLogsFile(AutomationProcessRefreshingWorksheetMessage() & "...")
 	PARAMETERS.Calculate
 
 	startProcessDate = CDate(tbl_PARAMETERS.ListRows(2).Range.Cells(2).Value)
@@ -54,9 +54,9 @@ End Sub
 Sub ScheduleProcedure(procedure As String, time As Date)
 	On Error GoTo Schedule
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=False
-	
+
 	Schedule:
 	Application.OnTime EarliestTime:=time, procedure:=procedure, Schedule:=True
 
-	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - Procedimiento " & procedure & " programado exitosamente para " & Format(time, dateFormat & " hh:mm:ss"))
+	Call AppendToLogsFile(Format(Now, "yyyy-MM-dd hh:mm:ss") & " - " & AutomationProcessProcedureScheduledMessage(procedure, Format(time, dateFormat & " hh:mm:ss")))
 End Sub

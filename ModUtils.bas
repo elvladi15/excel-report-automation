@@ -18,7 +18,7 @@ End Sub
 
 Sub RefreshAll()
 	Dim cn As WorkbookConnection
-	
+
 	On Error Goto ErrorHandler
 
 	For Each report in tbl_FILE_REPORTS.ListColumns(GetFileReportsNameColumnName()).DataBodyRange
@@ -69,7 +69,7 @@ End Sub
 Function GetBasicTableStructure() As Object
 	Dim basicTableStructure As Object
 	Set basicTableStructure = CreateObject("Scripting.Dictionary")
-	
+
 	Set basicTableStructure("tables") = New Collection
 
 		basicTableStructure("tables").Add CreateObject("Scripting.Dictionary")
@@ -172,7 +172,7 @@ End Function
 Function GetLanguageStructure() As Object
 	Dim languageStructure As Object
 	Set languageStructure = CreateObject("Scripting.Dictionary")
-	
+
 	Set languageStructure("languages") = New Collection
 		languageStructure("languages").Add CreateObject("Scripting.Dictionary")
 

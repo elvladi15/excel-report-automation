@@ -11,19 +11,19 @@ Sub CreateDrafts()
 
 	If executionMode = "MANUAL" Then
 		If draftsNotGenerated.Count = 0 Then
-				outputMesssage = outputMesssage & "Borradores generados exitosamente. "
+				outputMesssage = outputMesssage & MailSendingDraftsGeneratedSuccessfullyMessage()
 			Else
-				outputMesssage = "Los borradores:" & vbCrLf & vbCrLf
+				outputMesssage = MailSendingDraftsHeaderMessage() & vbCrLf & vbCrLf
 
 				For Each draft In draftsNotGenerated
 					outputMesssage = outputMesssage & draft & vbCrLf
 				Next draft
-				
+
 				outputMesssage = outputMesssage & vbCrLf
 
-				outputMesssage = outputMesssage & " no se pudieron crear porque sus archivos no se crearon." & vbCrLf & vbCrLf
+				outputMesssage = outputMesssage & MailSendingDraftsFilesNotCreatedSuffixMessage()
 		End If
-		
+
 		MsgBox outputMesssage
 	End If
 End Sub
@@ -31,7 +31,7 @@ End Sub
 Sub CreateDraft(mailName As String)
 	On Error GoTo ErrorHandler
 
-	Call AppendToLogsFile("Creando borrador: '" & mailName & "'...")
+	Call AppendToLogsFile(MailSendingCreatingDraftMessage(mailName) & "...")
 
 	Dim conversation As Object
 
@@ -49,13 +49,13 @@ Sub CreateDraft(mailName As String)
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
 	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
-	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ")")
+	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ")")
 	mailFiles = PARAMETERS.Evaluate("FILTER(" & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & " = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
 	If mailFileCount > 1 Then
 		If isOneFilePerRange Then
-			If startProcessDate = endProcessDate Then	
+			If startProcessDate = endProcessDate Then
 				fileEndings.Add Format(endProcessDate, dateFormat)
 				foldersToSearch.Add fileFolder & Format(endProcessDate, dateFormat) & "\"
 			Else
@@ -104,48 +104,50 @@ Sub CreateDraft(mailName As String)
 			If quantityOfFilesFound = 0 Then
 				draftsNotGenerated.Add mailName
 
-				AppendToLogsFile ("No se puede crear el borrador: '" & mailName & "' porque no hay archivos a generar.")
+				Call AppendToLogsFile(MailSendingCannotCreateDraftNoFilesMessage(mailName))
 
 				Exit Sub
 			End If
 		Next fileEnding
 	Next folder
 
-	conversation.Body = "MENSAJE " & executionMode & ". Anexo reporte. Saludos"
+	conversation.Body = MailSendingMessageBodyHeaderMessage()
 
 	conversation.Save
 
-	AppendToLogsFile ("El borrador: '" & mailName & "' fue creado exitosamente.")
+	Call AppendToLogsFile(MailSendingDraftCreatedSuccessfullyMessage(mailName))
 	Exit Sub
 
 	ErrorHandler:
-	AppendToLogsFile ("Ha ocurrido un error al crear el borrador: '" & mailName & "'.")
+	Call AppendToLogsFile(MailSendingDraftCreationErrorMessage(mailName))
 End Sub
 
 Sub SendAllDrafts()
 	If executionMode = "MANUAL" Then
 		If Not IsConversationColumnCorrect Then Exit Sub
 	End If
-	
-	Call AppendToLogsFile("Enviando borradores...")
+
+	Call AppendToLogsFile(MailSendingSendingDraftsMessage())
 
 	SendAllDraftsRecursive(1)
 
 	If executionMode = "MANUAL" Then
-		If IsNull(conversationsNotSent) Then
-			outputMesssage = outputMesssage & "Ha ocurrido un error durante el envío de correos."
+		If conversationsNotSent Is Nothing Then
+			outputMesssage = outputMesssage & MailSendingNoDraftsToSendMessage()
+		ElseIf IsNull(conversationsNotSent) Then
+			outputMesssage = outputMesssage & MailSendingGenericErrorMessage()
 		ElseIf conversationsNotSent.Count = 0 Then
-			outputMesssage = outputMesssage & "Correos enviados exitosamente."
+			outputMesssage = outputMesssage & MailSendingEmailsSentSuccessfullyMessage()
 		Else
-			outputMesssage = "Los correos con asunto:" & vbCrLf & vbCrLf
+			outputMesssage = MailSendingEmailsHeaderMessage() & vbCrLf & vbCrLf
 
 			For Each conversation In conversationsNotSent
 				outputMesssage = outputMesssage & conversation & vbCrLf
 			Next conversation
-			
+
 			outputMesssage = outputMesssage & vbCrLf
 
-			outputMesssage = outputMesssage & " no se pudieron enviar." & vbCrLf & vbCrLf
+			outputMesssage = outputMesssage & MailSendingEmailsNotSentSuffixMessage() & vbCrLf & vbCrLf
 		End If
 
 		MsgBox outputMesssage
@@ -155,16 +157,16 @@ End Sub
 Sub SendAllDraftsRecursive(attemptCount As Long)
 	Dim mailItem As Object
 	Dim i As Long
-	
+
 	On Error GoTo ErrHandler
 
 	If outlookDraftsFolderRef.Items.Count = 0 Then
-		Call AppendToLogsFile("No hay borradores que enviar.")
-		If executionMode = "MANUAL" Then MsgBox "No hay borradores que enviar."
+		Call AppendToLogsFile(MailSendingNoDraftsToSendMessage())
+		Set conversationsNotSent = Nothing
 		Exit Sub
 	End If
 
-	For Each conversation In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
+	For Each conversation In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		On Error Goto mailItemNotFound
 		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
 
@@ -176,8 +178,8 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Goto continueLoop
 
 		mailItemNotFound:
-		Call AppendToLogsFile("La conversación: '" & CStr(conversation) & "' no fue encontrada.")
-		If executionMode = "MANUAL" Then MsgBox "La conversación: '" & CStr(conversation) & "' no fue encontrada."
+		Call AppendToLogsFile(MailSendingConversationNotFoundMessage(CStr(conversation)))
+		If executionMode = "MANUAL" Then MsgBox MailSendingConversationNotFoundMessage(CStr(conversation))
 
 		conversationsNotSent.Add conversation
 
@@ -187,7 +189,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 	Application.Wait Now + TimeValue("00:00:30")
 
 	If outlookDraftsFolderRef.Items.Count > 0 Then
-		for i = outlookDraftsFolderRef.Items.Count To 1 Step -1
+		for i = outlookDraftsFolderRef.Items.Count To 1 Step - 1
 			outlookDraftsFolderRef.Items(i).Delete
 		Next
 	End If
@@ -196,13 +198,13 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 
 	ErrHandler:
 	If attemptCount = attemptMaxCount Then
-		Call AppendToLogsFile("El intento número " & attemptCount & " ha sido agotado. Envío de correos abortado.")
+		Call AppendToLogsFile(MailSendingAttemptsExhaustedMessage(CStr(attemptCount)))
 
 		Set conversationsNotSent = Null
 		Exit Sub
 	End If
-	
-	Call AppendToLogsFile("Ha ocurrido un error al enviar los borradores en el intento número " & attemptCount & ".")
 
-	Call SendAllDraftsRecursive(attemptCount + 1)
+	Call AppendToLogsFile(MailSendingAttemptErrorMessage(attemptCount))
+
+	Call SendAllDraftsRecursive(CStr(attemptCount + 1))
 End Sub

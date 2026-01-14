@@ -3,33 +3,30 @@ Sub CreateMailFiles()
 	Dim fileGenerated As Boolean
 	Dim generateReportColumn As String
 	Dim nameColumn As String
-	Dim outputMesssage As String
 
-	outputMesssage = ""
-
-	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")	
+	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
 	If executionMode = "MANUAL" Then
 		If reportsNotGenerated.Count = 0 Then
-			outputMesssage = outputMesssage & "Reportes generados exitosamente. "
+			outputMesssage = outputMesssage & FileGenerationReportsGeneratedSuccessfullyMessage()
 		Else
-			outputMesssage = "Los reportes:" & vbCrLf & vbCrLf
+			outputMesssage = FileGenerationReportsHeaderMessage() & vbCrLf & vbCrLf
 
 			For Each report In reportsNotGenerated
 				outputMesssage = outputMesssage & report & vbCrLf
 			Next report
-			
+
 			outputMesssage = outputMesssage & vbCrLf
 
-			outputMesssage = outputMesssage & " no se pudieron generar." & vbCrLf & vbCrLf
+			outputMesssage = outputMesssage & FileGenerationReportsNotGeneratedSuffixMessage() & vbCrLf & vbCrLf
 		End If
 
 		If mailFilesNotGenerated.Count = 0 Then
-			outputMesssage = outputMesssage & "Archivos creados exitosamente."
+			outputMesssage = outputMesssage & FileGenerationFilesCreatedSuccessfullyMessage()
 		Else
-			outputMesssage = outputMesssage & "Los archivos:" & vbCrLf & vbCrLf
+			outputMesssage = outputMesssage & FileGenerationFilesHeaderMessage() & vbCrLf & vbCrLf
 
 			For Each mailFile In mailFilesNotGenerated
 				outputMesssage = outputMesssage & mailFile & vbCrLf
@@ -37,7 +34,7 @@ Sub CreateMailFiles()
 
 			outputMesssage = outputMesssage & vbCrLf
 
-			outputMesssage = outputMesssage & " no se pudieron crear porque no tenían ningún reporte."
+			outputMesssage = outputMesssage & FileGenerationFilesNoReportSuffixMessage()
 		End If
 
 		MsgBox outputMesssage
@@ -129,11 +126,11 @@ Sub CreateMailFile(mailFileName As String)
 		Workbook.SaveAs fileName:=folder, FileFormat:=xlOpenXMLWorkbook
 		Application.DisplayAlerts = True
 
-		Call AppendToLogsFile("Archivo: '" & mailFileName & "' creado exitosamente.")
+		Call AppendToLogsFile(FileGenerationFileCreatedSuccessfullyMessage(mailFileName))
 	Else
 		mailFilesNotGenerated.Add mailFileName
 
-		Call AppendToLogsFile("El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte.")
+		Call AppendToLogsFile(FileGenerationFileNotCreatedNoReportMessage(mailFileName))
 	End If
 
 	Workbook.Close False
@@ -177,7 +174,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 	On Error Goto no_PROCESS_DATE_FOR_RANGE_column
 	reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").DataBodyRange.NumberFormat = tbl_PARAMETERS.ListRows(2).Range.Cells(1, 2).NumberFormat
-	
+
 	If Not IsNull(currentProcessDate) Then reportTable.Range.AutoFilter Field:=reportTable.ListColumns("PROCESS_DATE_FOR_RANGE").Index, Criteria1:=Format(currentProcessDate, dateFormat)
 
 
