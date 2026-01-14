@@ -28,6 +28,8 @@ Public logsFileFolder As String
 Public dateFormat As String
 Public scheduleTime As Date
 
+Public isFirstWorksheet As Boolean
+
 Public currentProcessDate As Variant
 
 Public mailFilesNotGenerated As Collection

@@ -660,6 +660,14 @@ Function FileGenerationFilesNoReportSuffixMessage() As String
     End If
 End Function
 
+Function FileGenerationGeneratingFileMessage(mailFileName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationGeneratingFileMessage = "Generando archivo: '" & mailFileName & "'"
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationGeneratingFileMessage = "Generating file: '" & mailFileName & "'"
+    End If
+End Function
+
 Function FileGenerationFileCreatedSuccessfullyMessage(mailFileName As String) As String
     If currentLanguage = "SPANISH" Then
         FileGenerationFileCreatedSuccessfullyMessage = "Archivo: '" & mailFileName & "' creado exitosamente."
@@ -673,6 +681,14 @@ Function FileGenerationFileNotCreatedNoReportMessage(mailFileName As String) As 
         FileGenerationFileNotCreatedNoReportMessage = "El archivo: '" & mailFileName & "' no pudo ser creado porque no se generó ningún reporte."
     ElseIf currentLanguage = "ENGLISH" Then
         FileGenerationFileNotCreatedNoReportMessage = "The file: '" & mailFileName & "' could not be created because no report was generated."
+    End If
+End Function
+
+Function FileGenerationFileGenericErrorMessage(mailFileName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationFileGenericErrorMessage = "Ha ocurrido un error al generar el archivo " & mailFileName & "."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationFileGenericErrorMessage = "An error occurred while generating the file " & mailFileName & "."
     End If
 End Function
 

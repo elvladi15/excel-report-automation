@@ -72,7 +72,9 @@ End Sub
 
 Sub CreateMailFile(mailFileName As String)
 	On Error Goto ErrorHandler
-	Call AppendToLogsFile("Generando archivo: '" & mailFileName & "'...")
+	Call AppendToLogsFile(FileGenerationGeneratingFileMessage(mailFileName) & "...")
+
+	isFirstWorksheet = True
 
 	Dim Workbook As Workbook
 	Dim fileReports As Variant
@@ -83,7 +85,7 @@ Sub CreateMailFile(mailFileName As String)
 
 	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, " & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & ")"))
 	folder = baseReportFolder & "\" & mailName
-	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange, mailName)
+	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(2).DataBodyRange, mailName)
 
 	Set Workbook = Workbooks.Add
 
@@ -93,7 +95,7 @@ Sub CreateMailFile(mailFileName As String)
 		Call CreateFileReport(Workbook, CStr(item))
 	Next item
 
-	If Workbook.Worksheets(Workbook.Worksheets.Count).Name <> "Sheet1" Then
+	If Not isFirstWorksheet Then
 		For Each Query In Workbook.Queries
 			Query.delete
 		Next Query
@@ -138,7 +140,7 @@ Sub CreateMailFile(mailFileName As String)
 	Exit Sub
 
 	ErrorHandler:
-	Call AppendToLogsFile("Ha ocurrido un error al generar el archivo " & mailFileName & ".")
+	Call AppendToLogsFile(FileGenerationFileGenericErrorMessage(mailFileName))
 End Sub
 
 Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
@@ -186,8 +188,9 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 		GoTo removeFilter
 	End If
 
-	If Workbook.Worksheets(1).Name = "Sheet1" Then
+	If isFirstWorksheet Then
 		Set Worksheet = Workbook.Worksheets(1)
+		isFirstWorksheet = False
 	Else
 		Set Worksheet = Workbook.Worksheets.Add
 	End If
