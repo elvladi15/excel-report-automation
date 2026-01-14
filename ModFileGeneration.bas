@@ -7,7 +7,7 @@ Sub CreateMailFiles()
 
 	outputMesssage = ""
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER(MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")	
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
@@ -50,13 +50,13 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailIsOneFilePerRangeColumnName() & "])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 
 	mailFileCount = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange, mailName)
 
-	For Each mailFileName In PARAMETERS.Evaluate("FILTER(MAIL_FILES[" & GetMailFilesNameColumnName() & "], MAIL_FILES[" & GetMailFilesMailColumnName() & "] = """ & mailName & """)")
+	For Each mailFileName In PARAMETERS.Evaluate("FILTER(" & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & " = """ & mailName & """)")
 		If isOneFilePerRange Then
 			currentProcessDate = Null
 
@@ -84,13 +84,13 @@ Sub CreateMailFile(mailFileName As String)
 	Dim folder As String
 	Dim fileQuantityPerMail As Long
 
-	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, MAIL_FILES[" & GetMailFilesNameColumnName() & "], MAIL_FILES[" & GetMailFilesMailColumnName() & "])"))
+	mailName = CStr(PARAMETERS.Evaluate("XLOOKUP(""" & mailFileName & """, " & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & ")"))
 	folder = baseReportFolder & "\" & mailName
 	fileQuantityPerMail = Application.WorksheetFunction.CountIf(tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange, mailName)
 
 	Set Workbook = Workbooks.Add
 
-	fileReports = PARAMETERS.Evaluate("FILTER(FILE_REPORTS[" & GetFileReportsNameColumnName() & "], FILE_REPORTS[" & GetFileReportsFileColumnName() & "] = """ & mailFileName & """)")
+	fileReports = PARAMETERS.Evaluate("FILTER(" & tbl_FILE_REPORTS.ListColumns(1).DataBodyRange.Address & ", " & tbl_FILE_REPORTS.ListColumns(2).DataBodyRange.Address & " = """ & mailFileName & """)")
 
 	For Each item In fileReports
 		Call CreateFileReport(Workbook, CStr(item))
@@ -158,7 +158,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	Set reportTable = ThisWorkbook.Sheets(fileReportName).ListObjects(fileReportName)
 
 	If reportTable.ListRows.Count = 1 And reportTable.ListColumns.Count = 1 Then
-		Call AppendToLogsFile("Hubo un error al consultar el reporte " & fileReportName & " desde la base de datos.")
+		Call AppendToLogsFile(FileGenerationErrorWhenFetchingReportMessage(fileReportName))
 
 		reportsNotGenerated.Add fileReportName
 
@@ -166,7 +166,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 	End If
 
 	If reportTable.ListRows.Count = 0 Then
-		Call AppendToLogsFile("El reporte " & fileReportName & " no trajo registros.")
+		Call AppendToLogsFile(FileGenerationReportReturnedNoRowsMessage(fileReportName))
 
 		reportsNotGenerated.Add fileReportName
 
@@ -182,7 +182,7 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 
 
 	If Application.WorksheetFunction.CountA(reportTable.DataBodyRange) = 0 Then
-		Call AppendToLogsFile("El reporte " & fileReportName & " no se actualizó.")
+		Call AppendToLogsFile(FileGenerationReportNotUpdatedMessage(fileReportName))
 
 		reportsNotGenerated.Add fileReportName
 
@@ -209,9 +209,9 @@ Sub CreateFileReport(Workbook As Workbook, fileReportName As String)
 		reportTable.AutoFilter.ShowAllData
 		Exit Sub
 	no_PROCESS_DATE_FOR_RANGE_column:
-		Call AppendToLogsFile("No se encontró la columna PROCESS_DATE_FOR_RANGE en el reporte " & fileReportName & ".")
+		Call AppendToLogsFile(FileGenerationMissingProcessDateColumnMessage(fileReportName))
 		Exit Sub
 	ErrorHandler:
-		Call AppendToLogsFile("Ha ocurrido un error al generar el reporte " & fileReportName & ".")
+		Call AppendToLogsFile(FileGenerationGenericErrorMessage(fileReportName))
 		Exit Sub
 End Sub

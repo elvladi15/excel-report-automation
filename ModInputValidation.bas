@@ -170,11 +170,11 @@ Function ValidateBasicTableContent(table As ListObject)
 			End If
 
 			If table.Name = "MAILS" Then
-				If column.Name = "UN ARCHIVO POR RANGO?" Then
+				If column.Name = tbl_MAILS.ListColumns(3).Name Then
 					GoTo continueLoop
 				End If
 
-				If column.Name = GetMailGenerateMailColumnName() Then
+				If column.Name = tbl_MAILS.ListColumns(4).Name Then
 					If cell.Value = Split(GetYesNoInCurrentLanguage(), ",")(0) Then
 						atLeast1MailToGenerate = True
 					End If
@@ -184,29 +184,29 @@ Function ValidateBasicTableContent(table As ListObject)
 
 			End If
 
-			If (table.Name = "MAIL_FILES" And column.Name = GetMailFilesMailColumnName()) Or table.Name = "FILE_REPORTS" Then GoTo continueLoop
+			If (table.Name = "MAIL_FILES" And column.Name = tbl_MAIL_FILES.ListColumns(2).Name) Or table.Name = "FILE_REPORTS" Then GoTo continueLoop
 
 			If Application.CountIf(column.DataBodyRange, cell.Value) > 1 Then
-				MsgBox "Hay valores duplicados en la columna: '" & column.Name & "' de la tabla: '" & table.Name & "'."
+				MsgBox InputValidationColumnHasDuplicatesMessage(column.Name, table.Name)
 				Exit Function
 			End If
 
-			If table.Name = "MAILS" And column.Name = GetMailNameColumnName() Then
-				For Each mailName In tbl_MAIL_FILES.ListColumns(GetMailFilesMailColumnName()).DataBodyRange
+			If table.Name = "MAILS" And column.Name = tbl_MAILS.ListColumns(1).Name Then
+				For Each mailName In tbl_MAIL_FILES.ListColumns(2).DataBodyRange
 					If mailName.Value = cell.Value Then Goto continueLoop
 				Next mailName
 
-				MsgBox "El correo: '" & cell.Value & "' no tiene ningún archivo asociado."
+				MsgBox InputValidationEmailHasNoFilesMessage(cell.Value)
 
 				Exit Function
 			End If
 			
-			If table.Name = "ARCHIVOS" And column.Name = GetMailFilesNameColumnName() Then
-				For Each mailFileName in tbl_FILE_REPORTS.ListColumns("ARCHIVO").DataBodyRange
+			If table.Name = "MAIL_FILES" And column.Name = tbl_FILE_REPORTS.ListColumns(1).Name Then
+				For Each mailFileName in tbl_FILE_REPORTS.ListColumns(2).DataBodyRange
 					If mailFileName.Value = cell.Value Then Goto continueLoop
 				Next mailFileName
 
-				MsgBox "El archivo: '" & cell.Value & "' no tiene ningún reporte asociado."
+				MsgBox InputValidationFileHasNoReportMessage(cell.Value)
 
 				Exit Function
 			End If
@@ -215,7 +215,7 @@ Function ValidateBasicTableContent(table As ListObject)
 	Next column
 	
 	If table.Name = "MAILS" And Not atLeast1MailToGenerate Then
-		MsgBox "Debe haber al menos 1 correo a generar."
+		MsgBox InputValidationAtLeastOneEmailMessage()
 		Exit Function
 	End If
 
@@ -235,7 +235,7 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		Set Worksheet = ThisWorkbook.Worksheets(nameColumn)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La hoja de cálculo: '" & nameColumn & "' no existe. Favor crearla junto a su tabla de Power Query."
+			MsgBox InputValidationWorksheetNotExistsMessage(nameColumn)
 			Exit Function
 		End If
 
@@ -243,7 +243,7 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		Set table = Worksheet.ListObjects(nameColumn)
 		On Error GoTo 0
 		If Err.Number <> 0 Then
-			MsgBox "La tabla: '" & nameColumn & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+			MsgBox InputValidationTableNotFoundOnSheetMessage(nameColumn)
 			Exit Function
 		End If
 	Next row
@@ -259,7 +259,7 @@ Function IsConversationColumnCorrect() As Boolean
 
 	For each conversation in tbl_MAILS.ListColumns(GetMailConversationColumnName()).DataBodyRange.Cells
 		If Not outlookReportFolderRef.Items.Restrict("[Subject] = '" & conversation.Value & "'").Count > 0 Then
-			MsgBox "La conversación: '" & conversation.Value & "' no existe."
+			MsgBox InputValidationConversationNotExistsMessage(conversation.Value)
 			Exit Function
 		End If
 	Next conversation

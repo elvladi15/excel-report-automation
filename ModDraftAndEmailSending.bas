@@ -5,7 +5,7 @@ Sub CreateDrafts()
 
 	If Not IsConversationColumnCorrect Then Exit Sub
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER([" & GetParameterNameColumnName() & "], [" & GetParameterGenerateLogsName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		Call CreateDraft(CStr(mailName))
 	Next mailName
 
@@ -48,9 +48,9 @@ Sub CreateDraft(mailName As String)
 
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailIsOneFilePerRangeColumnName() & "])") = Split(GetYesNoInCurrentLanguage(), ",")(0)
-	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailConversationColumnName() & "])")
-	mailFiles = PARAMETERS.Evaluate("FILTER(MAIL_FILES[" & GetMailFilesNameColumnName() & "], MAIL_FILES[" & GetMailFilesMailColumnName() & "] = """ & mailName & """)")
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
+	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ")")
+	mailFiles = PARAMETERS.Evaluate("FILTER(" & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & " = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
 	If mailFileCount > 1 Then
@@ -164,7 +164,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Exit Sub
 	End If
 
-	For Each conversation In PARAMETERS.Evaluate("FILTER(MAIL[" & GetMailConversationColumnName() & "], MAIL[" & GetMailGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+	For Each conversation In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		On Error Goto mailItemNotFound
 		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
 

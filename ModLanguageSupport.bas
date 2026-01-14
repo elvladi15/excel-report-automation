@@ -83,7 +83,7 @@ Sub UpdateApplicationLanguage()
     tbl_MAILS.ListColumns(3).Name = isOneFilePerRangeMailColumnName
     tbl_MAILS.ListColumns(4).Name = generateMailColumnName
 
-    With Range("MAILS[" & isOneFilePerRangeMailColumnName & "]").Validation
+    With tbl_MAILS.ListColumns(3).DataBodyRange.Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=currentYesNoInCurrentLanguage
@@ -91,8 +91,7 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-
-    For Each cell In Range("MAILS[" & isOneFilePerRangeMailColumnName & "]").Cells
+    For Each cell In tbl_MAILS.ListColumns(3).DataBodyRange.Cells
         If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
             cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
         Else
@@ -100,8 +99,7 @@ Sub UpdateApplicationLanguage()
         End If 
     Next cell
 
-
-    With Range("MAILS[" & generateMailColumnName & "]").Validation
+    With tbl_MAILS.ListColumns(4).DataBodyRange.Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=currentYesNoInCurrentLanguage
@@ -109,7 +107,7 @@ Sub UpdateApplicationLanguage()
         .InCellDropdown = True
     End With
 
-    For Each cell In Range("MAILS[" & generateMailColumnName & "]").Cells
+    For Each cell In tbl_MAILS.ListColumns(4).DataBodyRange.Cells
         If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
             cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
         Else
@@ -124,8 +122,8 @@ Sub UpdateApplicationLanguage()
 
     tbl_MAIL_FILES.ListColumns(1).Name = GetMailFilesNameColumnName()
     tbl_MAIL_FILES.ListColumns(2).Name = mailFilesMailColumnName
-    
-    With Range("MAIL_FILES[" & mailFilesMailColumnName & "]").Validation
+
+    With tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:="=INDIRECT(""MAILS[" & GetMailNameColumnName() & "]"")"
@@ -141,7 +139,7 @@ Sub UpdateApplicationLanguage()
     tbl_FILE_REPORTS.ListColumns(1).Name = GetFileReportsNameColumnName()
     tbl_FILE_REPORTS.ListColumns(2).Name = fileReportsFileColumnName
 
-    With Range("FILE_REPORTS[" & fileReportsFileColumnName & "]").Validation
+    With tbl_FILE_REPORTS.ListColumns(2).DataBodyRange.Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:="=INDIRECT(""MAIL_FILES[" & GetMailFilesNameColumnName() & "]"")"
@@ -549,6 +547,104 @@ Function InputValidationTableHasEmptyValuesMessage(tableName As String) As Strin
     End If
 End Function
 
+Function InputValidationColumnHasDuplicatesMessage(columnName As String, tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationColumnHasDuplicatesMessage = "Hay valores duplicados en la columna: '" & columnName & "' de la tabla: '" & tableName & "'."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationColumnHasDuplicatesMessage = "There are duplicate values in the column: '" & columnName & "' of the table: '" & tableName & "'."
+    End If
+End Function
+
+Function InputValidationEmailHasNoFilesMessage(emailValue As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationEmailHasNoFilesMessage = "El correo: '" & emailValue & "' no tiene ningún archivo asociado."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationEmailHasNoFilesMessage = "The email: '" & emailValue & "' has no associated files."
+    End If
+End Function
+
+Function InputValidationFileHasNoReportMessage(fileValue As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationFileHasNoReportMessage = "El archivo: '" & fileValue & "' no tiene ningún reporte asociado."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationFileHasNoReportMessage = "The file: '" & fileValue & "' has no associated report."
+    End If
+End Function
+
+Function InputValidationAtLeastOneEmailMessage() As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationAtLeastOneEmailMessage = "Debe haber al menos 1 correo a generar."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationAtLeastOneEmailMessage = "There must be at least 1 email to generate."
+    End If
+End Function
+
+Function InputValidationWorksheetNotExistsMessage(sheetName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationWorksheetNotExistsMessage = "La hoja de cálculo: '" & sheetName & "' no existe. Favor crearla junto a su tabla de Power Query."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationWorksheetNotExistsMessage = "The worksheet: '" & sheetName & "' does not exist. Please create it next to its Power Query table."
+    End If
+End Function
+
+Function InputValidationTableNotFoundOnSheetMessage(tableName As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationTableNotFoundOnSheetMessage = "La tabla: '" & tableName & "' no fue encontrada en su respectiva hoja de cálculo. Favor crear."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationTableNotFoundOnSheetMessage = "The table: '" & tableName & "' was not found on its corresponding worksheet. Please create it."
+    End If
+End Function
+
+Function InputValidationConversationNotExistsMessage(conversationValue As String) As String
+    If currentLanguage = "SPANISH" Then
+        InputValidationConversationNotExistsMessage = "La conversación: '" & conversationValue & "' no existe."
+    ElseIf currentLanguage = "ENGLISH" Then
+        InputValidationConversationNotExistsMessage = "The conversation: '" & conversationValue & "' does not exist."
+    End If
+End Function
+
+' FILE GENERATION MESSAGES
+
+Function FileGenerationErrorWhenFetchingReportMessage(fileReportName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationErrorWhenFetchingReportMessage = "Hubo un error al consultar el reporte " & fileReportName & " desde la base de datos."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationErrorWhenFetchingReportMessage = "There was an error querying the report " & fileReportName & " from the database."
+    End If
+End Function
+
+Function FileGenerationReportReturnedNoRowsMessage(fileReportName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationReportReturnedNoRowsMessage = "El reporte " & fileReportName & " no trajo registros."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationReportReturnedNoRowsMessage = "The report " & fileReportName & " returned no records."
+    End If
+End Function
+
+Function FileGenerationReportNotUpdatedMessage(fileReportName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationReportNotUpdatedMessage = "El reporte " & fileReportName & " no se actualizó."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationReportNotUpdatedMessage = "The report " & fileReportName & " was not updated."
+    End If
+End Function
+
+Function FileGenerationMissingProcessDateColumnMessage(fileReportName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationMissingProcessDateColumnMessage = "No se encontró la columna PROCESS_DATE_FOR_RANGE en el reporte " & fileReportName & "."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationMissingProcessDateColumnMessage = "The column PROCESS_DATE_FOR_RANGE was not found in the report " & fileReportName & "."
+    End If
+End Function
+
+Function FileGenerationGenericErrorMessage(fileReportName As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationGenericErrorMessage = "Ha ocurrido un error al generar el reporte " & fileReportName & "."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationGenericErrorMessage = "An error occurred while generating the report " & fileReportName & "."
+    End If
+End Function
+
 
 ' MISCELLANIOUS MESSAGES
 Function GetLanguageChangePromptMessage() As String
@@ -556,5 +652,21 @@ Function GetLanguageChangePromptMessage() As String
         GetLanguageChangePromptMessage = "¿Seguro que desea cambiar el idioma de la aplicación?"
     ElseIf currentLanguage = "ENGLISH" Then 
         GetLanguageChangePromptMessage = "Are you sure you want to change the application language?"
+    End If
+End Function
+
+Function RefreshAllUpdatingReportsMessage() As String
+    If currentLanguage = "SPANISH" Then
+        RefreshAllUpdatingReportsMessage = "Actualizando reportes..."
+    ElseIf currentLanguage = "ENGLISH" Then
+        RefreshAllUpdatingReportsMessage = "Updating reports..."
+    End If
+End Function
+
+Function ExcelSheetsUpdatedMessage() As String
+    If currentLanguage = "SPANISH" Then
+        ExcelSheetsUpdatedMessage = "Hojas de Excel actualizadas."
+    ElseIf currentLanguage = "ENGLISH" Then
+        ExcelSheetsUpdatedMessage = "Excel sheets updated."
     End If
 End Function

@@ -30,14 +30,11 @@ Sub RefreshAll()
 		End With
 	Next report
 
-	Call AppendToLogsFile("Actualizando reportes...")
+	Call AppendToLogsFile(RefreshAllUpdatingReportsMessage())
 	ThisWorkbook.RefreshAll
 
 	If executionMode = "MANUAL" Then
-		MsgBox("Hojas de Excel actualizadas.")
-	ElseIf executionMode = "AUTOMATIC"Then
-		startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""START_PROCESS_DATE"", PARAMETERS[NOMBRE], PARAMETERS[VALOR])")))
-		endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""END_PROCESS_DATE"", PARAMETERS[NOMBRE], PARAMETERS[VALOR])")))
+		MsgBox ExcelSheetsUpdatedMessage()
 	End If
 
 	Exit Sub

@@ -13,7 +13,7 @@ Sub ScheduleAutomaticRun()
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
 	If executionMode = "MANUAL" Then	
-		mails = PARAMETERS.Evaluate("FILTER(MAILS[" & GetMailNameColumnName() & "], MAILS[" & GetMailGenerateMailColumnName() & "] = """ & Split(GetYesNoInCurrentLanguage(), ",")(0) & """)")
+		mails = PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then
@@ -32,8 +32,8 @@ Sub AutomaticRun()
 	Call AppendToLogsFile("Refrescando hoja de cálculo...")
 	PARAMETERS.Calculate
 
-	startProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetParameterStartProcessDateName() & """, PARAMETERS[" & GetParameterNameColumnName() & "], PARAMETERS[" & GetParameterValueColumnName() & "])")))
-	endProcessDate = CDate(CStr(PARAMETERS.Evaluate("XLOOKUP(""" & GetParameterEndProcessDateName() & """, PARAMETERS[" & GetParameterNameColumnName() & "], PARAMETERS[" & GetParameterValueColumnName() & "])")))
+	startProcessDate = CDate(tbl_PARAMETERS.ListRows(2).Range.Cells(2).Value)
+	endProcessDate = CDate(tbl_PARAMETERS.ListRows(3).Range.Cells(2).Value)
 
 	RefreshAll
 
