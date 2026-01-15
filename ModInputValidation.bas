@@ -11,7 +11,7 @@ End Function
 Function IsBasicTableStructureCorrent() As Boolean
 	Dim tableObject As ListObject
 	Dim columnObject As ListColumn
-	
+
 	Set basicTableStructure = GetBasicTableStructure()
 
 	For Each table in basicTableStructure("tables")
@@ -100,7 +100,7 @@ Function IsParameterValidationCorrect() As Boolean
 			Exit Function
 		End If
 
-		If parameterName = logsFileFolderParameterName And generateLogsParameterName = Split(GetYesNoInCurrentLanguage(), ",")(1) Then GoTo continueLoop
+		If parameterName = logsFileFolderParameterName And tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation.Formula1, ",")(1) Then GoTo continueLoop
 
 		If parameterValue = "" Then
 			MsgBox InputValidationParameterCannotBeEmptyMessage(parameterName)
@@ -200,7 +200,7 @@ Function ValidateBasicTableContent(table As ListObject)
 
 				Exit Function
 			End If
-			
+
 			If table.Name = "MAIL_FILES" And column.Name = tbl_FILE_REPORTS.ListColumns(1).Name Then
 				For Each mailFileName in tbl_FILE_REPORTS.ListColumns(2).DataBodyRange
 					If mailFileName.Value = cell.Value Then Goto continueLoop
@@ -213,7 +213,7 @@ Function ValidateBasicTableContent(table As ListObject)
 			continueLoop:
 		Next cell
 	Next column
-	
+
 	If table.Name = "MAILS" And Not atLeast1MailToGenerate Then
 		MsgBox InputValidationAtLeastOneEmailMessage()
 		Exit Function
@@ -225,11 +225,11 @@ End Function
 Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	Dim Worksheet As Worksheet
 	Dim table As ListObject
-	Dim columnExists As Boolean
+	Dim connection As WorkbookConnection
 	Dim nameColumn As String
 
-	For Each row In tbl_FILE_REPORTS.DataBodyRange.Rows
-		nameColumn = row.Cells(1, tbl_FILE_REPORTS.ListColumns(GetFileReportsNameColumnName()).Index).Value
+	For Each row In tbl_FILE_REPORTS.ListRows
+		nameColumn = row.Range.Cells(1).Value
 
 		On Error Resume Next
 		Set Worksheet = ThisWorkbook.Worksheets(nameColumn)
@@ -244,6 +244,15 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 		On Error GoTo 0
 		If Err.Number <> 0 Then
 			MsgBox InputValidationTableNotFoundOnSheetMessage(nameColumn)
+			Exit Function
+		End If
+
+		Set connection = Nothing
+		On Error Resume Next
+		Set connection = ThisWorkbook.Connections("Query - " & nameColumn)
+		On Error GoTo 0
+		If connection Is Nothing Then
+			MsgBox FileGenerationQueryNotFoundMessage(nameColumn)
 			Exit Function
 		End If
 	Next row

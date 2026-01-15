@@ -603,6 +603,14 @@ Function InputValidationTableNotFoundOnSheetMessage(tableName As String) As Stri
     End If
 End Function
 
+Function FileGenerationQueryNotFoundMessage(nameColumn As String) As String
+    If currentLanguage = "SPANISH" Then
+        FileGenerationQueryNotFoundMessage = "El query '" & nameColumn & "' no existe. Favor de crearlo."
+    ElseIf currentLanguage = "ENGLISH" Then
+        FileGenerationQueryNotFoundMessage = "The query '" & nameColumn & "' does not exist. Please create it."
+    End If
+End Function
+
 Function InputValidationConversationNotExistsMessage(conversationValue As String) As String
     If currentLanguage = "SPANISH" Then
         InputValidationConversationNotExistsMessage = "La conversación: '" & conversationValue & "' no existe."

@@ -117,7 +117,6 @@ Sub CreateDraft(mailName As String)
 			Else
 				conversation.Body = DraftCreationMessageBodyHeaderMessage()
 			End If
-			
 		Next fileEnding
 	Next folder
 
