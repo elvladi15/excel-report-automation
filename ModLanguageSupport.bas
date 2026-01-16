@@ -69,25 +69,9 @@ Sub UpdateApplicationLanguage()
 
     tbl_MAILS.ListColumns(1).Name = GetMailNameColumnName()
     tbl_MAILS.ListColumns(2).Name = GetMailConversationColumnName()
-    tbl_MAILS.ListColumns(3).Name = GetMailIsOneFilePerRangeColumnName()
-    tbl_MAILS.ListColumns(4).Name = GetMailGenerateMailColumnName()
+    tbl_MAILS.ListColumns(4).Name = GetMailIsOneFilePerRangeColumnName()
+    tbl_MAILS.ListColumns(3).Name = GetMailGenerateMailColumnName()
     tbl_MAILS.ListColumns(5).Name = GetMailSendWhenNoFilesColumnName()
-
-    With tbl_MAILS.ListColumns(3).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=currentYesNoInCurrentLanguage
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
-
-    For Each cell In tbl_MAILS.ListColumns(3).DataBodyRange.Cells
-        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
-        Else
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
-        End If 
-    Next cell
 
     With tbl_MAILS.ListColumns(4).DataBodyRange.Validation
         .Delete
@@ -98,6 +82,22 @@ Sub UpdateApplicationLanguage()
     End With
 
     For Each cell In tbl_MAILS.ListColumns(4).DataBodyRange.Cells
+        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+        Else
+            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        End If 
+    Next cell
+
+    With tbl_MAILS.ListColumns(3).DataBodyRange.Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=currentYesNoInCurrentLanguage
+        .IgnoreBlank = False
+        .InCellDropdown = True
+    End With
+
+    For Each cell In tbl_MAILS.ListColumns(3).DataBodyRange.Cells
         If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
             cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
         Else

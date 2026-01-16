@@ -15,11 +15,12 @@ Function IsBasicTableStructureCorrent() As Boolean
 	Set basicTableStructure = GetBasicTableStructure()
 
 	For Each table in basicTableStructure("tables")
+		Set tableObject = Nothing
 		On Error Resume Next
 		Set tableObject = PARAMETERS.ListObjects(table("name"))
 		On Error GoTo 0
 
-		If Err.Number <> 0 Then
+		If tableObject Is Nothing Then
 			MsgBox InputValidationTableNotExistsMessage(CStr(table("name")))
 			Exit Function
 		End If
@@ -170,12 +171,12 @@ Function ValidateBasicTableContent(table As ListObject)
 			End If
 
 			If table.Name = "MAILS" Then
-				If column.Name = tbl_MAILS.ListColumns(3).Name Then
+				If column.Name = tbl_MAILS.ListColumns(4).Name Or column.Name = tbl_MAILS.ListColumns(5).Name Then
 					GoTo continueLoop
 				End If
 
-				If column.Name = tbl_MAILS.ListColumns(4).Name Then
-					If cell.Value = Split(GetYesNoInCurrentLanguage(), ",")(0) Then
+				If column.Name = tbl_MAILS.ListColumns(3).Name Then
+					If cell.Value = Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) Then
 						atLeast1MailToGenerate = True
 					End If
 
@@ -231,18 +232,20 @@ Function IsPowerQueryWorksheetAndTableValidationCorrect() As Boolean
 	For Each row In tbl_FILE_REPORTS.ListRows
 		nameColumn = row.Range.Cells(1).Value
 
+		Set Worksheet = Nothing
 		On Error Resume Next
 		Set Worksheet = ThisWorkbook.Worksheets(nameColumn)
 		On Error GoTo 0
-		If Err.Number <> 0 Then
+		If Worksheet Is Nothing Then
 			MsgBox InputValidationWorksheetNotExistsMessage(nameColumn)
 			Exit Function
 		End If
 
+		Set table = Nothing
 		On Error Resume Next
 		Set table = Worksheet.ListObjects(nameColumn)
 		On Error GoTo 0
-		If Err.Number <> 0 Then
+		If table Is Nothing Then
 			MsgBox InputValidationTableNotFoundOnSheetMessage(nameColumn)
 			Exit Function
 		End If

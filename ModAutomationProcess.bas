@@ -13,7 +13,7 @@ Sub ScheduleAutomaticRun()
 	Call ScheduleProcedure("AutomaticRun", scheduleDateTime)
 
 	If executionMode = "MANUAL" Then
-		mails = PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
+		mails = PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		mailCount = UBound(mails) - LBound(mails) + 1
 
 		If sendMails Then

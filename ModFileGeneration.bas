@@ -4,7 +4,7 @@ Sub CreateMailFiles()
 	Dim generateReportColumn As String
 	Dim nameColumn As String
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		Call CreateMail(CStr(mailName))
 	Next mailName
 
@@ -47,7 +47,7 @@ Sub CreateMail(mailName As String)
 	Dim mailFileCount As Long
 	Dim isOneFilePerRange As Boolean
 
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0)
 
 	If Dir(baseReportFolder & "\" & mailName, vbDirectory) = "" Then MkDir baseReportFolder & "\" & mailName
 

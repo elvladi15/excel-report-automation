@@ -3,9 +3,11 @@ Sub CreateDrafts()
 	Dim generateReportColumn As String
 	Dim nameColumn As String
 
+	Application.Cursor = xlWait
+
 	If Not IsConversationColumnCorrect Then Exit Sub
 
-	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
+	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		Call CreateDraft(CStr(mailName))
 	Next mailName
 
@@ -26,6 +28,8 @@ Sub CreateDrafts()
 
 		MsgBox outputMesssage
 	End If
+
+	Application.Cursor = xlDefault
 End Sub
 
 Sub CreateDraft(mailName As String)
@@ -50,8 +54,8 @@ Sub CreateDraft(mailName As String)
 	fileFolder = baseReportFolder & "\" & mailName & "\"
 
 	conversationSubject = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ")")
-	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
-	sendWhenNoFiles = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(5).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0)
+	isOneFilePerRange = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0)
+	sendWhenNoFiles = PARAMETERS.Evaluate("XLOOKUP(""" & mailName & """, " & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(5).DataBodyRange.Address & ")") = Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0)
 	mailFiles = PARAMETERS.Evaluate("FILTER(" & tbl_MAIL_FILES.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Address & " = """ & mailName & """)")
 	mailFileCount = UBound(mailFiles) - LBound(mailFiles) + 1
 
@@ -173,7 +177,7 @@ Sub SendAllDraftsRecursive(attemptCount As Long)
 		Exit Sub
 	End If
 
-	For Each conversation In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(4).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(4).DataBodyRange.Validation.Formula1, ",")(0) & """)")
+	For Each conversation In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(2).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		On Error Goto mailItemNotFound
 		Set mailItem = outlookDraftsFolderRef.Items.Restrict("[Subject] = '" & CStr(conversation) & "'").item(1)
 
