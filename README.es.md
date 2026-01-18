@@ -1,4 +1,4 @@
-# Excel para envío de correos automáticos v1.0.0
+# Excel para envío de correos automáticos v1.1.0
 
 ![Alt text](./assets/languages/ES/main-image.png "Imagen principal")
 
