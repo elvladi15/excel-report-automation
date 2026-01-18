@@ -1,122 +1,139 @@
-# Excel para envío de correos automáticos v1.0.0
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.es.md)
 
-![Alt text](./assets/imagen-principal.png "Imagen principal")
+# Excel for Automatic Email Sending v1.1.0
 
-## Descripción
-Archivo de Excel que utiliza macros, Power Query y el lenguaje de programación Visual Basic para generar y enviar automáticamente reportes diarios tomando como origen de datos SQL Server. El repositorio de GitHub con el código se puede encontrar en haciendo clic en el siguiente enlace: [Repositorio de GitHub](https://github.com/elvladi15/excel-report-automation)
+![Main image](./assets/languages/EN/main-image.png)
 
-## Configuración inicial
+## Description
+Excel file that uses macros, Power Query, and the VBA language to automate report generation and email sending.
 
-Cuando se abre el archivo por primera vez, puede que Excel imprima ciertas alertas previniendo la ejecución de código externo (macros), conexiones a orígenes de datos externos, etc. Para asegurarse de que el archivo funcione correctamente, es necesario habilitar los macros en el Trust Center, así como hacer que el archivo confíe en las conexiones remotas. Esto último se puede lograr navegando hacia ***File > Options > Trust Center > Trust Center Settings > External Content >*** habilitar las opciones: ***Enable all Data Connections*** y ***Enable automatic data refresh***.
+This project was created to solve a recurring need to generate reports from SQL Server and send them automatically via email.
 
-Al conectarse por 1ra. vez a SQL Server, es posible que también salga alguna alerta para confirmar la conexión. La idea es que el archivo pueda consultar de la base de datos sin necesitad de que salgan los prompts de Excel. Los mensajes de confirmación al presionar los botones de la hoja de cálculo, como "Archivos generados exitosamente", son normales, pero los que te preguntan por confirmación de si confiar en un origen de datos, se debe de tratar de mitigar en las configuraciones de Excel.
+The source code is available on GitHub:  
+https://github.com/elvladi15/excel-report-automation
 
-## Documentación
+## Initial Setup
+When opening the file for the first time, Excel may display alerts warning about the execution of external code (macros), connections to external data sources, etc. To ensure the file works correctly, it is necessary to enable macros in the Trust Center and allow the file to trust remote data connections. This can be done by navigating to ***File > Options > Trust Center > Trust Center Settings > External Content >*** and enabling the options: ***Enable all Data Connections*** and ***Enable automatic data refresh***.
 
-La aplicación corre sobre una hoja de cálculo llamada PARAMETERS, donde se configuran los valores iniciales y se programan las acciones de generación y envío automático por medio de la aplicación de escritorio Outlook.
+When connecting to SQL Server for the first time, Excel may also display an alert asking to confirm the connection. The goal is for the file to be able to query the database without Excel prompts appearing. Confirmation messages shown when pressing worksheet buttons, such as "Files generated successfully", are normal; however, prompts asking whether to trust a data source should be mitigated through Excel configuration settings.
 
-1. Para agregar un nuevo reporte, hay que abrir la herramienta nativa de Excel llamada Power Query, presionando Alt + F12 en el teclado, y crear un nuevo query asociado al reporte a generar (se puede duplicar uno de los ya existentes para conveniencia).
+## Documentation
 
-De todas formas, aquí está la plantilla:
+The application runs on a worksheet called **PARAMETERS**, where the initial values are configured and the automatic report generation and email sending actions are scheduled through the Outlook desktop application.
+
+1. To add a new report, open Excel’s native tool called **Power Query** by pressing **Alt + F12** on the keyboard, and create a new query associated with the report to be generated (you may duplicate an existing one for convenience).
+
+In any case, here is the template:
 
 ```
 let
-    StartProcessDate = DateTime.ToText(Table.SelectRows(PARAMETERS, each [NOMBRE] = "START_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
-    EndProcessDate = DateTime.ToText(Table.SelectRows(PARAMETERS, each [NOMBRE] = "END_PROCESS_DATE"){0}[VALOR],[Format="yyyyMMdd"]),
-    MaxTimeoutInSeconds = Int64.From(Table.SelectRows(PARAMETERS, each [NOMBRE] = "Timeout máximo en segundos"){0}[VALOR]),
+    dateFormat = Record.Field(PARAMETERS{8}, Table.ColumnNames(PARAMETERS){1}),
+    StartProcessDate = DateTime.ToText(Record.Field(PARAMETERS{1}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+    EndProcessDate = DateTime.ToText(Record.Field(PARAMETERS{2}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+    MaxTimeoutInSeconds = Int64.From(Record.Field(PARAMETERS{3}, Table.ColumnNames(PARAMETERS){1})),
     SQL =
     "
-        {CÓDIGO SQL AQUÍ}
+        {SQL QUERY HERE}
     ",
     Attempt = try Sql.Database("SERDB08,3433", "CNT", [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
     Check = try Value.Type(Attempt[Value]),
-    Result = if Check[HasError] then "ERROR AL CONSULTAR DE LA BASE DE DATOS" else Attempt[Value]
+    Result = if Check[HasError] then "ERROR WHEN FETCHING FROM THE DATABASE" else Attempt[Value]
 in
     Result
 ```
 
-Hay que llenar la variable "SQL" con la consulta de SQL Server.
+You must populate the **SQL** variable with the SQL Server query.
 
-1. Sustituir los filtros de fecha por las variables StartProcessDate y EndProcessDate que vienen en el script para que a la hora de construir el script SQL, utilice las variables que vienen de la hoja de cálculo de la tabla PARAMETERS
+The dateFormat variable can be assigned an static value if needed, for example, for Oracle query compatibility with date columns.
 
-Ejemplo:
+1. Replace the date filters with the variables **StartProcessDate** and **EndProcessDate** included in the script, so that when the SQL script is built, it uses the values coming from the **PARAMETERS** worksheet table.
 
-![Alt text](./assets/example-1.jpeg "Ejemplo 1")
+Example:
 
-1. Agregar la columna PROCESS_DATE_FOR_RANGE devolviendo la misma fecha que se filtra. Esta columna no aparecerá en los reportes. Es necesaria para que Power Query pueda obtener y filtrar la data 1 sola vez por reporte, en caso de que se vayan a generar múltiples archivos en 1 corrida, y no conectarse múltiples veces a la base de datos.
+![Example 1](./assets/common/example-1.jpeg "Example 1")
 
-1. Hacer clic en Done y revisar si el Query retorna los datos. De ser así, colocarle un nombre reporte en snake_case, sustituyendo los espacios por guión de piso.
+1. Add the column **PROCESS_DATE_FOR_RANGE**, returning the same date that is being filtered. This column will not appear in the reports. It is required so that Power Query can retrieve and filter the data only once per report, in case multiple files are generated in a single run, avoiding multiple connections to the database.
 
-1. En la pestaña Home, ir a Close > Close & Load > Close & Load To... y se selecciona para cargar en una hoja de cálculo nueva.
+1. Click **Done** and verify that the query returns data. If so, assign a report name in **snake_case**, replacing spaces with underscores.
 
-1. A esta hoja de cálculo, colocarle el mismo nombre que tiene el Query.
+1. In the **Home** tab, go to **Close > Close & Load > Close & Load To...**, and select to load it into a new worksheet.
 
-### Hoja de cálculo "PARÁMETROS"
+1. Assign this worksheet the same name as the Query.
 
-Esta es la hoja de cálculo principal, en la cual se especifican los detalles de los correos y archivos a generar/enviar.
+### "PARAMETERS" Worksheet
 
-### Descripción de parámetros
+This is the main worksheet, where the details of the emails and files to be generated and/or sent are specified.
 
-1. ***START_PROCESS_DATE***:Fecha de proceso inicial. Por defecto, contiene una fórmula para referirse al día de ayer.
-1. ***END_PROCESS_DATE***: Fecha de proceso final. Por defecto, contiene una fórmula para referirse al día de ayer.
-1. ***Timeout máximo en segundos***: cantidad máxima de segundos que el query va a esperar una respuesta de la base de datos.
-1. ***Directorio base reportes***: Ruta en donde se guardarán los archivos.
-1. ***Generar logs?***: Si se desea que la aplicación genere logs.
-1. ***Directorio archivos de logs***: en caso de querer generar logs, especificar la ruta donde se guardarán los mismos.
-1. ***Carpeta de Outlook***: El folder en Outlook donde se buscarán las conversaciones/asuntos para responder la línea de correos automáticamente.
-1. ***Formato de fechas***: El formato de fechas que aparecerá al generar el archivo, logs y mensajes en la aplicación.
-1. ***Hora de ejecución***: Hora a la que se programará la generación y/o envío de correos.
+### Parameter Description
 
-### Tabla CORREOS
+1. ***Application language***: Language of the application, by default, English. Can also be changed to Spanish.
+1. ***Start process date***: Initial process date. By default, it contains a formula that refers to yesterday.
+1. ***End process date***: Final process date. By default, it contains a formula that refers to yesterday.
+1. ***Maximum timeout in seconds***: Maximum number of seconds the query will wait for a response from the database.
+1. ***Files base directory***: Path where the files will be saved.
+1. ***Generate logs?***: Whether the application should generate logs or not.
+1. ***Log files directory***: If logs are enabled, the path where they will be stored.
+1. ***Outlook folder***: The Outlook folder where conversations/subjects will be searched to automatically reply to email threads.
+1. ***Date format***: Date format used when generating files, logs, and application messages.
+1. ***Execution time***: Time at which report generation and/or email sending will be scheduled.
 
-Esta tabla contiene todas las instancias de correo que se enviarán, o correos a generar. Una fila corresponde a un correo que puede contener 1 o varios archivos.
+### MAILS Table
 
-Las columnas son las siguientes:
+This table contains all the email instances to be sent or generated. Each row corresponds to one email, which may contain one or multiple files.
 
-1. ***NOMBRE***: El nombre del correo. preferiblemente colocar en mayúscula, separado por guión de piso.
-1. ***CONVERSACION***: El nombre del asunto de la línea de correos en Outlook, en la carpeta del parámetro ***Carpeta de Outlook***
-1. ***UN ARCHIVO POR RANGO?***: En caso de ser SI, siempre se generará 1 archivo en el rango de fechas establecido. Ejemplo: si el rango de fecha es: 2025-12-01 a 2025-12-31, se generará 1 archivo en ese rango de fechas. En caso de que sea NO, se generarán 31 archivos, cada uno de 1 fecha del rango.
-1. ***GENERAR CORREO?***: Variable que activa/desactiva la generación/envío de correos. Si el valor es NO, este correo no se tomará en cuenta en la programación.
+The columns are:
 
-### Tabla ARCHIVOS
+1. ***NAME***: Email name. Preferably uppercase and separated by underscores.
+1. ***CONVERSATION***: Subject name of the email thread in Outlook, located in the folder specified by ***Carpeta de Outlook***.
+1. ***GENERATE MAIL?***: Flag that enables/disables email generation/sending. If the value is NO, this email will not be included in the scheduling.
+1. ***ONE FILE PER RANGE?***: If YES, one file will always be generated for the specified date range. Example: if the date range is 2025-12-01 to 2025-12-31, one file will be generated for that range. If NO, 31 files will be generated, one per date in the range.
+1. ***SEND WHEN NO FILES?***: If YES and the mail doesn't have files to be attached, the mail will still be sent saying that there was no data to generate the reports.
 
-Contiene los archivos que se generarán por correo, así como el nombre del mismo.
+### MAIL_FILES Table
 
-Las columnas son las siguientes:
+Contains the files that will be generated per email, along with their names.
 
-1. ***NOMBRE***: El nombre base del archivo. Al final del nombre del archivo se le agregará la fecha, o rango de fechas, al que corresponde.
-1. ***CORREO***: El nombre del correo al que pertenece el archivo.
+The columns are:
 
-### Tabla REPORTES
+1. ***NAME***: Base file name. The date or date range corresponding to the file will be appended to the end of the name.
+1. ***MAIL***: Name of the email to which the file belongs.
 
-Contiene los reportes que se generarán los archivos. Cada reporte representa una hoja de cálculo en el archivo final, así como una hoja de cálculo en el mismo Excel, obtenida desde Power Query.
+### FILE_REPORTS Table
 
-1. ***NOMBRE***: El nombre del reporte. Debe existir una hoja de cálculo con el mismo nombre, que haga referencia a una consulta de Power Query.
-1. ***ARCHIVO***: El nombre del archivo al que pertenece el reporte.
+Contains the reports used to generate the files. Each report represents a worksheet in the final file, as well as a worksheet in the same Excel file obtained from Power Query.
 
-### Botones
+1. ***NAME***: Report name. A worksheet with the same name must exist and reference a Power Query query.
+1. ***MAIL_FILE***: Name of the file to which the report belongs.
 
-La aplicación contiene 6 botones que permiten no sólo programar las ejecuciones automáticas, sino también poder ejecutar manualmente cada paso del flujo de ejecución.
+### Buttons
 
-### Flujo de ejecución completo
+The application contains 6 buttons that allow not only scheduling automatic executions, but also manually executing each step of the process flow.
 
-1. ***Refrescar hojas de cálculo***: Primero se actualizan los reportes con el rango de fecha y configuraciones actuales.
-1. ***Generación de reportes***: Una vez los reportes actualizados, se procede a generar todos los archivos ya actualizados.
-1. ***Creación de borradores para envío de correos***: Se crearán los borradores con los archivos ya generados en la ruta ***Directorio base reportes***
-1. ***Envío de correos***: Una vez los borradores estén creados, se procederá a enviarlos.
+### Complete Execution Flow
 
-Cada paso en el flujo tiene su propio botón.
+1. ***REFRESH WORKSHEETS***: Reports are first updated using the current date range and configuration.
+1. ***CREATE MAIL FILES***: Once reports are updated, all corresponding files are generated.
+1. ***CREATE MAIL DRAFTS***: Drafts are created with the generated files located in ***Directorio base reportes***.
+1. ***SEND ALL DRAFTS***: Once drafts are created, they are sent.
 
-Los botones ***PROGRAMAR GENERACIÓN AUTOMÁTICA*** y ***PROGRAMAR ENVÍO AUTOMÁTICO*** configuran la ejecución automática de generación de archivos, y generación + envío, respectivamente. ***PROGRAMAR ENVÍO AUTOMÁTICO*** programa el flujo completo, mientras que ***PROGRAMAR GENERACIÓN AUTOMÁTICA*** sólo programa sólo los 2 primeros pasos del flujo.
+Each of the 4 steps in the flow has its own button.
 
-## Documentación Técnica
+The buttons ***SCHEDULE FILE GENERATION*** and ***SCHEDULE MAIL SENDING*** configure the automatic execution of file generation, and generation + sending, respectively. ***SCHEDULE MILE SENDING*** schedules the full flow, while ***SCHEDULE FILE GENERATION*** schedules only the first 2 steps of the flow.
 
-El IDE utilizado fue Visual Studio Code, haciendo uso de la interfaz de línea de comandos (CLI) xlwings, el cual es un programa que extrae los archivos .bas del Excel, pudiendo editar en cualquier IDE de conveniencia y facilidad de documentación y control de versiones. Aquí está el release de GitHub utilizado [release de GitHub utilizado](https://github.com/xlwings/xlwings/releases/tag/0.33.18).
+## Technical Documentation
 
-La primera línea de cada módulo en los archivos .bas es utilizado por xlwings para referenciar los módulos correspondientes en el Excel.
+The IDE used was **Visual Studio Code**, using the Excel integration provided by the **xlwings** extension.  
+The specific version used can be found here:  
+https://github.com/xlwings/xlwings/releases/tag/0.33.18
 
-El punto de partida del código es el archivo [ModMain.bas](./ModMain.bas), el cual es llamado por todos los botones de la hoja de cálculo. Dependiendo del botón, se decide a cuál método delegarse la ejecución.
+The first line of each module in the `.bas` files is used by xlwings to reference the corresponding modules within Excel.
 
-Para la corrida automática, el punto de partida siempre es el método AutomaticRun, ubicado en el archivo [ModAutomationProcess.bas](./ModAutomationProcess.bas).
+The entry point of the code is the file `ModMain.bas`.  
+From there, execution is delegated to different procedures depending on the button pressed.
 
-El pdf de la documentación fue creado con la extensión de Visual Studio Code llamada [Markdonw PDF](https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf) hecha por yzane.
+For automated execution, the entry point is always the `StartAutomationProcess` method located in the file `ModAutomationProcess.bas`.
+
+The PDF documentation was created using the Visual Studio Code extension  
+**Markdown PDF** by yzane:  
+https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf
