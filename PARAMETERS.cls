@@ -9,6 +9,13 @@ Sub Worksheet_Change(ByVal Target As Range)
 End Sub
 
 Sub Worksheet_SelectionChange(ByVal Target As Range)
+    Set languageStructure = GetLanguageStructure()
+
+    Set tbl_PARAMETERS = PARAMETERS.ListObjects("PARAMETERS")
+    Set tbl_MAILS = PARAMETERS.ListObjects("MAILS")
+    Set tbl_MAIL_FILES = PARAMETERS.ListObjects("MAIL_FILES")
+    Set tbl_FILE_REPORTS = PARAMETERS.ListObjects("FILE_REPORTS")
+
     If Not Intersect(Target, tbl_PARAMETERS.ListRows(1).Range.Cells(2)) Is Nothing Then
         currentLanguageName = tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value
         currentLanguage = GetLanguageByLanguageName(tbl_PARAMETERS.ListRows(1).Range.Cells(2).Value)

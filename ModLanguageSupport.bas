@@ -2,6 +2,7 @@ Attribute VB_Name = "ModLanguageSupport"
 Sub UpdateApplicationLanguage()
     Dim previousYesNoInCurrentLanguage As String
     Dim currentYesNoInCurrentLanguage As String
+    Dim targetRange As Range
 
     previousYesNoInCurrentLanguage = GetYesNoInCurrentLanguage()
 
@@ -50,19 +51,20 @@ Sub UpdateApplicationLanguage()
     tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value = GetParameterDateFormatName()
     tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value = GetParameterScheduleTimeName()
 
-    With tbl_PARAMETERS.ListRows(6).Range.Cells(1).Validation
+    With tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation
         .Delete
         .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
         xlBetween, Formula1:=currentYesNoInCurrentLanguage
-        .IgnoreBlank = False
+        .IgnoreBlank = True
         .InCellDropdown = True
     End With
-
-    If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value Then
-        tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
-    Else
-        tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
-    End If  
+    If tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value <> "" Then
+        If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value Then
+            tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+        Else
+            tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+        End If
+    End If
 
     'MAILS TABLE
     tbl_MAILS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailsTableName()
@@ -73,53 +75,29 @@ Sub UpdateApplicationLanguage()
     tbl_MAILS.ListColumns(3).Name = GetMailGenerateMailColumnName()
     tbl_MAILS.ListColumns(5).Name = GetMailSendWhenNoFilesColumnName()
 
-    With tbl_MAILS.ListColumns(4).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=currentYesNoInCurrentLanguage
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
-
-    For Each cell In tbl_MAILS.ListColumns(4).DataBodyRange.Cells
-        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+    For i = 3 to 5
+        If tbl_MAILS.ListRows.Count = 0 Then
+            Set targetRange = tbl_MAILS.HeaderRowRange.Cells(1, i).Offset(1)
         Else
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
-        End If 
-    Next cell
+            Set targetRange = tbl_MAILS.ListColumns(i).DataBodyRange
 
-    With tbl_MAILS.ListColumns(3).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=currentYesNoInCurrentLanguage
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
+            For Each cell In targetRange.Cells
+                If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
+                    cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+                Else
+                    cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+                End If 
+            Next cell
+        End If
 
-    For Each cell In tbl_MAILS.ListColumns(3).DataBodyRange.Cells
-        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
-        Else
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
-        End If 
-    Next cell
-
-    With tbl_MAILS.ListColumns(5).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=currentYesNoInCurrentLanguage
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
-
-    For Each cell In tbl_MAILS.ListColumns(5).DataBodyRange.Cells
-        If Split(previousYesNoInCurrentLanguage, ",")(0) = cell.Value Then
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(0)
-        Else
-            cell.Value = Split(currentYesNoInCurrentLanguage, ",")(1)
-        End If 
-    Next cell
+        With targetRange.Validation
+            .Delete
+            .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+            xlBetween, Formula1:=currentYesNoInCurrentLanguage
+            .IgnoreBlank = False
+            .InCellDropdown = True
+        End With
+    Next i
 
     'MAIL FILES TABLE
     tbl_MAIL_FILES.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetMailFilesTableName()
@@ -127,27 +105,11 @@ Sub UpdateApplicationLanguage()
     tbl_MAIL_FILES.ListColumns(1).Name = GetMailFilesNameColumnName()
     tbl_MAIL_FILES.ListColumns(2).Name = GetMailFilesMailColumnName()
 
-    With tbl_MAIL_FILES.ListColumns(2).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:="=INDIRECT(""MAILS[" & GetMailNameColumnName() & "]"")"
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
-
     'FILE REPORTS TABLE
     tbl_FILE_REPORTS.HeaderRowRange.Columns(1).Offset(-1, 0).Value = GetFileReportsTableName()
 
     tbl_FILE_REPORTS.ListColumns(1).Name = GetFileReportsNameColumnName()
     tbl_FILE_REPORTS.ListColumns(2).Name = GetFileReportsFileColumnName()
-
-    With tbl_FILE_REPORTS.ListColumns(2).DataBodyRange.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:="=INDIRECT(""MAIL_FILES[" & GetMailFilesNameColumnName() & "]"")"
-        .IgnoreBlank = False
-        .InCellDropdown = True
-    End With
 End Sub
 
 Function GetLanguageByLanguageName(languageName As String) As String
