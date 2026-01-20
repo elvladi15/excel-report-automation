@@ -8,7 +8,7 @@
 ![Alt text](./assets/languages/ES/main-image.png "Imagen principal")
 
 ## Descripción
-Archivo de Excel que utiliza macros, Power Query y el lenguaje de programación Visual Basic para generar y enviar automáticamente reportes diarios tomando como origen de datos SQL Server. El repositorio de GitHub con el código se puede encontrar en haciendo clic en el siguiente enlace: [Repositorio de GitHub](https://github.com/elvladi15/excel-report-automation)
+Archivo de Excel que utiliza macros, Power Query y el lenguaje de programación Visual Basic para generar y enviar automáticamente reportes diarios tomando como origen de datos SQL Server.
 
 ## Configuración inicial
 
@@ -34,9 +34,9 @@ let
     "
         {CONSULTA SQL AQUÍ}
     ",
-    Attempt = try Sql.Database("SERDB08,3433", "CNT", [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
+    Attempt = try Sql.Database({servidor}, {base de datos}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
     Check = try Value.Type(Attempt[Value]),
-    Result = if Check[HasError] then "ERROR WHEN FETCHING FROM THE DATABASE" else Attempt[Value]
+    Result = if Check[HasError] then "ERROR AL CONSULTAR DE LA BASE DE DATOS" else Attempt[Value]
 in
     Result
 ```
