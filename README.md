@@ -12,9 +12,6 @@ Excel file that uses macros, Power Query, and the VBA language to automate repor
 
 This project was created to solve a recurring need to generate reports from SQL Server and send them automatically via email.
 
-The source code is available on GitHub:  
-https://github.com/elvladi15/excel-report-automation
-
 ## Initial Setup
 When opening the file for the first time, Excel may display alerts warning about the execution of external code (macros), connections to external data sources, etc. To ensure the file works correctly, it is necessary to enable macros in the Trust Center and allow the file to trust remote data connections. This can be done by navigating to ***File > Options > Trust Center > Trust Center Settings > External Content >*** and enabling the options: ***Enable all Data Connections*** and ***Enable automatic data refresh***.
 
@@ -38,7 +35,7 @@ let
     "
         {SQL QUERY HERE}
     ",
-    Attempt = try Sql.Database("SERDB08,3433", "CNT", [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
+    Attempt = try Sql.Database({server}, {database}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
     Check = try Value.Type(Attempt[Value]),
     Result = if Check[HasError] then "ERROR WHEN FETCHING FROM THE DATABASE" else Attempt[Value]
 in
