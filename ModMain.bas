@@ -1,6 +1,6 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.1.0"
+Public Const version As String = "1.1.1"
 
 Public currentLanguageName As String
 Public currentLanguage As String
@@ -70,5 +70,6 @@ Sub Main()
 		ScheduleAutomaticRun
 	End If
 	Application.DisplayAlerts = True
-	Exit Sub
+
+	executionMode = "AUTOMATIC"
 End Sub

@@ -5,7 +5,7 @@ Sub CreateDrafts()
 
 	Application.Cursor = xlWait
 
-	If Not IsConversationColumnCorrect Then Exit Sub
+	If Not IsConversationColumnCorrect Then GoTo removeCursorWait
 
 	For Each mailName In PARAMETERS.Evaluate("FILTER(" & tbl_MAILS.ListColumns(1).DataBodyRange.Address & ", " & tbl_MAILS.ListColumns(3).DataBodyRange.Address & " = """ & Split(tbl_MAILS.ListColumns(3).DataBodyRange.Validation.Formula1, ",")(0) & """)")
 		Call CreateDraft(CStr(mailName))
@@ -29,6 +29,7 @@ Sub CreateDrafts()
 		MsgBox outputMesssage
 	End If
 
+	removeCursorWait:
 	Application.Cursor = xlDefault
 End Sub
 
