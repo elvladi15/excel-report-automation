@@ -71,6 +71,7 @@ Function IsParameterValidationCorrect() As Boolean
 	Dim logsFileFolderParameterName As String
 	Dim outlookFolderParameterName As String
 	Dim dateFormatParameterName As String
+	Dim scheduleDateParameterName As String
 	Dim scheduleTimeParameterName As String
 
 
@@ -85,50 +86,48 @@ Function IsParameterValidationCorrect() As Boolean
 	logsFileFolderParameterName = tbl_PARAMETERS.ListRows(7).Range.Cells(1).Value
 	outlookFolderParameterName = tbl_PARAMETERS.ListRows(8).Range.Cells(1).Value
 	dateFormatParameterName = tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value
-	scheduleTimeParameterName = tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value
+	scheduleDateParameterName = tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value
+	scheduleTimeParameterName = tbl_PARAMETERS.ListRows(11).Range.Cells(1).Value
 
 	For Each row In tbl_PARAMETERS.ListRows
 		parameterName = row.Range.Cells(1).Value
 		parameterValue = row.Range.Cells(2).Value
 
-		If (parameterName = startProcessDateParameterName Or parameterName = endProcessDateParameterName) And Not IsDate(parameterValue) Then
-			MsgBox InputValidationParameterMustBeValidDateMessage(parameterName)
-			Exit Function
-		End If
-
-		If parameterName = maxTimeoutInSecondsParameterName And Not IsNumeric(parameterValue) Then
-			MsgBox InputValidationParameterMustBeNumberMessage(parameterName)
-			Exit Function
-		End If
-
-		If parameterName = logsFileFolderParameterName And tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation.Formula1, ",")(1) Then GoTo continueLoop
-
-		If parameterValue = "" Then
-			MsgBox InputValidationParameterCannotBeEmptyMessage(parameterName)
-			Exit Function
-		End If
-
-		If parameterName = logsFileFolderParameterName Or parameterName = filesBaseFolderParameterName Then
-			If Dir(parameterValue, vbDirectory) = "" Then
-				MsgBox InputValidationParameterDirectoryNotExistsMessage(parameterName)
+		Select Case parameterName
+			Case startProcessDateParameterName, endProcessDateParameterName, scheduleDateParameterName
+				If Not IsDate(parameterValue) Then
+					MsgBox InputValidationParameterMustBeValidDateMessage(parameterName)
+					Exit Function
+				End If
+			Case maxTimeoutInSecondsParameterName
+				If Not IsNumeric(parameterValue) Then
+					MsgBox InputValidationParameterMustBeNumberMessage(parameterName)
+					Exit Function
+				End If
+			Case logsFileFolderParameterName
+				If tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation.Formula1, ",")(1) Then GoTo continueLoop
+			Case ""
+				MsgBox InputValidationParameterCannotBeEmptyMessage(parameterName)
 				Exit Function
-			End If
+			Case logsFileFolderParameterName, filesBaseFolderParameterName
+				If Dir(parameterValue, vbDirectory) = "" Then
+					MsgBox InputValidationParameterDirectoryNotExistsMessage(parameterName)
+					Exit Function
+				End If
 
-			If Right(parameterValue, 1) = "\" Then
-				MsgBox InputValidationParameterDirectoryEndsWithSlashMessage(parameterValue)
+				If Right(parameterValue, 1) = "\" Then
+					MsgBox InputValidationParameterDirectoryEndsWithSlashMessage(parameterValue)
+					Exit Function
+				End If
+			Case scheduleTimeParameterName
+				On Error Goto NotValidTime
+				scheduleTime = TimeValue(parameterValue)
+				GoTo continueLoop
+
+				NotValidTime:
+				MsgBox InputValidationExecutionTimeNotValidMessage(parameterValue)
 				Exit Function
-			End If
-		End If
-
-		If parameterName = scheduleTimeParameterName Then
-			On Error Goto NotValidTime
-			scheduleTime = TimeValue(parameterValue)
-			GoTo continueLoop
-
-			NotValidTime:
-			MsgBox InputValidationExecutionTimeNotValidMessage(parameterValue)
-			Exit Function
-		End If
+		End Select
 
 		continueLoop:
 	Next row
@@ -140,7 +139,8 @@ Function IsParameterValidationCorrect() As Boolean
 	logsFileFolder = tbl_PARAMETERS.ListRows(7).Range.Cells(2).Value
 	outlookFolderName = tbl_PARAMETERS.ListRows(8).Range.Cells(2).Value
 	dateFormat = tbl_PARAMETERS.ListRows(9).Range.Cells(2).Value
-	scheduleTime = TimeValue(tbl_PARAMETERS.ListRows(10).Range.Cells(2).Value)
+	scheduleDate = CDate(tbl_PARAMETERS.ListRows(10).Range.Cells(2).Value)
+	scheduleTime = TimeValue(tbl_PARAMETERS.ListRows(11).Range.Cells(2).Value)
 
 	IsParameterValidationCorrect = True
 End Function

@@ -1,6 +1,6 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.1.1"
+Public Const version As String = "1.2.0"
 
 Public currentLanguageName As String
 Public currentLanguage As String
@@ -26,6 +26,7 @@ Public outlookFolderName As String
 Public canGenerateLogs As Boolean
 Public logsFileFolder As String
 Public dateFormat As String
+Public scheduleDate As Date
 Public scheduleTime As Date
 
 Public isFirstWorksheet As Boolean

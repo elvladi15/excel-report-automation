@@ -3,7 +3,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.es.md)
 
-# Excel for Automatic Email Sending v1.1.1
+# Excel for Automatic Email Sending v1.2.0
 
 ![Main image](./assets/languages/EN/main-image.png)
 
@@ -27,19 +27,19 @@ In any case, here is the template:
 
 ```
 let
-    dateFormat = Record.Field(PARAMETERS{8}, Table.ColumnNames(PARAMETERS){1}),
-    StartProcessDate = DateTime.ToText(Record.Field(PARAMETERS{1}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
-    EndProcessDate = DateTime.ToText(Record.Field(PARAMETERS{2}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
-    MaxTimeoutInSeconds = Int64.From(Record.Field(PARAMETERS{3}, Table.ColumnNames(PARAMETERS){1})),
-    SQL =
-    "
-        {SQL QUERY HERE}
-    ",
-    Attempt = try Sql.Database({server}, {database}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
-    Check = try Value.Type(Attempt[Value]),
-    Result = if Check[HasError] then "ERROR WHEN FETCHING FROM THE DATABASE" else Attempt[Value]
+	dateFormat = Record.Field(PARAMETERS{8}, Table.ColumnNames(PARAMETERS){1}),
+	StartProcessDate = DateTime.ToText(Record.Field(PARAMETERS{1}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+	EndProcessDate = DateTime.ToText(Record.Field(PARAMETERS{2}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+	MaxTimeoutInSeconds = Int64.From(Record.Field(PARAMETERS{3}, Table.ColumnNames(PARAMETERS){1})),
+	SQL =
+	"
+		{SQL QUERY HERE}
+	",
+	Attempt = try Sql.Database({server}, {database}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
+	Check = try Value.Type(Attempt[Value]),
+	Result = if Check[HasError] then "ERROR WHEN FETCHING FROM THE DATABASE" else Attempt[Value]
 in
-    Result
+	Result
 ```
 
 You must populate the **SQL** variable with the SQL Server query.
@@ -75,6 +75,7 @@ This is the main worksheet, where the details of the emails and files to be gene
 1. ***Log files directory***: If logs are enabled, the path where they will be stored.
 1. ***Outlook folder***: The Outlook folder where conversations/subjects will be searched to automatically reply to email threads.
 1. ***Date format***: Date format used when generating files, logs, and application messages.
+1. ***Execution date***: Date at which report generation and/or email sending will be scheduled.
 1. ***Execution time***: Time at which report generation and/or email sending will be scheduled.
 
 ### MAILS Table
@@ -122,17 +123,17 @@ The buttons ***SCHEDULE FILE GENERATION*** and ***SCHEDULE MAIL SENDING*** confi
 
 ## Technical Documentation
 
-The IDE used was **Visual Studio Code**, using the Excel integration provided by the **xlwings** extension.  
-The specific version used can be found here:  
+The IDE used was **Visual Studio Code**, using the Excel integration provided by the **xlwings** extension.
+The specific version used can be found here:
 https://github.com/xlwings/xlwings/releases/tag/0.33.18
 
 The first line of each module in the `.bas` files is used by xlwings to reference the corresponding modules within Excel.
 
-The entry point of the code is the file `ModMain.bas`.  
+The entry point of the code is the file `ModMain.bas`.
 From there, execution is delegated to different procedures depending on the button pressed.
 
 For automated execution, the entry point is always the `StartAutomationProcess` method located in the file `ModAutomationProcess.bas`.
 
-The PDF documentation was created using the Visual Studio Code extension  
-**Markdown PDF** by yzane:  
+The PDF documentation was created using the Visual Studio Code extension
+**Markdown PDF** by yzane:
 https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf
