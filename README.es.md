@@ -3,7 +3,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.es.md)
 
-# Excel para envío de correos automáticos v1.2.1
+# Excel para envío de correos automáticos v1.2.0
 
 ![Alt text](./assets/languages/ES/main-image.png "Imagen principal")
 
@@ -26,19 +26,19 @@ De todas formas, aquí está la plantilla:
 
 ```
 let
-    dateFormat = Record.Field(PARAMETERS{8}, Table.ColumnNames(PARAMETERS){1}),
-    StartProcessDate = DateTime.ToText(Record.Field(PARAMETERS{1}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
-    EndProcessDate = DateTime.ToText(Record.Field(PARAMETERS{2}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
-    MaxTimeoutInSeconds = Int64.From(Record.Field(PARAMETERS{3}, Table.ColumnNames(PARAMETERS){1})),
-    SQL =
-    "
-        {CONSULTA SQL AQUÍ}
-    ",
-    Attempt = try Sql.Database({servidor}, {base de datos}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
-    Check = try Value.Type(Attempt[Value]),
-    Result = if Check[HasError] then "ERROR AL CONSULTAR DE LA BASE DE DATOS" else Attempt[Value]
+	dateFormat = Record.Field(PARAMETERS{8}, Table.ColumnNames(PARAMETERS){1}),
+	StartProcessDate = DateTime.ToText(Record.Field(PARAMETERS{1}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+	EndProcessDate = DateTime.ToText(Record.Field(PARAMETERS{2}, Table.ColumnNames(PARAMETERS){1}),[Format=dateFormat]),
+	MaxTimeoutInSeconds = Int64.From(Record.Field(PARAMETERS{3}, Table.ColumnNames(PARAMETERS){1})),
+	SQL =
+	"
+		{CONSULTA SQL AQUÍ}
+	",
+	Attempt = try Sql.Database({servidor}, {base de datos}, [Query=SQL, CommandTimeout = #duration(0, 0, 0, MaxTimeoutInSeconds)]),
+	Check = try Value.Type(Attempt[Value]),
+	Result = if Check[HasError] then "ERROR AL CONSULTAR DE LA BASE DE DATOS" else Attempt[Value]
 in
-    Result
+	Result
 ```
 
 Hay que llenar la variable "SQL" con la consulta de SQL Server.

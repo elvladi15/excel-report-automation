@@ -1,6 +1,6 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.2.1"
+Public Const version As String = "1.2.0"
 
 Public currentLanguageName As String
 Public currentLanguage As String
