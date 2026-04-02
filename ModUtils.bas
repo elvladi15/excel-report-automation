@@ -90,6 +90,7 @@ Function GetBasicTableStructure() As Object
 					.Item("rows").Add GetParameterLogFilesFolderName()
 					.Item("rows").Add GetParameterOutlookFolderName()
 					.Item("rows").Add GetParameterDateFormatName()
+					.Item("rows").Add GetParameterScheduleDateName()
 					.Item("rows").Add GetParameterScheduleTimeName()
 			End With
 

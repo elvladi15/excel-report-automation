@@ -4,7 +4,7 @@ Sub ScheduleAutomaticRun()
 	Dim mails As Variant
 	Dim mailCount As Long
 
-	scheduleDateTime = Date + 1 + ScheduleTime
+	scheduleDateTime = ScheduleDate + ScheduleTime
 
 	If sendMails Then
 		If Not IsConversationColumnCorrect Then Exit Sub

@@ -3,7 +3,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.es.md)
 
-# Excel para envío de correos automáticos v1.1.1
+# Excel para envío de correos automáticos v1.2.1
 
 ![Alt text](./assets/languages/ES/main-image.png "Imagen principal")
 
@@ -72,6 +72,7 @@ Esta es la hoja de cálculo principal, en la cual se especifican los detalles de
 1. ***Directorio archivos de logs***: en caso de querer generar logs, especificar la ruta donde se guardarán los mismos.
 1. ***Carpeta de Outlook***: El folder en Outlook donde se buscarán las conversaciones/asuntos para responder la línea de correos automáticamente.
 1. ***Formato de fechas***: El formato de fechas que aparecerá al generar el archivo, logs y mensajes en la aplicación.
+1. ***Fecha de ejecución***: Fecha a la que se programará la generación y/o envío de correos.
 1. ***Hora de ejecución***: Hora a la que se programará la generación y/o envío de correos.
 
 ### Tabla CORREOS

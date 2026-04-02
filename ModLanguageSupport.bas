@@ -49,7 +49,8 @@ Sub UpdateApplicationLanguage()
     tbl_PARAMETERS.ListRows(7).Range.Cells(1).Value = GetParameterLogFilesFolderName()
     tbl_PARAMETERS.ListRows(8).Range.Cells(1).Value = GetParameterOutlookFolderName()
     tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value = GetParameterDateFormatName()
-    tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value = GetParameterScheduleTimeName()
+    tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value = GetParameterScheduleDateName()
+    tbl_PARAMETERS.ListRows(11).Range.Cells(1).Value = GetParameterScheduleTimeName()
 
     With tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation
         .Delete
@@ -320,6 +321,14 @@ Function GetParameterDateFormatName() As String
     End If
 End Function
 
+Function GetParameterScheduleDateName() As String
+    If currentLanguage = "SPANISH" Then
+        GetParameterScheduleDateName = "Fecha de ejecución"
+    ElseIf currentLanguage = "ENGLISH" Then 
+        GetParameterScheduleDateName = "Execution date"
+    End If
+End Function
+
 Function GetParameterScheduleTimeName() As String
     If currentLanguage = "SPANISH" Then
         GetParameterScheduleTimeName = "Hora de ejecución"
@@ -328,7 +337,7 @@ Function GetParameterScheduleTimeName() As String
     End If
 End Function
 
-' MAILS TABLE
+'MAILS TABLE
 Function GetMailsTableName() As String
     If currentLanguage = "SPANISH" Then
         GetMailsTableName = "CORREOS"
