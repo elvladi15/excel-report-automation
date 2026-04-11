@@ -1,21 +1,4 @@
 Attribute VB_Name = "ModUtils"
-Sub CloseAllOtherWorkbooks()
-	Dim wb As Workbook, keep As Workbook
-	Set keep = ThisWorkbook
-
-	Application.DisplayAlerts = False
-	On Error GoTo CleanUp
-
-	For Each wb In Application.Workbooks
-		If Not wb Is keep Then
-			wb.Close SaveChanges:=False
-		End If
-	Next wb
-
-	CleanUp:
-	Application.DisplayAlerts = True
-End Sub
-
 Sub RefreshAll()
 	Dim cn As WorkbookConnection
 

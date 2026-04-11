@@ -144,7 +144,7 @@ Function GetAllLanguageNamesString() As String
 
 	For Each language in languageStructure("languages")
 		If language("name") <> currentLanguage Then Goto continueLoop
-		
+
 		languageNames = languageNames & language("languageName") & ","
 
 		For Each languageName in language("languageNames")

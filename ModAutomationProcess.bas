@@ -27,7 +27,6 @@ End Sub
 
 Sub AutomaticRun()
 	Call AppendToLogsFile(AutomationProcessClosingOtherWorkbooksMessage())
-	CloseAllOtherWorkbooks
 
 	Call AppendToLogsFile(AutomationProcessRefreshingWorksheetMessage() & "...")
 	PARAMETERS.Calculate

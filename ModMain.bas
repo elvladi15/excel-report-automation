@@ -1,6 +1,6 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.2.0"
+Public Const version As String = "1.2.1"
 
 Public currentLanguageName As String
 Public currentLanguage As String
@@ -45,8 +45,6 @@ Public sendMails As Boolean
 
 Sub Main()
 	If Not IsInputValidationCorrect Then Exit Sub
-
-	CloseAllOtherWorkbooks
 
 	executionMode = "MANUAL"
 	attemptMaxCount = 3
