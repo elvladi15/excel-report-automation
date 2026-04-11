@@ -26,8 +26,6 @@ Sub ScheduleAutomaticRun()
 End Sub
 
 Sub AutomaticRun()
-	Call AppendToLogsFile(AutomationProcessClosingOtherWorkbooksMessage())
-
 	Call AppendToLogsFile(AutomationProcessRefreshingWorksheetMessage() & "...")
 	PARAMETERS.Calculate
 

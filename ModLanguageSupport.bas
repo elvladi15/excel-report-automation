@@ -746,9 +746,9 @@ End Function
 
 Function DraftCreationNoFilesForDateRangeBodyMessage() As String
 	If currentLanguage = "SPANISH" Then
-		DraftCreationNoFilesForDateRangeBodyMessage = "NO HAY ARCHIVOS PARA ADJUNTAR EN ESTE RANGO DE FECHAS."
+		DraftCreationNoFilesForDateRangeBodyMessage = "NO SE GENERARON ARCHIVOS PARA LA FECHA: " & Format(startProcessDate, dateFormat) & "."
 	ElseIf currentLanguage = "ENGLISH" Then
-		DraftCreationNoFilesForDateRangeBodyMessage = "THERE ARE NO FILES TO ATTACH FOR THIS DATE RANGE."
+		DraftCreationNoFilesForDateRangeBodyMessage = "FILES WERE NOT GENERATED FOR THE DATE: " & Format(startProcessDate, dateFormat) & "."
 	End If
 End Function
 
@@ -883,14 +883,6 @@ Function AutomationProcessReportScheduleSuccessMessage(mailCount As String, next
 		AutomationProcessReportScheduleSuccessMessage = "Programación de genereración de reportes exitosa. Se generarán los archivos de " & mailCount & " correos. Próxima corrida: " & nextRun
 	ElseIf currentLanguage = "ENGLISH" Then
 		AutomationProcessReportScheduleSuccessMessage = "Report generation scheduled successfully. Files for " & mailCount & " emails will be generated. Next run: " & nextRun
-	End If
-End Function
-
-Function AutomationProcessClosingOtherWorkbooksMessage() As String
-	If currentLanguage = "SPANISH" Then
-		AutomationProcessClosingOtherWorkbooksMessage = "Cerrando los demás libros de Excel..."
-	ElseIf currentLanguage = "ENGLISH" Then
-		AutomationProcessClosingOtherWorkbooksMessage = "Closing other Excel workbooks..."
 	End If
 End Function
 
