@@ -28,6 +28,7 @@ Public logsFileFolder As String
 Public dateFormat As String
 Public scheduleDate As Date
 Public scheduleTime As Date
+Public weekendSend As Boolean
 
 Public isFirstWorksheet As Boolean
 

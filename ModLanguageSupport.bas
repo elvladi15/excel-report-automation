@@ -51,6 +51,7 @@ Sub UpdateApplicationLanguage()
 	tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value = GetParameterDateFormatName()
 	tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value = GetParameterScheduleDateName()
 	tbl_PARAMETERS.ListRows(11).Range.Cells(1).Value = GetParameterScheduleTimeName()
+	tbl_PARAMETERS.ListRows(12).Range.Cells(1).Value = GetParameterWeekendSendName()
 
 	With tbl_PARAMETERS.ListRows(6).Range.Cells(2).Validation
 		.Delete
@@ -64,6 +65,21 @@ Sub UpdateApplicationLanguage()
 			tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
 		Else
 			tbl_PARAMETERS.ListRows(6).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
+		End If
+	End If
+
+	With tbl_PARAMETERS.ListRows(12).Range.Cells(2).Validation
+		.Delete
+		.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+		xlBetween, Formula1:=currentYesNoInCurrentLanguage
+		.IgnoreBlank = True
+		.InCellDropdown = True
+	End With
+	If tbl_PARAMETERS.ListRows(12).Range.Cells(2).Value <> "" Then
+		If Split(previousYesNoInCurrentLanguage, ",")(0) = tbl_PARAMETERS.ListRows(12).Range.Cells(2).Value Then
+			tbl_PARAMETERS.ListRows(12).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(0)
+		Else
+			tbl_PARAMETERS.ListRows(12).Range.Cells(2).Value = Split(currentYesNoInCurrentLanguage, ",")(1)
 		End If
 	End If
 
@@ -334,6 +350,14 @@ Function GetParameterScheduleTimeName() As String
 		GetParameterScheduleTimeName = "Hora de ejecución"
 	ElseIf currentLanguage = "ENGLISH" Then 
 		GetParameterScheduleTimeName = "Execution time"
+	End If
+End Function
+
+Function GetParameterWeekendSendName() As String
+	If currentLanguage = "SPANISH" Then
+		GetParameterWeekendSendName = "¿Enviar fin de semana?"
+	ElseIf currentLanguage = "ENGLISH" Then 
+		GetParameterWeekendSendName = "Weekend send?"
 	End If
 End Function
 
@@ -870,6 +894,14 @@ Function MailSendingAttemptErrorMessage(attemptCount As String) As String
 End Function
 
 'AUTOMATION PROCESS MESSAGES
+Function AutomationProcessMailScheduleToPastDateErrorMessage() As String
+	If currentLanguage = "SPANISH" Then
+		AutomationProcessMailScheduleToPastDateErrorMessage = "No se puede programar para una fecha pasada."
+	ElseIf currentLanguage = "ENGLISH" Then
+		AutomationProcessMailScheduleToPastDateErrorMessage = "You can't schedule to a past date."
+	End If
+End Function
+
 Function AutomationProcessMailScheduleSuccessMessage(mailCount As String, nextRun As String) As String
 	If currentLanguage = "SPANISH" Then
 		AutomationProcessMailScheduleSuccessMessage = "Programación de envío de correos exitosa. Se enviarán " & mailCount & " correos. Próxima corrida: " & nextRun

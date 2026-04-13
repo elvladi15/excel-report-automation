@@ -75,6 +75,7 @@ Function GetBasicTableStructure() As Object
 					.Item("rows").Add GetParameterDateFormatName()
 					.Item("rows").Add GetParameterScheduleDateName()
 					.Item("rows").Add GetParameterScheduleTimeName()
+					.Item("rows").Add GetParameterWeekendSendName()
 			End With
 
 			.Item("columns").Add CreateObject("Scripting.Dictionary")

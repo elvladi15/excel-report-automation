@@ -6,6 +6,12 @@ Sub ScheduleAutomaticRun()
 
 	scheduleDateTime = ScheduleDate + ScheduleTime
 
+	If Now > scheduleDateTime Then
+		MsgBox AutomationProcessMailScheduleToPastDateErrorMessage
+
+		Exit Sub
+	End If
+
 	If sendMails Then
 		If Not IsConversationColumnCorrect Then Exit Sub
 	End If
@@ -45,7 +51,13 @@ Sub AutomaticRun()
 	End If
 
 	scheduleNextRun:
-	Call ScheduleProcedure("AutomaticRun", Date + 1 + scheduleTime)
+	dayIncrement = 1
+
+	If weekendSend And Weekday(Date) = vbFriday Then
+		dayIncrement = 3
+	End If
+
+	Call ScheduleProcedure("AutomaticRun", Date + dayIncrement + scheduleTime)
 End Sub
 
 Sub ScheduleProcedure(procedure As String, time As Date)
