@@ -73,6 +73,7 @@ Function IsParameterValidationCorrect() As Boolean
 	Dim dateFormatParameterName As String
 	Dim scheduleDateParameterName As String
 	Dim scheduleTimeParameterName As String
+	Dim weekendSendParameterName As String
 
 
 	nameParameterColumnName = tbl_PARAMETERS.ListColumns(1).Name
@@ -88,6 +89,7 @@ Function IsParameterValidationCorrect() As Boolean
 	dateFormatParameterName = tbl_PARAMETERS.ListRows(9).Range.Cells(1).Value
 	scheduleDateParameterName = tbl_PARAMETERS.ListRows(10).Range.Cells(1).Value
 	scheduleTimeParameterName = tbl_PARAMETERS.ListRows(11).Range.Cells(1).Value
+	weekendSendParameterName = tbl_PARAMETERS.ListRows(12).Range.Cells(1).Value
 
 	For Each row In tbl_PARAMETERS.ListRows
 		parameterName = row.Range.Cells(1).Value
@@ -141,6 +143,7 @@ Function IsParameterValidationCorrect() As Boolean
 	dateFormat = tbl_PARAMETERS.ListRows(9).Range.Cells(2).Value
 	scheduleDate = CDate(tbl_PARAMETERS.ListRows(10).Range.Cells(2).Value)
 	scheduleTime = TimeValue(tbl_PARAMETERS.ListRows(11).Range.Cells(2).Value)
+	weekendSend = tbl_PARAMETERS.ListRows(12).Range.Cells(2).Value = Split(GetYesNoInCurrentLanguage(), ",")(0)
 
 	IsParameterValidationCorrect = True
 End Function

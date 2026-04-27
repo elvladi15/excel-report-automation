@@ -3,7 +3,7 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/elvladi15/excel-report-automation/blob/main/README.es.md)
 
-# Excel for Automatic Email Sending v1.2.0
+# Excel for Automatic Email Sending v1.3.0
 
 ![Main image](./assets/languages/EN/main-image.png)
 
@@ -77,6 +77,7 @@ This is the main worksheet, where the details of the emails and files to be gene
 1. ***Date format***: Date format used when generating files, logs, and application messages.
 1. ***Execution date***: Date at which report generation and/or email sending will be scheduled.
 1. ***Execution time***: Time at which report generation and/or email sending will be scheduled.
+1. ***Weekend Send?***: Whether the application will send reports on the weekend.
 
 ### MAILS Table
 

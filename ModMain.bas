@@ -1,6 +1,6 @@
 Attribute VB_Name = "ModMain"
 
-Public Const version As String = "1.2.0"
+Public Const version As String = "1.3.0"
 
 Public currentLanguageName As String
 Public currentLanguage As String
@@ -28,6 +28,7 @@ Public logsFileFolder As String
 Public dateFormat As String
 Public scheduleDate As Date
 Public scheduleTime As Date
+Public weekendSend As Boolean
 
 Public isFirstWorksheet As Boolean
 
@@ -45,8 +46,6 @@ Public sendMails As Boolean
 
 Sub Main()
 	If Not IsInputValidationCorrect Then Exit Sub
-
-	CloseAllOtherWorkbooks
 
 	executionMode = "MANUAL"
 	attemptMaxCount = 3
