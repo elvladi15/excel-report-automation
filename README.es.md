@@ -74,6 +74,7 @@ Esta es la hoja de cálculo principal, en la cual se especifican los detalles de
 1. ***Formato de fechas***: El formato de fechas que aparecerá al generar el archivo, logs y mensajes en la aplicación.
 1. ***Fecha de ejecución***: Fecha a la que se programará la generación y/o envío de correos.
 1. ***Hora de ejecución***: Hora a la que se programará la generación y/o envío de correos.
+1. ***¿Enviar fin de semana?***: Si se desea que los reportes se envíen el fin de semana.
 
 ### Tabla CORREOS
 

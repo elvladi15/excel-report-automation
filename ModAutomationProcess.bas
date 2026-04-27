@@ -53,9 +53,7 @@ Sub AutomaticRun()
 	scheduleNextRun:
 	dayIncrement = 1
 
-	If weekendSend And Weekday(Date) = vbFriday Then
-		dayIncrement = 3
-	End If
+	If Not weekendSend And Weekday(Date) = vbFriday Then dayIncrement = 3
 
 	Call ScheduleProcedure("AutomaticRun", Date + dayIncrement + scheduleTime)
 End Sub
